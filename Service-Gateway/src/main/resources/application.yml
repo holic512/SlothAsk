@@ -1,0 +1,21 @@
+server:
+  #网关端口
+  port: 8081
+spring:
+  application:
+    #在服务中心的应用名称
+    name: service-gateway
+  cloud:
+    gateway:
+      enabled: true  # 启用网关功能
+      discovery:
+        locator:
+          enabled: true  # 自动映射 Eureka 下的服务路由
+          lower-case-service-id: true  # 服务名称小写处理
+
+# 注册到服务中心
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+

@@ -1,0 +1,11 @@
+server:
+  port: 8082 # 用户服务的端口号
+
+spring:
+  application:
+    name: service-user # 服务名
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka # 指向 Eureka Server 的地址

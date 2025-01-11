@@ -1,0 +1,332 @@
+erDiagram
+    %% 用户相关关系
+    user ||--o| user_profile : "id = user_id"
+    user ||--o{ project_category : "id = creator_id"
+    user ||--o{ question_comment : "id = user_id"
+    user ||--o{ category_comment : "id = user_id"
+    user ||--|| user_question_stats : "id = user_id"
+    user ||--o{ user_achievement : "id = user_id"
+    user ||--o| user_points : "id = user_id"
+    user ||--o{ points_record : "id = user_id"
+    user ||--o{ user_member : "id = user_id"
+    user ||--o{ user_category_permission : "id = user_id"
+    user ||--o{ user_sign_in : "id = user_id"
+    user ||--o{ user_question_record : "id = user_id"
+    user ||--o{ category_rating : "id = user_id"
+    user ||--o{ wrong_question_book : "id = user_id"
+    question ||--o{ wrong_question_book : "id = question_id"
+    user ||--o{ user_follow : "id = user_id"
+    user ||--o{ user_follow : "id = followed_user_id"
+
+    %% 题库相关关系
+    project_category ||--o{ question_category : "id = project_id"
+    question_category ||--o{ question : "id = category_id"
+    question ||--o{ question_comment : "id = question_id"
+    question_category ||--o{ category_comment : "id = category_id"
+    question_comment ||--o{ question_comment : "id = parent_id"
+    category_comment ||--o{ category_comment : "id = parent_id"
+
+    %% 会员和权限相关关系
+    member_level ||--o{ user_member : "id = level_id"
+    achievement ||--o{ user_achievement : "id = achievement_id"
+    user_achievement ||--o| user_profile : "id = display_achievement_id"
+    question_category ||--o| question_permission : "id = category_id"
+    member_level ||--o{ question_permission : "id = min_member_level"
+    question_category ||--o{ user_category_permission : "id = category_id"
+
+    %% 用户基础信息表
+    user {
+        bigint id PK "自增主键(unsigned)"
+        varchar username "用户名"
+        varchar password "密码(加密存储)"
+        varchar email "邮箱"
+        varchar phone "手机号"
+        tinyint status "1:正常 0:禁用"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 用户详细资料表
+    user_profile {
+        bigint id PK "自增主键(unsigned)"
+        bigint user_id FK "用户ID"
+        varchar nickname "昵称"
+        varchar avatar "头像URL"
+        tinyint gender "0:未知 1:男 2:女"
+        int age "年龄"
+        varchar bio "个人简介"
+        bigint display_achievement_id FK "展示成就ID"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 项目大分类表
+    project_category {
+        bigint id PK "自增主键(unsigned)"
+        varchar name "项目分类名称"
+        varchar description "项目描述"
+        bigint creator_id FK "创建者ID"
+        int sort_order "排序序号"
+        tinyint status "1:正常 0:禁用"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 题库分类表
+    question_category {
+        bigint id PK "自增主键(unsigned)"
+        bigint project_id FK "所属项目ID"
+        varchar name "分类名称"
+        varchar description "分类描述"
+        int sort_order "排序序号"
+        bigint view_count "访问数量"
+        tinyint status "1:正常 0:禁用"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 题库内容表
+    question {
+        bigint id PK "自增主键(unsigned)"
+        bigint category_id FK "分类ID"
+        varchar title "题目标题"
+        text content "题目内容"
+        text answer "题目答案"
+        tinyint difficulty "1:简单 2:中等 3:困难"
+        tinyint type "1:单选 2:多选 3:判断 4:简答"
+        varchar tags "题目标签"
+        tinyint status "1:正常 0:禁用"
+        bigint view_count "浏览次数"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 题目评论表
+    question_comment {
+        bigint id PK "自增主键(unsigned)"
+        bigint question_id FK "题目ID"
+        bigint user_id FK "用户ID"
+        text content "评论内容"
+        bigint parent_id FK "父评论ID"
+        int like_count "点赞数"
+        tinyint status "1:正常 0:禁用"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 题库分类评论表
+    category_comment {
+        bigint id PK "自增主键(unsigned)"
+        bigint category_id FK "分类ID"
+        bigint user_id FK "用户ID"
+        text content "评论内容"
+        bigint parent_id FK "父评论ID"
+        int like_count "点赞数"
+        tinyint status "1:正常 0:禁用"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 用户刷题统计表
+    user_question_stats {
+        bigint id PK "自增主键(unsigned)"
+        bigint user_id FK "用户ID"
+        int total_solved "总刷题数"
+        int easy_solved "简单题数量"
+        int medium_solved "中等题数量"
+        int hard_solved "困难题数量"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 成就表
+    achievement {
+        bigint id PK "自增主键(unsigned)"
+        varchar name "成就名称"
+        varchar description "成就描述"
+        varchar icon "成就图标URL"
+        tinyint condition_type "条件类型"
+        int condition_value "达成条件数值"
+        tinyint status "1:正常 0:禁用"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 用户成就表
+    user_achievement {
+        bigint id PK "自增主键(unsigned)"
+        bigint user_id FK "用户ID"
+        bigint achievement_id FK "成就ID"
+        datetime achieve_time "获得时间"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 会员等级表
+    member_level {
+        bigint id PK "自增主键(unsigned)"
+        varchar name "等级名称"
+        varchar description "等级描述"
+        decimal price "会员价格"
+        int duration "有效期(天)"
+        varchar icon "等级图标"
+        varchar benefits "会员权益"
+        tinyint status "1:正常 0:禁用"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 用户会员表
+    user_member {
+        bigint id PK "自增主键(unsigned)"
+        bigint user_id FK "用户ID"
+        bigint level_id FK "等级ID"
+        datetime start_time "开始时间"
+        datetime end_time "结束时间"
+        tinyint status "1:正常 0:禁用"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 用户积分表
+    user_points {
+        bigint id PK "自增主键(unsigned)"
+        bigint user_id FK "用户ID"
+        int points "当前积分"
+        int total_points "累计获得积分"
+        int used_points "已使用积分"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 积分变动记录表
+    points_record {
+        bigint id PK "自增主键(unsigned)"
+        bigint user_id FK "用户ID"
+        int points "变动积分"
+        tinyint type "1:获得 2:使用"
+        tinyint source "来源类型"
+        varchar description "变动说明"
+        datetime create_time "创建时间"
+    }
+
+    %% 题库权限表
+    question_permission {
+        bigint id PK "自增主键(unsigned)"
+        bigint category_id FK "题库分类ID"
+        int points_required "所需积分"
+        tinyint is_member_free "会员是否免费"
+        bigint min_member_level FK "最低会员等级"
+        tinyint status "1:公开 2:私有 3:关闭"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 用户题库权限表
+    user_category_permission {
+        bigint id PK "自增主键(unsigned)"
+        bigint user_id FK "用户ID"
+        bigint category_id FK "题库分类ID"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 签到记录表
+    user_sign_in {
+        bigint id PK "自增主键(unsigned)"
+        bigint user_id FK "用户ID"
+        date sign_date "签到日期"
+        datetime sign_time "具体签到时间"
+        varchar sign_ip "签到IP地址"
+        int continuous_days "连续签到天数"
+        int points_earned "获得积分"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 答题记录表
+    user_question_record {
+        bigint id PK "自增主键(unsigned)"
+        bigint user_id FK "用户ID"
+        bigint question_id FK "题目ID"
+        text user_answer "用户答案"
+        tinyint is_correct "是否正确"
+        int answer_time "答题用时(秒)"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 题库评分表
+    category_rating {
+        bigint id PK "自增主键(unsigned)"
+        bigint user_id FK "用户ID"
+        bigint category_id FK "题库分类ID"
+        tinyint rating "评分(1-5分)"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    admin_role ||--o{ admin_user : "id = role_id"
+    admin_user ||--o{ admin_login_log : "id = admin_id"
+
+    %% 管理员角色表
+    admin_role {
+        bigint id PK "自增主键(unsigned)"
+        varchar name "角色名称"
+        varchar description "角色描述"
+        text permissions "权限集合(JSON)"
+        tinyint status "1:正常 0:禁用"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 管理员表
+    admin_user {
+        bigint id PK "自增主键(unsigned)"
+        varchar username "用户名"
+        varchar password "密码(加密存储)"
+        varchar real_name "真实姓名"
+        varchar email "邮箱"
+        varchar phone "手机号"
+        bigint role_id FK "角色ID"
+        varchar last_login_ip "最后登录IP"
+        datetime last_login_time "最后登录时间"
+        int login_count "登录次数"
+        tinyint status "1:正常 0:禁用"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 管理员登录日志表
+    admin_login_log {
+        bigint id PK "自增主键(unsigned)"
+        bigint admin_id FK "管理员ID"
+        varchar login_ip "登录IP"
+        datetime login_time "登录时间"
+        tinyint login_status "登录状态"
+        varchar user_agent "浏览器信息"
+        datetime create_time "创建时间"
+    }
+
+    %% 错题本表
+    wrong_question_book {
+        bigint id PK "自增主键(unsigned)"
+        bigint user_id FK "用户ID"
+        bigint question_id FK "题目ID"
+        int wrong_count "错误次数"
+        datetime last_wrong_time "最后错误时间"
+        text last_wrong_answer "最后错误答案"
+        varchar remark "用户备注"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+
+    %% 用户关注表
+    user_follow {
+        bigint id PK "自增主键(unsigned)"
+        bigint user_id FK "关注者ID"
+        bigint followed_user_id FK "被关注者ID"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }
+ 

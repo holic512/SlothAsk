@@ -1,0 +1,13 @@
+server:
+  port: 8761 # 服务注册中心默认端口
+
+eureka:
+  client:
+    register-with-eureka: false # 禁止自身注册到 Eureka
+    fetch-registry: false       # 禁止从 Eureka 获取服务注册信息
+  server:
+    wait-time-in-ms-when-sync-empty: 0 # 同步延迟时间（优化启动速度）
+
+spring:
+  application:
+    name: eureka-server
