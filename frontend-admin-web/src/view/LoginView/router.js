@@ -8,12 +8,12 @@ export default [
         component: HomePage,
         children: [
             {
-                path: '/',
-                name: 'LoginPage',
+                path: 'login',
+                name: 'Login',
                 component: LoginPage
             },
             {
-                path: '/mailLogin',
+                path: 'mailLogin',
                 name: 'mailLogin',
                 component: () => import('./view/mail-login/index.vue'),
             },
