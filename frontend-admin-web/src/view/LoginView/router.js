@@ -8,14 +8,9 @@ export default [
         component: HomePage,
         children: [
             {
-                path: 'login',
+                path: '/',
                 name: 'Login',
                 component: LoginPage
-            },
-            {
-                path: 'mailLogin',
-                name: 'mailLogin',
-                component: () => import('./view/mail-login/index.vue'),
             },
         ]
     },
