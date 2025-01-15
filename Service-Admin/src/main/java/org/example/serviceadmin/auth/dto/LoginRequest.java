@@ -10,13 +10,29 @@
 package org.example.serviceadmin.auth.dto;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
+/**
+ * 登录请求对象
+ */
 @Data
-@Getter
-@Setter
 public class LoginRequest {
+    /**
+     * 用户名
+     */
     private String username;
+    
+    /**
+     * 密码
+     */
     private String password;
+    
+    /**
+     * 验证码ID
+     */
+    private String captchaId;
+    
+    /**
+     * 验证码答案
+     */
+    private String captchaAnswer;
 }

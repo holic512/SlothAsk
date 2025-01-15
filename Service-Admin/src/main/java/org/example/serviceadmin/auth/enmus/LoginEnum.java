@@ -7,19 +7,23 @@
  */
 package org.example.serviceadmin.auth.enmus;
 
-import lombok.Getter;
-
-@Getter
+/**
+ * 登录状态枚举
+ */
 public enum LoginEnum {
     Success("登录成功"),
-    UserNotFound("用户名不存在"),
-    PasswordError("密码错误");
+    UserNotFound("用户不存在"),
+    PasswordError("密码错误"),
+    AccountLocked("账户已锁定，请完成验证码验证"),
+    CaptchaError("验证码错误");
 
     private final String message;
 
-    // 构造函数
     LoginEnum(String message) {
         this.message = message;
     }
 
+    public String getMessage() {
+        return message;
+    }
 }
