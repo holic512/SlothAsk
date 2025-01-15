@@ -21,4 +21,7 @@ public interface AuthAdminUserMapper extends BaseMapper<AdminUser> {
 
     @Select("SELECT Password FROM admin_user WHERE username = #{username}")
     String selectPasswordByUserName(@Param("username") String username);
+
+    @Select("SELECT * FROM admin_user WHERE username = #{username}")
+    AdminUser selectByUsername(@Param("username") String username);
 }

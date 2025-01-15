@@ -7,11 +7,8 @@
  * Usage:
  * Todo
  */
-package org.example.serviceadmin.config.ApiResponse;
+package org.example.servicegateway.config.ApiResponse;
 
-import lombok.Data;
-
-@Data
 public class ApiResponse {
     int status;
     String message;
@@ -26,5 +23,29 @@ public class ApiResponse {
         this.status = status;
         this.message = message;
         this.data = data;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(Object data) {
+        this.data = data;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

@@ -9,6 +9,9 @@
  */
 package org.example.serviceadmin.auth.controller;
 
+import cn.dev33.satoken.stp.SaTokenInfo;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.tuple.Pair;
 import org.example.serviceadmin.auth.dto.LoginRequest;
 import org.example.serviceadmin.auth.enmus.LoginEnum;
 import org.example.serviceadmin.auth.service.PostAuthService;
@@ -30,19 +33,20 @@ public class PostAuthController {
     }
 
     @PostMapping("/login")
-    public ApiResponse login(@RequestBody LoginRequest loginRequest) {
+    public ApiResponse login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
 
         if (loginRequest.getUsername() == null || loginRequest.getPassword() == null) {
             return new ApiResponse(404, "用户名和密码不能为空");
         }
 
         // 调用服务类
-        LoginEnum result = postAuthService.login(loginRequest.getUsername(), loginRequest.getPassword());
+        Pair<LoginEnum, SaTokenInfo> result = postAuthService.login(loginRequest.getUsername(), loginRequest.getPassword(),request);
 
-        if (result == LoginEnum.Success) {
-            return new ApiResponse(200, result.getMessage());
+        LoginEnum status = result.getLeft();
+        if (status == LoginEnum.Success) {
+            return new ApiResponse(200, status.getMessage(),result.getRight());
         } else {
-            return new ApiResponse(400, result.getMessage());
+            return new ApiResponse(400, status.getMessage());
         }
 
     }
