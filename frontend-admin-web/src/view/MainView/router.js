@@ -3,7 +3,7 @@ import HomePage from './index.vue'
 export default [
     {
         path: '/main',
-        name: 'HomePage',
+        name: 'MainHomePage',
         component: HomePage,
         children: [
 

@@ -4,7 +4,7 @@ import LoginPage from './view/login/index.vue'
 export default [
     {
         path: '/',
-        name: 'HomePage',
+        name: 'LoginHomePage',
         component: HomePage,
         children: [
             {
