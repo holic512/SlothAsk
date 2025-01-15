@@ -9,13 +9,8 @@ export default [
         children: [
             {
                 path: '/',
-                name: 'LoginPage',
+                name: 'Login',
                 component: LoginPage
-            },
-            {
-                path: '/mailLogin',
-                name: 'mailLogin',
-                component: () => import('./view/mail-login/index.vue'),
             },
         ]
     },
