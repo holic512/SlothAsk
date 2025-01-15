@@ -3,7 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/SlothAsk.iml" filepath="$PROJECT_DIR$/SlothAsk.iml" />
-      <module fileurl="file://$PROJECT_DIR$/frontend-web.iml" filepath="$PROJECT_DIR$/frontend-web.iml" />
+      <module fileurl="file://$PROJECT_DIR$/frontend-admin-web.iml" filepath="$PROJECT_DIR$/frontend-admin-web.iml" />
+      <module fileurl="file://$PROJECT_DIR$/frontend-user-web.iml" filepath="$PROJECT_DIR$/frontend-user-web.iml" />
     </modules>
   </component>
 </project>
