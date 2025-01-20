@@ -19,7 +19,6 @@ const props = defineProps({
   collapse: {
     type: Boolean,
     default: false,
-
     required: true
   }
 })
@@ -33,7 +32,7 @@ const handleClose = (key, keyPath) => {
 </script>
 
 <template>
-  <div class="navigation-container">
+  <el-scrollbar class="navigation-container">
     <el-menu
       default-active="/main/dashboard"
       class="el-menu-vertical"
@@ -119,49 +118,14 @@ const handleClose = (key, keyPath) => {
         <el-menu-item index="/main/system/config">系统配置</el-menu-item>
       </el-sub-menu>
     </el-menu>
-  </div>
+  </el-scrollbar>
 </template>
 
 <style scoped>
 .navigation-container {
   height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
   background-color: var(--el-bg-color);
   border-right: 1px solid var(--el-border-color-light);
-  user-select: none; /* 防止文字被选中 */
-}
-
-/* 自定义滚动条样式 */
-.navigation-container::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-  display: none;
-}
-
-.navigation-container:hover::-webkit-scrollbar {
-  display: block;
-}
-
-.navigation-container::-webkit-scrollbar-thumb {
-  background: var(--el-border-color);
-  border-radius: 2px;
-}
-
-.navigation-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.navigation-container:hover::-webkit-scrollbar-thumb {
-  background: var(--el-border-color-darker);
-}
-
-.navigation-container {
-  scrollbar-width: none;
-}
-
-.navigation-container:hover {
-  scrollbar-width: thin;
 }
 
 .el-menu-vertical {
@@ -230,11 +194,5 @@ const handleClose = (key, keyPath) => {
 :deep(.el-menu--popup .el-menu-item.is-active) {
   background-color: var(--el-color-primary-light-9) !important;
   color: var(--el-color-primary) !important;
-}
-
-:deep(.el-menu-item), 
-:deep(.el-sub-menu__title),
-:deep(.el-menu--popup) {
-  user-select: none; /* 确保所有菜单项文字都不可选中 */
 }
 </style>
