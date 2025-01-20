@@ -8,7 +8,7 @@ export default [
         component: HomePage,
         children: [
             {
-                path: '/',
+                path: '',
                 name: 'Login',
                 component: LoginPage
             },

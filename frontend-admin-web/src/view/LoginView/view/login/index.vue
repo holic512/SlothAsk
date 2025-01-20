@@ -1,7 +1,8 @@
 <script setup>
-import { reactive, ref } from 'vue'
-import { ElMessage } from 'element-plus'
-import { Clock } from '@element-plus/icons-vue'
+import {reactive, ref} from 'vue'
+import {ElMessage} from 'element-plus'
+import {Clock} from '@element-plus/icons-vue'
+import {PLogin} from "./PLogin.js";
 
 // 登录表单数据
 const loginType = ref('email') // email 或 account
@@ -27,10 +28,29 @@ const toggleLoginType = () => {
   form.password = ''
 }
 
+// 验证码功能
+const captcha = ref(false);
+const captchaUrl = ref();
+const captchaId = ref('');
+const captchaAnswer = ref('');
+
 // 登录处理
-const handleLogin = () => {
-  // TODO: 实现登录逻辑
-  ElMessage.success('登录成功')
+const handleLogin = async () => {
+  // 区别邮箱登录和 验证码登录
+  if (loginType.value === 'account') {
+    const response = await PLogin(form.account, form.password, captchaAnswer.value, captchaId.value);
+    console.log(response)
+    // 账号已经锁定
+    if (response.message === '验证码错误' || response.message === '账户已锁定，请完成验证码验证') {
+      captcha.value = true
+      captchaUrl.value = response.data.imageBase64
+      captchaId.value = response.data.captchaId
+
+      console.log(captchaUrl.value)
+    }
+  } else {
+
+  }
 }
 </script>
 
@@ -46,25 +66,39 @@ const handleLogin = () => {
 
       <div class="login-form">
         <h2 class="form-title">{{ loginType === 'email' ? '邮箱登录' : '账号登录' }}</h2>
-        
+
         <!-- 邮箱登录表单 -->
         <template v-if="loginType === 'email'">
           <el-form :model="form" label-position="top">
             <el-form-item label="邮箱">
-              <el-input 
-                v-model="form.email"
-                placeholder="请输入邮箱"
-                prefix-icon="Message"
+              <el-input
+                  v-model="form.email"
+                  placeholder="请输入邮箱"
+                  prefix-icon="Message"
               />
             </el-form-item>
             <el-form-item label="密码">
-              <el-input 
-                v-model="form.password"
-                type="password"
-                placeholder="请输入密码"
-                prefix-icon="Lock"
-                show-password
+              <el-input
+                  v-model="form.password"
+                  type="password"
+                  placeholder="请输入密码"
+                  prefix-icon="Lock"
+                  show-password
               />
+            </el-form-item>
+            <el-form-item label="验证码">
+              <div class="captcha-container">
+                <el-input
+                    v-model="form.captchaAnswer"
+                    placeholder="请输入验证码"
+                    prefix-icon="Lock"
+                />
+                <el-image
+                    src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                    class="captcha-image"
+                    fit="cover"
+                />
+              </div>
             </el-form-item>
           </el-form>
         </template>
@@ -73,38 +107,54 @@ const handleLogin = () => {
         <template v-else>
           <el-form :model="form" label-position="top">
             <el-form-item label="账号">
-              <el-input 
-                v-model="form.account"
-                placeholder="请输入账号"
-                prefix-icon="User"
+              <el-input
+                  v-model="form.account"
+                  placeholder="请输入账号"
+                  prefix-icon="User"
               />
             </el-form-item>
+
             <el-form-item label="密码">
-              <el-input 
-                v-model="form.password"
-                type="password"
-                placeholder="请输入密码"
-                prefix-icon="Lock"
-                show-password
+              <el-input
+                  v-model="form.password"
+                  type="password"
+                  placeholder="请输入密码"
+                  prefix-icon="Lock"
+                  show-password
               />
             </el-form-item>
+
+            <el-form-item label="验证码" v-if="captcha">
+              <div class="captcha-container">
+                <el-input
+                    v-model="captchaAnswer"
+                    placeholder="请输入验证码"
+                />
+                <el-image
+                    :src="captchaUrl"
+                    class="captcha-image"
+                    fit="cover"
+                />
+              </div>
+            </el-form-item>
+
           </el-form>
         </template>
 
         <!-- 登录按钮 -->
-        <el-button 
-          type="primary" 
-          class="login-button"
-          @click="handleLogin"
+        <el-button
+            type="primary"
+            class="login-button"
+            @click="handleLogin"
         >
           登录
         </el-button>
 
         <!-- 切换登录方式 -->
         <div class="login-switch">
-          <el-link 
-            type="primary" 
-            @click="toggleLoginType"
+          <el-link
+              type="primary"
+              @click="toggleLoginType"
           >
             切换至{{ loginType === 'email' ? '账号密码' : '邮箱' }}登录
           </el-link>
@@ -115,7 +165,9 @@ const handleLogin = () => {
     <!-- 右侧装饰区域 -->
     <div class="login-right">
       <div class="time-display">
-        <el-icon class="clock-icon"><Clock /></el-icon>
+        <el-icon class="clock-icon">
+          <Clock/>
+        </el-icon>
         <span class="time-text">{{ currentTime }}</span>
       </div>
     </div>
@@ -215,9 +267,9 @@ const handleLogin = () => {
   display: flex;
   align-items: center;
   gap: 16px;
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.1) 0%, 
-    rgba(255, 255, 255, 0.05) 100%);
+  background: linear-gradient(135deg,
+  rgba(255, 255, 255, 0.1) 0%,
+  rgba(255, 255, 255, 0.05) 100%);
   padding: 25px 40px;
   border-radius: 20px;
   backdrop-filter: blur(12px);
@@ -261,5 +313,21 @@ const handleLogin = () => {
 :deep(.el-button--primary:hover) {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+}
+
+.captcha-container {
+  display: flex;
+  align-items: center;
+
+}
+
+.captcha-container :deep(.el-input) {
+  flex: 1;
+}
+
+.captcha-image {
+  width: 100px;
+  height: 34px;
+  cursor: pointer;
 }
 </style>

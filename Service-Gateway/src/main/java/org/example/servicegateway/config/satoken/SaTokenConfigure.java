@@ -50,13 +50,14 @@ public class SaTokenConfigure {
                 // 认证函数：每次请求执行
                 .setAuth(obj -> {
                     SaRouter
-                        // 放行无需认证的接口
-                        .notMatch("/auth/**", "/admin/auth/**", "/user/auth/**", "/images/**")
-                        .check(r -> {
-                            // 其他路由的认证逻辑
-                            SaRouter.match("/admin/**").check(StpKit.ADMIN::checkLogin);
-                            SaRouter.match("/service-user/users/**").check(StpKit.ADMIN::checkLogin);
-                        });
+                            // 放行无需认证的接口
+                            .notMatch("/auth/**", "/user/auth/**", "/images/**")
+                            .notMatch("/service-admin/auth/**")
+                            .check(r -> {
+                                // 其他路由的认证逻辑
+                                SaRouter.match("/admin/**").check(StpKit.ADMIN::checkLogin);
+                                SaRouter.match("/service-user/users/**").check(StpKit.ADMIN::checkLogin);
+                            });
                 })
                 ;
     }

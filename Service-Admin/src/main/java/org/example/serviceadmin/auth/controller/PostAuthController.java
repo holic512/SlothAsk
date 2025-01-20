@@ -47,7 +47,7 @@ public class PostAuthController {
     @PostMapping("/login")
     public ApiResponse login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         // 参数校验
-        if (loginRequest.getUsername() == null || loginRequest.getPassword() == null) {
+        if (loginRequest.getUsername() == null || loginRequest.getUsername().isEmpty() || loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
             return new ApiResponse(404, "用户名和密码不能为空");
         }
 
