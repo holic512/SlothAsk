@@ -1,16 +1,10 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { Fold, Expand, Moon, Sunny } from '@element-plus/icons-vue'
+import {ref, computed, onMounted} from 'vue'
+import {useRoute} from 'vue-router'
+import {Fold, Expand, Moon, Sunny} from '@element-plus/icons-vue'
 
-const props = defineProps({
-  isCollapsed: {
-    type: Boolean,
-    required: true
-  }
-})
+const collapsed = defineModel('collapsed')
 
-const emit = defineEmits(['update:collapsed'])
 const route = useRoute()
 const isDark = ref(false)
 
@@ -18,7 +12,7 @@ const isDark = ref(false)
 const toggleTheme = () => {
   isDark.value = !isDark.value
   const html = document.documentElement
-  
+
   if (isDark.value) {
     html.classList.add('dark')
     localStorage.setItem('theme', 'dark')
@@ -38,7 +32,7 @@ onMounted(() => {
 })
 
 const toggleCollapse = () => {
-  emit('update:collapsed', !props.isCollapsed)
+  collapsed.value = !collapsed.value
 }
 
 // 路由映射表
@@ -88,20 +82,20 @@ const routeMap = {
 const breadcrumbs = computed(() => {
   const paths = route.path.split('/').filter(Boolean)
   const result = []
-  
+
   if (paths[0] === 'main') {
     if (paths[1] === 'dashboard') {
-      return [{ title: '仪表盘' }]
+      return [{title: '仪表盘'}]
     }
-    
+
     if (paths[1] && routeMap[paths[1]]) {
-      result.push({ title: routeMap[paths[1]].name })
+      result.push({title: routeMap[paths[1]].name})
       if (paths[2] && routeMap[paths[1]][paths[2]]) {
-        result.push({ title: routeMap[paths[1]][paths[2]] })
+        result.push({title: routeMap[paths[1]][paths[2]]})
       }
     }
   }
-  
+
   return result
 })
 </script>
@@ -109,29 +103,32 @@ const breadcrumbs = computed(() => {
 <template>
   <div class="main-header">
     <div class="left-section">
-      <el-icon 
-        class="collapse-icon"
-        @click="toggleCollapse"
+
+      <!--  展开缩放功能-->
+      <el-icon
+          class="collapse-icon"
+          @click="toggleCollapse"
       >
-        <component :is="props.isCollapsed ? 'Expand' : 'Fold'" />
+        <Expand v-if="collapsed"/>
+        <Fold v-else/>
       </el-icon>
-      
+
       <el-breadcrumb separator="/" class="breadcrumb">
         <el-breadcrumb-item v-for="(item, index) in breadcrumbs" :key="index">
           {{ item.title }}
         </el-breadcrumb-item>
       </el-breadcrumb>
     </div>
-    
+
     <div class="right-section">
       <el-tooltip
-        :content="isDark ? '切换到明亮模式' : '切换到暗黑模式'"
-        placement="bottom"
+          :content="isDark ? '切换到明亮模式' : '切换到暗黑模式'"
+          placement="bottom"
       >
         <div class="theme-switch" @click="toggleTheme">
           <el-icon :size="20">
-            <Moon v-if="!isDark" />
-            <Sunny v-else />
+            <Moon v-if="!isDark"/>
+            <Sunny v-else/>
           </el-icon>
         </div>
       </el-tooltip>
@@ -145,12 +142,12 @@ const breadcrumbs = computed(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
   background-color: var(--el-bg-color);
 }
 
 .left-section {
+  padding-left: 8px;
   display: flex;
   align-items: center;
 }
