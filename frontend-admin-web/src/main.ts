@@ -19,5 +19,13 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
 }
 
+// pinia
+import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
+const pinia = createPinia()
+app.use(pinia)
+pinia.use(piniaPluginPersistedstate)
+
+
 app.use(router)
 app.mount('#app')

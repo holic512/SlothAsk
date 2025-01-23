@@ -7,11 +7,11 @@
  * Usage:
  * Todo
  */
-package org.example.serviceuser.entity;
+package org.example.serviceuser.admin.request;
 
 import lombok.Data;
-import org.example.serviceuser.dto.UserDto;
-import org.example.serviceuser.dto.UserProfileDto;
+import org.example.serviceuser.admin.dto.UserDto;
+import org.example.serviceuser.admin.dto.UserProfileDto;
 
 @Data
 public class UserUpdateRequest {

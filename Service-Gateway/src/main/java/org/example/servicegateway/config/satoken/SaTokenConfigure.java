@@ -55,7 +55,9 @@ public class SaTokenConfigure {
                             .notMatch("/service-admin/auth/**")
                             .check(r -> {
                                 // 其他路由的认证逻辑
-                                SaRouter.match("/admin/**").check(StpKit.ADMIN::checkLogin);
+                                SaRouter.match("/service-admin/**").check(StpKit.ADMIN::checkLogin);
+                                SaRouter.match("/service-user/admin/**").check(StpKit.ADMIN::checkLogin);
+
                                 SaRouter.match("/service-user/users/**").check(StpKit.ADMIN::checkLogin);
                             });
                 })

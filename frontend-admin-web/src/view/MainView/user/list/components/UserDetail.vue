@@ -1,8 +1,18 @@
-<script setup>
-const visible = defineModel('visible')
-const userData = defineModel('userData', {
-  default: () => ({})
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useUserListStore } from "../pinia/userListStore";
+import type { IUser } from "../types/user"
+
+const userListStore = useUserListStore()
+
+// 使用计算属性处理 drawer 显示状态
+const visible = computed({
+    get: () => userListStore.drawerVisible,
+    set: (value) => userListStore.drawerVisible = value
 })
+
+// 使用计算属性获取用户数据
+const userData = computed<IUser | null>(() => userListStore.currentUser)
 
 // 性别格式化
 const formatGender = (gender) => {
@@ -23,19 +33,14 @@ const formatStatus = (status) => {
   return statusMap[status] || { text: '未知', type: 'info', effect: 'plain' }
 }
 
-// 关闭抽屉
-const handleClose = () => {
-  visible.value = false
-}
 </script>
 
 <template>
   <el-drawer
-    :model-value="visible"
+    v-model="visible"
     title="用户详情"
     size="400px"
     destroy-on-close
-    @update:model-value="handleClose"
   >
     <template v-if="userData">
       <div class="user-detail">
@@ -72,7 +77,7 @@ const handleClose = () => {
             </div>
             <div class="info-item">
               <span class="label">年龄</span>
-              <span class="value">{{ userData.age }}岁</span>
+              <span class="value">{{ userData.age ? null : '保密' }}岁</span>
             </div>
           </div>
         </div>

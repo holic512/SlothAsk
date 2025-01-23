@@ -1,4 +1,5 @@
 import axios from "axios";
+import {useSessionStore} from "../pinia/Session.js";
 
 const instance = axios.create({
     // baseURL: `${window.location.origin}/api/`,  // 根据当前域名动态设置 baseURL
@@ -10,6 +11,11 @@ const instance = axios.create({
 // 创建请求拦截器
 instance.interceptors.request.use(config => {
 
+    const Session = useSessionStore();
+
+    if (Session){
+        config.headers["SlothAsk"] = Session.session.tokenValue;
+    }
 
     return config;
 }, error => {

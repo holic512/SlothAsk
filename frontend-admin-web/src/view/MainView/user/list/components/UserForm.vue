@@ -1,110 +1,112 @@
-<script setup>
-import { ref, watch } from 'vue'
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
+import { Plus } from '@element-plus/icons-vue'
+import { useUserListStore } from '../pinia/userListStore'
+import type { IUserForm } from '../types/form'
+import type { IUser } from '../types/user'
+import { getUserFormRules } from '../constants/formRules'
+import { handleUserFormSubmit } from '../service/handleFormSubmit'
 
-const visible = defineModel('visible')
-const type = defineModel('type', {
-  default: 'add'
+// 获取 store 实例
+const userListStore = useUserListStore()
+
+// 表单引用
+const formRef = ref()
+
+// 创建本地表单数据
+const formData = ref<IUserForm>({
+    username: '',
+    nickname: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    status: 1,
+    gender: 1,
+    age: undefined,
+    bio: '',
+    avatar: ''
 })
-const userData = defineModel('userData', {
-  default: () => ({})
-})
 
-const formRef = ref(null)
-const form = ref({
-  username: '',
-  nickname: '',
-  email: '',
-  phone: '',
-  password: '',
-  confirmPassword: '',
-  status: 1,
-  gender: 1,
-  age: '',
-  bio: '',
-  avatar: ''
-})
-
-const rules = {
-  username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
-  ],
-  email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
-  ],
-  phone: [
-    { required: true, message: '请输入手机号', trigger: 'blur' },
-    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
-  ],
-  password: [
-    { required: type.value === 'add', message: '请输入密码', trigger: 'blur' },
-    { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
-  ],
-  confirmPassword: [
-    { required: type.value === 'add', message: '请确认密码', trigger: 'blur' },
-    {
-      validator: (rule, value, callback) => {
-        if (value !== form.value.password) {
-          callback(new Error('两次输入密码不一致'))
-        } else {
-          callback()
-        }
-      },
-      trigger: 'blur'
-    }
-  ]
-}
-
-// 监听编辑模式下的用户数据变化
+// 监听编辑用户数据变化
 watch(
-  () => userData.value,
-  (newVal) => {
-    if (type.value === 'edit' && newVal) {
-      const { password, confirmPassword, ...data } = newVal
-      form.value = { ...form.value, ...data }
-    }
-  },
-  { immediate: true }
+    () => userListStore.currentEditUser,
+    (newUser: IUser | null) => {
+        if (userListStore.formType === 'edit' && newUser) {
+            // 编辑模式：使用当前编辑用户的数据
+            formData.value = {
+                ...newUser,
+                password: '',
+                confirmPassword: ''
+            }
+        } else {
+            // 新增模式：重置为默认值
+            formData.value = {
+                username: '',
+                nickname: '',
+                email: '',
+                phone: '',
+                password: '',
+                confirmPassword: '',
+                status: 1,
+                gender: 1,
+                age: undefined,
+                bio: '',
+                avatar: ''
+            }
+        }
+    },
+    { immediate: true }
 )
 
-// 是否设置密码（仅新增时有效）
-const setPassword = ref(true)
+// 状态选项
+const statusOptions = [
+    { value: 1, label: '正常' },
+    { value: 0, label: '禁用' }
+]
 
-const emit = defineEmits(['submit'])
+// 性别选项
+const genderOptions = [
+    { value: 1, label: '男' },
+    { value: 2, label: '女' },
+    { value: 0, label: '保密' }
+]
+
+// 获取表单校验规则
+const rules = getUserFormRules(userListStore.formType)
+
+// 根据表单类型显示不同的表单项
+const showPasswordFields = computed(() => userListStore.formType === 'add')
 
 // 表单提交
-const handleSubmit = async () => {
-  if (!formRef.value) return
-
-  await formRef.value.validate((valid) => {
-    if (valid) {
-      emit('submit', form.value)
-    }
-  })
+const handleSubmit = async (): Promise<void> => {
+    if (!formRef.value) return
+    
+    await formRef.value.validate(async (valid: boolean) => {
+        if (valid) {
+            await handleUserFormSubmit(formData.value)
+        }
+    })
 }
 
 // 重置表单
-const resetForm = () => {
-  if (formRef.value) {
-    formRef.value.resetFields()
-    if (type.value === 'add') {
-      setPassword.value = true
+const resetForm = (): void => {
+    if (formRef.value) {
+        formRef.value.resetFields()
     }
-  }
 }
 
 // 关闭弹窗
-const handleClose = () => {
-  resetForm()
-  visible.value = false
+const handleClose = (): void => {
+    resetForm()
+    userListStore.formVisible = false
 }
 </script>
 
 <template>
   <el-dialog
-    :model-value="visible"
-    :title="type === 'add' ? '新增用户' : '编辑用户'"
+    :model-value="userListStore.formVisible"
+    :title="userListStore.formType === 'add' ? '新增用户' : '编辑用户'"
     width="640px"
     @update:model-value="handleClose"
     class="user-form-dialog"
@@ -112,7 +114,7 @@ const handleClose = () => {
   >
     <el-form
       ref="formRef"
-      :model="form"
+      :model="formData"
       :rules="rules"
       label-width="70px"
       class="user-form"
@@ -122,12 +124,12 @@ const handleClose = () => {
           <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="用户名" prop="username">
-                <el-input v-model="form.username" placeholder="请输入用户名"/>
+                <el-input v-model="formData.username" placeholder="请输入用户名"/>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="昵称" prop="nickname">
-                <el-input v-model="form.nickname" placeholder="请输入昵称"/>
+                <el-input v-model="formData.nickname" placeholder="请输入昵称"/>
               </el-form-item>
             </el-col>
           </el-row>
@@ -135,43 +137,35 @@ const handleClose = () => {
           <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="邮箱" prop="email">
-                <el-input v-model="form.email" placeholder="请输入邮箱"/>
+                <el-input v-model="formData.email" placeholder="请输入邮箱"/>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="手机号" prop="phone">
-                <el-input v-model="form.phone" placeholder="请输入手机号"/>
+                <el-input v-model="formData.phone" placeholder="请输入手机号"/>
               </el-form-item>
             </el-col>
           </el-row>
 
-          <template v-if="type === 'add'">
-
-            <div style="margin-left:16px;">
-              <el-form-item label=" " label-width="0">
-                <el-checkbox v-model="setPassword" class="password-checkbox">设置初始密码</el-checkbox>
-              </el-form-item>
-            </div>
-
-
-            <el-row :gutter="16" v-if="setPassword">
+          <template v-if="showPasswordFields">
+            <el-row :gutter="16">
               <el-col :span="12">
                 <el-form-item label="密码" prop="password">
-                  <el-input
-                      v-model="form.password"
-                      type="password"
-                      placeholder="请输入密码"
-                      show-password
+                  <el-input 
+                    v-model="formData.password" 
+                    type="password" 
+                    placeholder="请输入密码"
+                    show-password
                   />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
-                <el-form-item label="确认" prop="confirmPassword">
-                  <el-input
-                      v-model="form.confirmPassword"
-                      type="password"
-                      placeholder="请确认密码"
-                      show-password
+                <el-form-item label="确认密码" prop="confirmPassword">
+                  <el-input 
+                    v-model="formData.confirmPassword" 
+                    type="password" 
+                    placeholder="请确认密码"
+                    show-password
                   />
                 </el-form-item>
               </el-col>
@@ -180,28 +174,37 @@ const handleClose = () => {
 
           <el-row :gutter="16">
             <el-col :span="12">
-              <el-form-item label="性别" prop="gender">
-                <el-radio-group v-model="form.gender">
-                  <el-radio :label="1">男</el-radio>
-                  <el-radio :label="2">女</el-radio>
-                  <el-radio :label="0">未知</el-radio>
+              <el-form-item label="状态" prop="status">
+                <el-radio-group v-model="formData.status">
+                  <el-radio 
+                    v-for="option in statusOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </el-radio>
                 </el-radio-group>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="年龄" prop="age">
-                <el-input-number v-model="form.age" :min="0" :max="150" style="width: 120px"/>
+              <el-form-item label="性别" prop="gender">
+                <el-radio-group v-model="formData.gender">
+                  <el-radio 
+                    v-for="option in genderOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </el-radio>
+                </el-radio-group>
               </el-form-item>
             </el-col>
           </el-row>
 
           <el-row :gutter="16">
             <el-col :span="12">
-              <el-form-item label="状态" prop="status">
-                <el-radio-group v-model="form.status">
-                  <el-radio :label="1">正常</el-radio>
-                  <el-radio :label="0">禁用</el-radio>
-                </el-radio-group>
+              <el-form-item label="年龄" prop="age">
+                <el-input-number v-model="formData.age" :min="0" :max="150" style="width: 120px"/>
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -210,9 +213,9 @@ const handleClose = () => {
                     class="avatar-uploader"
                     action="/api/upload"
                     :show-file-list="false"
-                    :on-success="(res) => form.avatar = res.url"
+                    :on-success="(res) => formData.avatar = res.url"
                 >
-                  <img v-if="form.avatar" :src="form.avatar" class="avatar"/>
+                  <img v-if="formData.avatar" :src="formData.avatar" class="avatar"/>
                   <div v-else class="avatar-placeholder">
                     <el-icon class="upload-icon">
                       <Plus/>
@@ -225,7 +228,7 @@ const handleClose = () => {
 
           <el-form-item label="简介" prop="bio">
             <el-input
-                v-model="form.bio"
+                v-model="formData.bio"
                 type="textarea"
                 :rows="2"
                 placeholder="请输入个人简介"

@@ -1,10 +1,15 @@
-<script setup>
-import { ref } from 'vue'
-import { View, Edit, Delete, Key } from '@element-plus/icons-vue'
-import { ElMessageBox } from 'element-plus'
+<script setup lang="ts">
+import {ref} from 'vue'
+import {View, Edit, Delete, Key} from '@element-plus/icons-vue'
+import {useUserListStore} from "../pinia/userListStore";
+import {handleView} from "../service/handleView";
+import {handleSelectionChange} from "../service/handleSelection";
+import {handleEdit} from "../service/handleAddEdit";
+import {handlePassword} from "../service/handlePassword";
+import {handleDelete} from "../service/handleDelete";
 
-const data = defineModel('data')
-const loading = defineModel('loading')
+// 定义变量属性类
+const userListStore = useUserListStore()
 
 // 表格高度
 const tableHeight = ref('calc(100vh - 240px)')
@@ -12,52 +17,35 @@ const tableHeight = ref('calc(100vh - 240px)')
 // 状态格式化
 const formatStatus = (status) => {
   const statusMap = {
-    1: { text: '正常', type: 'success', effect: 'plain' },
-    0: { text: '禁用', type: 'danger', effect: 'plain' }
+    1: {text: '正常', type: 'success', effect: 'plain'},
+    0: {text: '禁用', type: 'danger', effect: 'plain'}
   }
-  return statusMap[status] || { text: '未知', type: 'info', effect: 'plain' }
+  return statusMap[status] || {text: '未知', type: 'info', effect: 'plain'}
 }
 
-const emit = defineEmits(['view', 'edit', 'delete', 'password', 'selection-change'])
-
-// 删除确认
-const handleDelete = (row) => {
-  ElMessageBox.confirm(
-    '确认删除该用户吗？',
-    '删除确认',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    }
-  ).then(() => {
-    emit('delete', row)
-  }).catch(() => {})
-}
 </script>
 
 <template>
   <el-table
-    :data="data"
-    style="width: 100%"
-    border
-    stripe
-    :loading="loading"
-    :height="tableHeight"
-    @selection-change="rows => emit('selection-change', rows)"
+      :data="userListStore.tableData"
+      style="width: 100%"
+      border
+      stripe
+      :height="tableHeight"
+      @selection-change="rows => handleSelectionChange(rows)"
   >
-    <el-table-column type="selection" width="50" fixed />
-    <el-table-column prop="id" label="ID" width="80" fixed />
-    <el-table-column prop="username" label="用户名" min-width="120" />
-    <el-table-column prop="email" label="邮箱" min-width="180" show-overflow-tooltip />
-    <el-table-column prop="phone" label="手机号" min-width="120" />
+    <el-table-column type="selection" width="50" fixed/>
+    <el-table-column prop="id" label="ID" width="80" fixed/>
+    <el-table-column prop="username" label="用户名" min-width="120"/>
+    <el-table-column prop="email" label="邮箱" min-width="180" show-overflow-tooltip/>
+    <el-table-column prop="phone" label="手机号" min-width="120"/>
     <el-table-column label="状态" width="90" align="center">
       <template #default="{ row }">
         <el-tag
-          :type="formatStatus(row.status).type"
-          :effect="formatStatus(row.status).effect"
-          size="small"
-          class="status-tag"
+            :type="formatStatus(row.status).type"
+            :effect="formatStatus(row.status).effect"
+            size="small"
+            class="status-tag"
         >
           {{ formatStatus(row.status).text }}
         </el-tag>
@@ -68,34 +56,34 @@ const handleDelete = (row) => {
         <div class="operation-buttons">
           <el-tooltip content="查看详情" placement="top">
             <el-button
-              link
-              type="primary"
-              :icon="View"
-              @click="emit('view', row)"
+                link
+                type="primary"
+                :icon="View"
+                @click="handleView(row)"
             />
           </el-tooltip>
           <el-tooltip content="编辑" placement="top">
             <el-button
-              link
-              type="primary"
-              :icon="Edit"
-              @click="emit('edit', row)"
+                link
+                type="primary"
+                :icon="Edit"
+                @click="handleEdit(row)"
             />
           </el-tooltip>
           <el-tooltip content="修改密码" placement="top">
             <el-button
-              link
-              type="warning"
-              :icon="Key"
-              @click="emit('password', row)"
+                link
+                type="warning"
+                :icon="Key"
+                @click="handlePassword( row)"
             />
           </el-tooltip>
           <el-tooltip content="删除" placement="top">
             <el-button
-              link
-              type="danger"
-              :icon="Delete"
-              @click="handleDelete(row)"
+                link
+                type="danger"
+                :icon="Delete"
+                @click="handleDelete(row)"
             />
           </el-tooltip>
         </div>

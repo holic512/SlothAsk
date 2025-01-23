@@ -7,7 +7,7 @@
  * Usage:
  * Todo
  */
-package org.example.serviceuser.entity;
+package org.example.serviceuser.admin.request;
 
 import lombok.Data;
 

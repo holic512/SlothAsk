@@ -7,7 +7,7 @@
  * Usage:
  * Todo
  */
-package org.example.serviceuser.dto;
+package org.example.serviceuser.admin.dto;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;

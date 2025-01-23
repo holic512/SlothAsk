@@ -1,64 +1,53 @@
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
+import { useUserListStore } from '../pinia/userListStore'
+import type { IPasswordForm } from '../types/form'
+import { passwordFormRules } from '../constants/formRules'
+import { handlePasswordFormSubmit } from '../service/handleFormSubmit'
 
-const props = defineProps({
-  visible: {
-    type: Boolean,
-    required: true
-  },
-  userData: {
-    type: Object,
-    required: true
-  }
+// 获取 store 实例
+const userListStore = useUserListStore()
+
+const formRef = ref()
+const form = ref<IPasswordForm>({
+    id: 0,
+    password: '',
+    confirmPassword: ''
 })
 
-const emit = defineEmits(['update:visible', 'submit'])
+// 监听当前用户ID变化
+const currentUserId = computed(() => userListStore.currentPasswordUser?.id || 0)
+watch(
+    currentUserId,
+    (newId) => {
+        form.value.id = newId
+    },
+    { immediate: true }
+)
 
-const formRef = ref(null)
-const form = ref({
-  password: '',
-  confirmPassword: ''
-})
+const rules = passwordFormRules
 
-const rules = {
-  password: [
-    { required: true, message: '请输入新密码', trigger: 'blur' },
-    { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
-  ],
-  confirmPassword: [
-    { required: true, message: '请确认新密码', trigger: 'blur' },
-    {
-      validator: (rule, value, callback) => {
-        if (value !== form.value.password) {
-          callback(new Error('两次输入密码不一致'))
-        } else {
-          callback()
+// 表单提交
+const handleSubmit = async (): Promise<void> => {
+    if (!formRef.value) return
+    
+    await formRef.value.validate(async (valid: boolean) => {
+        if (valid) {
+            await handlePasswordFormSubmit(form.value)
         }
-      },
-      trigger: 'blur'
-    }
-  ]
+    })
 }
 
-const handleSubmit = async () => {
-  if (!formRef.value) return
-  
-  await formRef.value.validate((valid) => {
-    if (valid) {
-      emit('submit', { ...form.value, id: props.userData.id })
-    }
-  })
-}
-
-const handleClose = () => {
-  formRef.value?.resetFields()
-  emit('update:visible', false)
+// 关闭弹窗
+const handleClose = (): void => {
+    formRef.value?.resetFields()
+    userListStore.passwordFormVisible = false
 }
 </script>
 
 <template>
   <el-dialog
-    :model-value="visible"
+    :model-value="userListStore.passwordFormVisible"
     title="修改密码"
     width="480px"
     @update:model-value="handleClose"
@@ -72,6 +61,9 @@ const handleClose = () => {
       label-width="80px"
     >
       <div class="form-content">
+        <div class="current-user">
+          当前用户：{{ userListStore.currentPasswordUser?.username }}
+        </div>
         <el-form-item label="新密码" prop="password">
           <el-input
             v-model="form.password"
@@ -123,5 +115,11 @@ const handleClose = () => {
   margin-right: 0;
   padding: 16px 20px;
   border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.current-user {
+    margin-bottom: 16px;
+    color: var(--el-text-color-secondary);
+    font-size: 14px;
 }
 </style> 

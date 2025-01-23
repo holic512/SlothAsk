@@ -3,6 +3,12 @@ import {reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {Clock} from '@element-plus/icons-vue'
 import {PLogin} from "./PLogin.js";
+import {useSessionStore} from "../../../../pinia/Session.js";
+import {useRouter} from "vue-router";
+
+
+const router = useRouter()
+
 
 // 登录表单数据
 const loginType = ref('email') // email 或 account
@@ -36,21 +42,38 @@ const captchaAnswer = ref('');
 
 // 登录处理
 const handleLogin = async () => {
+
+  // 定义响应体
+  let response;
+
   // 区别邮箱登录和 验证码登录
   if (loginType.value === 'account') {
-    const response = await PLogin(form.account, form.password, captchaAnswer.value, captchaId.value);
-    console.log(response)
+    response = await PLogin(form.account, form.password, captchaAnswer.value, captchaId.value);
     // 账号已经锁定
     if (response.message === '验证码错误' || response.message === '账户已锁定，请完成验证码验证') {
       captcha.value = true
       captchaUrl.value = response.data.imageBase64
       captchaId.value = response.data.captchaId
 
-      console.log(captchaUrl.value)
     }
   } else {
 
   }
+
+  console.log(response)
+
+  if (response.status === 200) {
+    // 保存Session信息
+    const SessionStore = useSessionStore()
+    SessionStore.setSession(response.data)
+
+    //登录成功 跳转路由
+    ElMessage.success("登录成功")
+
+     router.push('/main')
+
+  }
+
 }
 </script>
 

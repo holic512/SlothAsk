@@ -7,15 +7,14 @@
  * Usage:
  * Todo
  */
-package org.example.serviceuser.controller;
+package org.example.serviceuser.admin.controller;
 
-import org.example.serviceadmin.config.ApiResponse.ApiResponse;
-import org.example.serviceuser.dto.ResultDto;
-import org.example.serviceuser.dto.UserDto;
-import org.example.serviceuser.dto.UserProfileDto;
-import org.example.serviceuser.entity.BatchDeleteRequest;
-import org.example.serviceuser.entity.UserUpdateRequest;
-import org.example.serviceuser.service.UserService;
+import org.example.serviceuser.admin.dto.ResultDto;
+import org.example.serviceuser.admin.dto.UserDto;
+import org.example.serviceuser.admin.dto.UserProfileDto;
+import org.example.serviceuser.admin.request.BatchDeleteRequest;
+import org.example.serviceuser.admin.request.UserUpdateRequest;
+import org.example.serviceuser.admin.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,28 +41,9 @@ public class UserController {
 
     }
 
-    /**
-     * 获取用户列表
-     *
-     * @param keyword  搜索关键词（用户名、邮箱、手机号）
-     * @param status   用户状态，1 为正常，0 为禁用
-     * @param pageNum  当前页码
-     * @param pageSize 每页数量
-     * @return 返回用户列表的结果
-     */
-    @GetMapping("/list")
-    public ResultDto getUsers(@RequestParam(required = false) String keyword,
-                              @RequestParam(required = false) Integer status,
-                              @RequestParam int pageNum,
-                              @RequestParam int pageSize) {
-        // 调用 Service 层方法，获取用户列表
-        return userService.getUsers(keyword, status, pageNum, pageSize);
-    }
 
-    @PostMapping("/add")
-    public ResultDto addUser(@RequestBody UserDto userDto) {
 
-    }
+
 
     @PutMapping("/update")
     public ResultDto updateUser(@RequestBody UserUpdateRequest request) {
