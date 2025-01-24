@@ -15,12 +15,12 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
 @TableName("user_profile")
 public class UserProfile {
-
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
@@ -46,8 +46,8 @@ public class UserProfile {
     private Long displayAchievementId;
 
     @TableField("create_time")
-    private Date createTime;
+    private LocalDateTime createTime;
 
     @TableField("update_time")
-    private Date updateTime;
+    private LocalDateTime updateTime;
 }

@@ -14,5 +14,5 @@ import lombok.Data;
 import java.util.List;
 @Data
 public class BatchDeleteRequest {
-    private List<Integer> ids;  // 用户 ID 列表
+    private List<Long> ids;  // 用户 ID 列表
 }
