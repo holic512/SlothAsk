@@ -97,7 +97,7 @@ public interface AdminUserMapper extends BaseMapper<User> {
     /**
      * 根据用户名更新用户密码
      *
-     * @param id          用户id
+     * @param id 用户id
      * @param newPassword 新密码
      * @return 更新的记录数
      */
@@ -113,6 +113,11 @@ public interface AdminUserMapper extends BaseMapper<User> {
     int deleteUser(Long id);
 
     // 批量删除用户
-    @Delete("DELETE FROM user WHERE id IN ()")
-    int deleteUsersBatch(List<Integer> ids);
+    @Delete("<script>" +
+            "DELETE FROM user WHERE id IN " +
+            "<foreach collection='ids' item='id' open='(' separator=',' close=')'>" +
+            "#{id}" +
+            "</foreach>" +
+            "</script>")
+    int deleteUsersBatch(@Param("ids") List<Long> ids);
 }

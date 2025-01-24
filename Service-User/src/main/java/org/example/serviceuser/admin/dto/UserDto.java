@@ -5,14 +5,15 @@
  * Created Date: 2025-01-21
  * Version: 1.0
  * Usage:
- * 用于获取用户列表
+ * Todo
  */
 package org.example.serviceuser.admin.dto;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Data
 public class UserDto {
@@ -21,13 +22,12 @@ public class UserDto {
     private String nickname;
     private String email;
     private String phone;
+    private String password; //可选，不设置则系统生成随机密码
     private Integer status;
     private Integer gender;
     private Integer age;
     private String avatar;
     private String bio;
-    private Date createTime;
-
-    private String password;
-
+    private LocalDateTime createTime;
+    private LocalDateTime updateTime;
 }

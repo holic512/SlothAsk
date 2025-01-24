@@ -10,9 +10,8 @@
 package org.example.serviceuser.admin.service;
 
 import org.example.serviceuser.admin.dto.PageDto;
-import org.example.serviceuser.admin.dto.ResultDto;
 
-public interface GetAdminService {
+public interface GetUserService {
 
     /**
      * 获取用户列表

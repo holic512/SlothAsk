@@ -12,6 +12,8 @@ package org.example.serviceuser.admin.dto;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 @TableName("user_profile")
 public class UserProfileDto {
@@ -23,4 +25,6 @@ public class UserProfileDto {
     private Integer age;
     private String bio;
     private Long displayAchievementId;
+    private Date createTime;
+    private Date updateTime;
 }
