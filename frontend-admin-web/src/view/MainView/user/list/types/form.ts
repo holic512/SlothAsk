@@ -13,7 +13,7 @@ export interface IUserForm {
     password?: string
     status: number
     gender: number
-    age?: number
+    age: number | null
     bio?: string
     avatar?: string
 }

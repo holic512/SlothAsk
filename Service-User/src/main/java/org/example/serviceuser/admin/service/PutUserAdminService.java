@@ -2,6 +2,7 @@ package org.example.serviceuser.admin.service;
 
 import org.example.serviceuser.admin.dto.UserDto;
 import org.example.serviceuser.admin.enums.PutUserAdminEnum;
+import org.example.serviceuser.admin.request.UpdateUserRequest;
 import org.example.serviceuser.config.ApiResponse.ApiResponse;
 
 public interface PutUserAdminService {
@@ -14,5 +15,5 @@ public interface PutUserAdminService {
     PutUserAdminEnum UpdatePassword(Long id, String password);
 
     // 更新用户基本信息
-    ApiResponse updateUser(UserDto userDto);
+    PutUserAdminEnum updateUser(UpdateUserRequest updateUserRequest);
 }

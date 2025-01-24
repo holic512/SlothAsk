@@ -125,6 +125,34 @@ public interface AdminUserMapper extends BaseMapper<User> {
     Long countUsersByPhone(String phone);
 
 
+    /**
+     * 查询当前用户名的id
+     *
+     * @param username 用户名
+     * @return id
+     */
+    @Select("SELECT u.id FROM user u WHERE u.username = #{username}")
+    Long SelectIdByUsername(String username);
+
+
+    /**
+     * 查询当前邮箱的id
+     *
+     * @param email 邮箱
+     * @return id
+     */
+    @Select("SELECT u.id FROM user u WHERE u.email = #{email}")
+    Long SelectIdByEmail(String email);
+
+
+    /**
+     * 查询当前手机号的id
+     *
+     * @param phone 手机号
+     * @return id
+     */
+    @Select("SELECT u.id FROM user u WHERE u.phone = #{phone}")
+    Long SelectIdByPhone(String phone);
 
 
     /**
@@ -138,8 +166,6 @@ public interface AdminUserMapper extends BaseMapper<User> {
     int updatePasswordByUserId(Long id, String newPassword);
 
 
-    @Update("UPDATE user SET email = #{email},  phone = #{phone}, status = #{status} WHERE id = #{id}")
-    int updateUser(UserDto userDto);
 
     // 删除用户
     @Delete("DELETE FROM user WHERE id = #{id}")

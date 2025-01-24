@@ -11,10 +11,6 @@ import org.example.serviceuser.entity.UserProfile;
 @Mapper
 public interface AdminUserProfileMapper extends BaseMapper<UserProfile> {
 
-    @Insert("INSERT INTO user_profile (user_id, nickname, avatar, gender, age, bio, create_time, update_time) " +
-            "VALUES (#{userId}, #{nickname}, #{avatar}, #{gender}, #{age}, #{bio}, #{createTime}, #{updateTime})")
-    int insert(UserProfile userProfile);
-
-    @Update("UPDATE user_profile SET nickname = #{nickname}, gender = #{gender}, age = #{age}, avatar = #{avatar}, bio = #{bio} WHERE user_id = #{id}")
-    int updateUserProfile(UserDto userDto);
+    @Update("UPDATE user_profile SET nickname = #{nickname}, gender = #{gender}, age = #{age}, avatar = #{avatar}, bio = #{bio} WHERE user_id = #{userId}")
+    int updateByUserId(UserProfile userProfile);
 }

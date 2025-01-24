@@ -13,11 +13,15 @@ import org.example.serviceuser.admin.dto.UserDto;
 import org.example.serviceuser.admin.enums.PutUserAdminEnum;
 import org.example.serviceuser.admin.mapper.AdminUserMapper;
 import org.example.serviceuser.admin.mapper.AdminUserProfileMapper;
+import org.example.serviceuser.admin.request.UpdateUserRequest;
 import org.example.serviceuser.admin.service.PutUserAdminService;
 import org.example.serviceuser.config.ApiResponse.ApiResponse;
+import org.example.serviceuser.entity.User;
+import org.example.serviceuser.entity.UserProfile;
 import org.example.serviceuser.util.SCryptUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PutUserAdminAdminServiceImpl implements PutUserAdminService {
@@ -50,23 +54,49 @@ public class PutUserAdminAdminServiceImpl implements PutUserAdminService {
     }
 
     @Override
-    public ApiResponse updateUser(UserDto userDto) {
-        try {
-            // 更新用户基本信息
-            int userUpdateResult = adminUserMapper.updateUser(userDto); // 更新 user 表
+    @Transactional
+    public PutUserAdminEnum updateUser(UpdateUserRequest userRequest) {
+        // 获取新数据是否于数据库数据冲突
+        Long existingIdByPhone = adminUserMapper.SelectIdByPhone(userRequest.getPhone());
+        if (existingIdByPhone != null && !existingIdByPhone.equals(userRequest.getId())) {
+            return PutUserAdminEnum.ALREADY_PHONE;
+        }
 
-            // 更新用户个人资料信息（直接使用 userDto 中的个人资料字段）
-            int userProfileUpdateResult = adminUserProfileMapper.updateUserProfile(userDto); // 更新 user_profile 表
+        Long existingIdByUsername = adminUserMapper.SelectIdByUsername(userRequest.getUsername());
+        if (existingIdByUsername != null && !existingIdByUsername.equals(userRequest.getId())) {
+            return PutUserAdminEnum.ALREADY_USERNAME;
+        }
 
-            // 判断是否都成功更新
-            if (userUpdateResult > 0 && userProfileUpdateResult > 0) {
-                return new ApiResponse(200, "success", null); // 返回成功响应
-            } else {
-                return new ApiResponse(404, "用户不存在", null); // 如果更新失败（找不到用户或资料）
-            }
-        } catch (Exception e) {
-            // 捕获异常并返回错误信息
-            return new ApiResponse(500, "Internal Server Error", null);
+        Long existingIdByEmail = adminUserMapper.SelectIdByEmail(userRequest.getEmail());
+        if (existingIdByEmail != null && !existingIdByEmail.equals(userRequest.getId())) {
+            return PutUserAdminEnum.ALREADY_EMAIL;
+        }
+
+
+        // 更新用户基本信息
+        User user = new User();
+        user.setId(userRequest.getId());
+        user.setUsername(userRequest.getUsername());
+        user.setEmail(userRequest.getEmail());
+        user.setPhone(userRequest.getPhone());
+        user.setStatus(userRequest.getStatus());
+        int userUpdateResult = adminUserMapper.updateById(user);
+
+        // 更新用户个人资料信息
+        UserProfile userProfile = new UserProfile();
+        userProfile.setUserId(userRequest.getId());
+        userProfile.setAge(userRequest.getAge());
+        userProfile.setBio(userRequest.getBio());
+        userProfile.setNickname(userRequest.getNickname());
+        userProfile.setGender(userRequest.getGender());
+        userProfile.setAvatar(userRequest.getAvatar());
+        int userProfileUpdateResult = adminUserProfileMapper.updateByUserId(userProfile); // 更新 user_profile 表
+
+        // 判断是否都成功更新
+        if (userUpdateResult > 0 && userProfileUpdateResult > 0) {
+            return PutUserAdminEnum.SUCCESS;
+        } else {
+            return PutUserAdminEnum.FAILURE;
         }
     }
 }

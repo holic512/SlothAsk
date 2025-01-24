@@ -6,6 +6,7 @@ import type {IUserForm} from '../types/form'
 import type {IUser} from '../types/user'
 import {getUserFormRules} from '../constants/formRules'
 import {handleAddUser} from "@/view/MainView/user/list/service/handleAddUser";
+import {handleUpdateUser} from "@/view/MainView/user/list/service/handleUpdateUser";
 
 
 // 获取 store 实例
@@ -24,20 +25,30 @@ const formData = ref<IUserForm>({
   password: '',
   status: 1,
   gender: 1,
-  age: undefined,
+  age: null,
   bio: '',
   avatar: ''
 })
 
-// 监听编辑用户数据变化
+// 监听编辑页面是否开始渲染
 watch(
-    () => userListStore.currentEditUser,
-    (newUser: IUser | null) => {
-      if (userListStore.formType === 'edit' && newUser) {
+    () => userListStore.formVisible,
+    () => {
+      if (userListStore.formType === 'edit' && userListStore.currentEditUser) {
+
+        let newUser = userListStore.currentEditUser
         // 编辑模式：使用当前编辑用户的数据
         formData.value = {
-          ...newUser,
-          password: '',
+          id: newUser.id,
+          username: newUser.username,
+          nickname: newUser.nickname,
+          email: newUser.email,
+          phone: newUser.phone,
+          status: newUser.status,
+          gender: newUser.gender,
+          age: newUser.age,
+          bio: newUser.bio,
+          avatar: newUser.avatar,
         }
       } else {
         // 新增模式：重置为默认值
@@ -50,7 +61,7 @@ watch(
           password: '',
           status: 1,
           gender: 1,
-          age: undefined,
+          age: null,
           bio: '',
           avatar: ''
         }
@@ -84,10 +95,10 @@ const handleSubmit = async (): Promise<void> => {
 
   await formRef.value.validate(async (valid: boolean) => {
     if (!valid) return;
-
     // 当校验成功时 判断当前什么状态 用来区别不同接口
     if (userListStore.formType === 'edit') {
       // 编辑状态
+      await handleUpdateUser(formData.value)
 
     } else {
       // 新增状态
@@ -108,6 +119,12 @@ const handleClose = (): void => {
   resetForm()
   userListStore.formVisible = false
 }
+
+const handleAgeChange = (value: number) => {
+  formData.value.age = value
+  console.log(formData.value.age)
+}
+
 </script>
 
 <template>
@@ -201,7 +218,13 @@ const handleClose = (): void => {
           <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="年龄" prop="age">
-                <el-input-number v-model="formData.age" :min="0" :max="150" style="width: 120px"/>
+                <el-input-number
+                    v-model="formData.age"
+                    :min="0"
+                    :max="150"
+                    style="width: 120px"
+                    @change="handleAgeChange"
+                />
               </el-form-item>
             </el-col>
             <el-col :span="12">

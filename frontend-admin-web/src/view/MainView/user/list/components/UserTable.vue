@@ -2,7 +2,7 @@
 import {ref} from 'vue'
 import {View, Edit, Delete, Key} from '@element-plus/icons-vue'
 import {useUserListStore} from "../pinia/userListStore";
-import {handleView} from "../service/handleView";
+import {handleProfileView} from "../service/handleProfileView";
 import {handleSelectionChange} from "../service/handleSelection";
 import {handleEdit} from "../service/handleAddEdit";
 import {handlePassword} from "../service/handlePassword";
@@ -72,7 +72,7 @@ const formatStatus = (status) => {
                 link
                 type="primary"
                 :icon="View"
-                @click="handleView(row)"
+                @click="handleProfileView(row)"
             />
           </el-tooltip>
           <el-tooltip content="编辑" placement="top">
