@@ -10,36 +10,42 @@
 package org.example.serviceuser.admin.service.impl;
 
 import org.example.serviceuser.admin.dto.UserDto;
+import org.example.serviceuser.admin.enums.PutUserAdminEnum;
 import org.example.serviceuser.admin.mapper.AdminUserMapper;
 import org.example.serviceuser.admin.mapper.AdminUserProfileMapper;
-import org.example.serviceuser.admin.service.PutUserService;
+import org.example.serviceuser.admin.service.PutUserAdminService;
 import org.example.serviceuser.config.ApiResponse.ApiResponse;
+import org.example.serviceuser.util.SCryptUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PutUserServiceImpl implements PutUserService {
+public class PutUserAdminAdminServiceImpl implements PutUserAdminService {
 
     private final AdminUserMapper adminUserMapper;
     private final AdminUserProfileMapper adminUserProfileMapper;
 
     @Autowired
-    public PutUserServiceImpl(AdminUserMapper adminUserMapper, AdminUserProfileMapper adminUserProfileMapper) {
+    public PutUserAdminAdminServiceImpl(AdminUserMapper adminUserMapper, AdminUserProfileMapper adminUserProfileMapper) {
         this.adminUserMapper = adminUserMapper;
         this.adminUserProfileMapper = adminUserProfileMapper;
     }
 
 
     @Override
-    public String UpdatePassword(int id, String password) {
-        // 调用Mapper方法，返回一个字符串（可能是空字符串或操作结果）
-        int result = adminUserMapper.updatePasswordByUserId(id, password);
+    public PutUserAdminEnum UpdatePassword(Long id, String password) {
 
-        // 如果受影响的行数大于0，表示更新成功
+        // 调用密码加密
+        String hashPassword = SCryptUtil.hashPassword(password);
+
+
+        // 调用Mapper方法，返回受影响的行数大于0，表示更新成功
+        int result = adminUserMapper.updatePasswordByUserId(id, hashPassword);
+
         if (result > 0) {
-            return "success";  // 更新成功
+            return PutUserAdminEnum.SUCCESS;  // 更新成功
         } else {
-            return "failure";  // 更新失败
+            return PutUserAdminEnum.FAILURE;  // 更新失败
         }
     }
 

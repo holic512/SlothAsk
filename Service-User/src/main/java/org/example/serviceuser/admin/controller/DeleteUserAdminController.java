@@ -10,7 +10,7 @@
 package org.example.serviceuser.admin.controller;
 
 import org.example.serviceuser.admin.request.BatchDeleteRequest;
-import org.example.serviceuser.admin.service.DeleteUserService;
+import org.example.serviceuser.admin.service.DeleteUserAdminService;
 import org.example.serviceuser.config.ApiResponse.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,20 +18,20 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/user")
-public class DeleteUserController {
+@RequestMapping("/admin")
+public class DeleteUserAdminController {
 
-    private final DeleteUserService deleteUserService;
+    private final DeleteUserAdminService deleteUserAdminService;
 
     @Autowired
-    public DeleteUserController(DeleteUserService deleteUserService) {
-        this.deleteUserService = deleteUserService;
+    public DeleteUserAdminController(DeleteUserAdminService deleteUserAdminService) {
+        this.deleteUserAdminService = deleteUserAdminService;
     }
 
 
     @DeleteMapping("/delete/{id}")
     public ApiResponse deleteUser(@PathVariable Long id) {
-        int result = deleteUserService.deleteUser(id);
+        int result = deleteUserAdminService.deleteUser(id);
 
         // 判断删除是否成功
         if (result > 0) {
@@ -47,7 +47,7 @@ public class DeleteUserController {
         List<Long> ids = request.getIds();
 
         // 调用 service 层进行批量删除
-        boolean success = deleteUserService.deleteUsersBatch(ids);
+        boolean success = deleteUserAdminService.deleteUsersBatch(ids);
 
         // 判断删除是否成功
         if (success) {

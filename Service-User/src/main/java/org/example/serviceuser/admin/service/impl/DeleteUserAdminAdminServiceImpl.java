@@ -10,20 +10,19 @@
 package org.example.serviceuser.admin.service.impl;
 
 import org.example.serviceuser.admin.mapper.AdminUserMapper;
-import org.example.serviceuser.admin.mapper.AdminUserProfileMapper;
-import org.example.serviceuser.admin.service.DeleteUserService;
+import org.example.serviceuser.admin.service.DeleteUserAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class DeleteUserServiceImpl implements DeleteUserService {
+public class DeleteUserAdminAdminServiceImpl implements DeleteUserAdminService {
 
     private final AdminUserMapper adminUserMapper;
 
     @Autowired
-    public DeleteUserServiceImpl(AdminUserMapper adminUserMapper) {
+    public DeleteUserAdminAdminServiceImpl(AdminUserMapper adminUserMapper) {
         this.adminUserMapper = adminUserMapper;
     }
 

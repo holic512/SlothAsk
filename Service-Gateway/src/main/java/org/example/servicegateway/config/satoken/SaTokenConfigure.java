@@ -52,11 +52,14 @@ public class SaTokenConfigure {
                     SaRouter
                             // 放行无需认证的接口
                             .notMatch("/auth/**", "/user/auth/**", "/images/**")
-                            .notMatch("/service-admin/auth/**")
+
+                            // 放行用户登录接口和验证码接口
+                            .notMatch("/service-admin/auth/**", "/service-admin/captcha/**")
                             .check(r -> {
-                                // 其他路由的认证逻辑
+                                // 拦截管理员接口 和 各个有关于管理员操作的子服务
                                 SaRouter.match("/service-admin/**").check(StpKit.ADMIN::checkLogin);
                                 SaRouter.match("/service-user/admin/**").check(StpKit.ADMIN::checkLogin);
+
 
                                 SaRouter.match("/service-user/users/**").check(StpKit.ADMIN::checkLogin);
                             });

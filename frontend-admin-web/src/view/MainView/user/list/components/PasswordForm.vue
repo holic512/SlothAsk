@@ -25,7 +25,25 @@ watch(
     { immediate: true }
 )
 
-const rules = passwordFormRules
+// 创建响应式的校验规则
+const rules = computed(() => ({
+    password: passwordFormRules.password,
+    confirmPassword: [
+        { required: true, message: '请确认新密码', trigger: 'blur' },
+        { 
+            validator: (rule: any, value: string, callback: Function) => {
+                if (value === '') {
+                    callback(new Error('请再次输入密码'))
+                } else if (value !== form.value.password) {
+                    callback(new Error('两次输入密码不一致'))
+                } else {
+                    callback()
+                }
+            }, 
+            trigger: 'blur' 
+        }
+    ]
+}))
 
 // 表单提交
 const handleSubmit = async (): Promise<void> => {

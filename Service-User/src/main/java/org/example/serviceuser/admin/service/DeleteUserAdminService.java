@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-public interface DeleteUserService {
+public interface DeleteUserAdminService {
     // 删除用户
     @Delete("DELETE FROM user WHERE id = #{id}")
     int deleteUser(Long id);

@@ -39,22 +39,24 @@ export const getUserFormRules = (type: 'add' | 'edit'): IFormRules => ({
 /**
  * 密码表单校验规则
  */
-export const passwordFormRules: IFormRules = {
+export const passwordFormRules = {
     password: [
         { required: true, message: '请输入新密码', trigger: 'blur' },
-        { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
+        { min: 6, message: '密码长度不能小于6位', trigger: 'blur' }
     ],
     confirmPassword: [
         { required: true, message: '请确认新密码', trigger: 'blur' },
-        {
-            validator: (rule: any, value: any, callback: any) => {
-                if (value !== (document.querySelector('input[name="password"]') as HTMLInputElement)?.value) {
+        { 
+            validator: (rule: any, value: string, callback: Function) => {
+                if (value === '') {
+                    callback(new Error('请再次输入密码'))
+                } else if (value !== form.value.password) {
                     callback(new Error('两次输入密码不一致'))
                 } else {
                     callback()
                 }
-            },
-            trigger: 'blur'
+            }, 
+            trigger: 'blur' 
         }
     ]
 } 

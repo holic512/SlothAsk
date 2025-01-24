@@ -10,7 +10,7 @@
 package org.example.serviceuser.admin.controller;
 
 import org.example.serviceuser.admin.dto.PageDto;
-import org.example.serviceuser.admin.service.GetUserService;
+import org.example.serviceuser.admin.service.GetUserAdminService;
 import org.example.serviceuser.config.ApiResponse.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,14 +19,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/user")
-public class GetUserController {
+@RequestMapping("/admin")
+public class GetUserAdminController {
 
-    private final GetUserService getUserService;
+    private final GetUserAdminService getUserAdminService;
 
     @Autowired
-    public GetUserController(GetUserService getUserService) {
-        this.getUserService = getUserService;
+    public GetUserAdminController(GetUserAdminService getUserAdminService) {
+        this.getUserAdminService = getUserAdminService;
     }
 
 
@@ -46,7 +46,7 @@ public class GetUserController {
                                 @RequestParam int pageSize) {
 
         // 调用 Service 层方法，获取用户列表
-        PageDto result = getUserService.getUsers(keyword, status, pageNum, pageSize);
+        PageDto result = getUserAdminService.getUsers(keyword, status, pageNum, pageSize);
 
         return new ApiResponse(200, "查询成功", result);
     }

@@ -1,7 +1,7 @@
 /**
- * File Name: PostAdminServiceImpl.java
+ * File Name: PostUserServiceImpl.java
  * Description: Todo
- * Author: holic512
+ * Author: lv
  * Created Date: 2025-01-24
  * Version: 1.0
  * Usage:
@@ -9,42 +9,42 @@
  */
 package org.example.serviceuser.admin.service.impl;
 
-import org.example.serviceuser.admin.enums.PostAdminEnum;
+import org.example.serviceuser.admin.enums.PostUserAdminEnum;
 import org.example.serviceuser.admin.mapper.AdminUserMapper;
 import org.example.serviceuser.admin.mapper.AdminUserProfileMapper;
 import org.example.serviceuser.admin.request.AddUserRequest;
-import org.example.serviceuser.admin.service.PostAdminService;
+import org.example.serviceuser.admin.service.PostUserAdminService;
 import org.example.serviceuser.entity.User;
 import org.example.serviceuser.entity.UserProfile;
-import org.example.serviceuser.util.SCryptUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PostAdminServiceImpl implements PostAdminService {
+public class PostUserAdminAdminServiceImpl implements PostUserAdminService {
+
 
     private final AdminUserMapper adminUserMapper;
     private final AdminUserProfileMapper adminUserProfileMapper;
 
     @Autowired
-    public PostAdminServiceImpl(AdminUserMapper adminUserMapper, AdminUserProfileMapper adminUserProfileMapper) {
+    public PostUserAdminAdminServiceImpl(AdminUserMapper adminUserMapper, AdminUserProfileMapper adminUserProfileMapper) {
         this.adminUserMapper = adminUserMapper;
         this.adminUserProfileMapper = adminUserProfileMapper;
     }
 
     @Override
-    public PostAdminEnum addUser(AddUserRequest addUserRequest) {
+    public PostUserAdminEnum addUser(AddUserRequest addUserRequest) {
         // 判断邮箱 用户名 或 手机号是否重复
         if (adminUserMapper.countUsersByUsername(addUserRequest.getUsername()) > 0) {
-            return PostAdminEnum.ALREADY_USERNAME;
+            return PostUserAdminEnum.ALREADY_USERNAME;
         }
 
         if (adminUserMapper.countUsersByEmail(addUserRequest.getEmail()) > 0) {
-            return PostAdminEnum.ALREADY_EMAIL;
+            return PostUserAdminEnum.ALREADY_EMAIL;
         }
 
         if (adminUserMapper.countUsersByPhone(addUserRequest.getPhone()) > 0) {
-            return PostAdminEnum.ALREADY_PHONE;
+            return PostUserAdminEnum.ALREADY_PHONE;
         }
 
         // 创建 user对象并插入
@@ -69,6 +69,6 @@ public class PostAdminServiceImpl implements PostAdminService {
 
         adminUserProfileMapper.insert(userProfile);
 
-        return PostAdminEnum.SUCCESS;
+        return PostUserAdminEnum.SUCCESS;
     }
 }

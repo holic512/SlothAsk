@@ -11,7 +11,7 @@ package org.example.serviceuser.admin.service;
 
 import org.example.serviceuser.admin.dto.PageDto;
 
-public interface GetUserService {
+public interface GetUserAdminService {
 
     /**
      * 获取用户列表

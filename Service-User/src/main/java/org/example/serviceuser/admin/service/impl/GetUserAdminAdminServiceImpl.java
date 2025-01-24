@@ -13,21 +13,21 @@ import org.example.serviceuser.admin.dto.PageDto;
 import org.example.serviceuser.admin.dto.UserDto;
 import org.example.serviceuser.admin.mapper.AdminUserMapper;
 import org.example.serviceuser.admin.mapper.AdminUserProfileMapper;
-import org.example.serviceuser.admin.service.GetUserService;
+import org.example.serviceuser.admin.service.GetUserAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class GetUserServiceImpl implements GetUserService {
+public class GetUserAdminAdminServiceImpl implements GetUserAdminService {
 
 
     private final AdminUserMapper adminUserMapper;
     private final AdminUserProfileMapper adminUserProfileMapper;
 
     @Autowired
-    public GetUserServiceImpl(AdminUserMapper adminUserMapper, AdminUserProfileMapper adminUserProfileMapper) {
+    public GetUserAdminAdminServiceImpl(AdminUserMapper adminUserMapper, AdminUserProfileMapper adminUserProfileMapper) {
         this.adminUserMapper = adminUserMapper;
         this.adminUserProfileMapper = adminUserProfileMapper;
     }

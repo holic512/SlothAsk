@@ -12,7 +12,7 @@ package org.example.serviceuser.admin.enums;
 import lombok.Getter;
 
 @Getter
-public enum PostAdminEnum {
+public enum PostUserAdminEnum {
     SUCCESS("成功"),
     ALREADY_EMAIL("已有邮箱"),
     ALREADY_USERNAME("已有用户名"),
@@ -20,7 +20,7 @@ public enum PostAdminEnum {
 
     private final String message;
 
-    PostAdminEnum(String message) {
+    PostUserAdminEnum(String message) {
         this.message = message;
     }
 }

@@ -135,7 +135,7 @@ public interface AdminUserMapper extends BaseMapper<User> {
      * @return 更新的记录数
      */
     @Update("UPDATE user SET password = #{newPassword} WHERE id = #{id}")
-    int updatePasswordByUserId(int id, String newPassword);
+    int updatePasswordByUserId(Long id, String newPassword);
 
 
     @Update("UPDATE user SET email = #{email},  phone = #{phone}, status = #{status} WHERE id = #{id}")
