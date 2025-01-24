@@ -1,11 +1,10 @@
 /**
  * File Name: PutUserServiceImpl.java
- * Description: Todo
+ * Description: 用户管理系统-管理员更新用户服务实现类
  * Author: lv
  * Created Date: 2025-01-24
  * Version: 1.0
- * Usage:
- * Todo
+ * Usage: 实现管理员更新用户信息的服务接口，包括密码更新和用户基本信息更新的具体实现，并处理用户名、邮箱、手机号的唯一性校验
  */
 package org.example.serviceuser.admin.service.impl;
 

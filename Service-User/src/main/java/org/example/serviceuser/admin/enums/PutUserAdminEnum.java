@@ -1,11 +1,10 @@
 /**
  * File Name: PutUserAdminEnum.java
- * Description: Todo
+ * Description: 用户更新操作结果枚举类
  * Author: holic512
  * Created Date: 2025-01-24
  * Version: 1.0
- * Usage:
- * Todo
+ * Usage: 定义用户信息更新操作的可能结果状态，包括成功、失败、邮箱已存在、用户名已存在、手机号已存在等
  */
 package org.example.serviceuser.admin.enums;
 

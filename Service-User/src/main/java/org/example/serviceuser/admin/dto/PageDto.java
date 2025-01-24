@@ -1,11 +1,10 @@
 /**
  * File Name: PageDto.java
- * Description: Todo
+ * Description: 分页数据传输对象
  * Author: lv
  * Created Date: 2025-01-21
  * Version: 1.0
- * Usage:
- * Todo
+ * Usage: 用于封装分页查询结果，包含总记录数和当前页的用户列表数据
  */
 package org.example.serviceuser.admin.dto;
 

@@ -1,11 +1,10 @@
 /**
  * File Name: GetAdminController.java
- * Description: Todo
+ * Description: 用户管理系统-管理员查询用户控制器
  * Author: holic512
  * Created Date: 2025-01-21
  * Version: 1.0
- * Usage:
- * Todo
+ * Usage: 提供管理员查询用户列表的接口，支持分页、关键词搜索和状态筛选
  */
 package org.example.serviceuser.admin.controller;
 

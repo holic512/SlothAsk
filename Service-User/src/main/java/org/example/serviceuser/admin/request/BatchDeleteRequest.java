@@ -1,11 +1,10 @@
 /**
  * File Name: BatchDeleteRequest.java
- * Description: Todo
+ * Description: 批量删除用户请求数据传输对象
  * Author: lv
  * Created Date: 2025-01-21
  * Version: 1.0
- * Usage:
- * Todo
+ * Usage: 用于接收管理员批量删除用户时的请求数据，包含要删除的用户ID列表
  */
 package org.example.serviceuser.admin.request;
 

@@ -1,11 +1,10 @@
 /**
  * File Name: AddUserRequest.java
- * Description: Todo
+ * Description: 添加用户请求数据传输对象
  * Author: holic512
  * Created Date: 2025-01-24
  * Version: 1.0
- * Usage:
- * Todo
+ * Usage: 用于接收管理员添加新用户时的请求数据，包含用户基本信息和个人资料信息，并进行数据校验
  */
 package org.example.serviceuser.admin.request;
 

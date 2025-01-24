@@ -1,11 +1,10 @@
 /**
  * File Name: PostUserServiceImpl.java
- * Description: Todo
+ * Description: 用户管理系统-管理员添加用户服务实现类
  * Author: lv
  * Created Date: 2025-01-24
  * Version: 1.0
- * Usage:
- * Todo
+ * Usage: 实现管理员添加新用户的服务接口，包括基本信息和个人资料添加的具体实现，并处理用户名、邮箱、手机号的唯一性校验
  */
 package org.example.serviceuser.admin.service.impl;
 

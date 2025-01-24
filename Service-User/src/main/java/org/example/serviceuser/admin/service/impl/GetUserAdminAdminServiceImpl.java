@@ -1,13 +1,14 @@
 /**
  * File Name: GetAdminServiceImpl.java
- * Description: Todo
+ * Description: 用户管理系统-管理员查询用户服务实现类
  * Author: holic512
  * Created Date: 2025-01-21
  * Version: 1.0
- * Usage:
- * Todo
+ * Usage: 实现管理员查询用户列表的服务接口，包括分页、关键词搜索和状态筛选的具体实现
  */
 package org.example.serviceuser.admin.service.impl;
+
+import java.util.List;
 
 import org.example.serviceuser.admin.dto.PageDto;
 import org.example.serviceuser.admin.dto.UserDto;
@@ -16,8 +17,6 @@ import org.example.serviceuser.admin.mapper.AdminUserProfileMapper;
 import org.example.serviceuser.admin.service.GetUserAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class GetUserAdminAdminServiceImpl implements GetUserAdminService {

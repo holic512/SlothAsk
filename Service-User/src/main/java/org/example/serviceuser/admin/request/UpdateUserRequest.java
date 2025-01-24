@@ -1,11 +1,10 @@
 /**
  * File Name: UpdateUserRequest.java
- * Description: Todo
+ * Description: 更新用户信息请求数据传输对象
  * Author: holic512
  * Created Date: 2025-01-24
  * Version: 1.0
- * Usage:
- * Todo
+ * Usage: 用于接收管理员更新用户基本信息时的请求数据，包含用户ID和需要更新的信息字段，并进行数据校验
  */
 package org.example.serviceuser.admin.request;
 

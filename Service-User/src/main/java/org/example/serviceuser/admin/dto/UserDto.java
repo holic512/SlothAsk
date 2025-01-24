@@ -1,11 +1,10 @@
 /**
  * File Name: User.java
- * Description: Todo
+ * Description: 用户数据传输对象
  * Author: lv
  * Created Date: 2025-01-21
  * Version: 1.0
- * Usage:
- * Todo
+ * Usage: 用于在不同层之间传递用户信息，包含用户的基本信息和个人资料
  */
 package org.example.serviceuser.admin.dto;
 

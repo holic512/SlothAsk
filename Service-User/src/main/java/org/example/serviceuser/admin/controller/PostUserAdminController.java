@@ -1,11 +1,10 @@
 /**
  * File Name: PostAdminController.java
- * Description: Todo
+ * Description: 用户管理系统-管理员新增用户控制器
  * Author: holic512
  * Created Date: 2025-01-23
  * Version: 1.0
- * Usage:
- * Todo
+ * Usage: 提供管理员添加新用户的接口
  */
 package org.example.serviceuser.admin.controller;
 
@@ -31,6 +30,13 @@ public class PostUserAdminController {
         this.postUserAdminService = postUserAdminService;
     }
 
+    /**
+     * 添加新用户
+     * @param userRequest 新用户的信息请求对象
+     * @return ApiResponse 添加操作的响应结果
+     * 成功返回: 200 状态码和成功消息
+     * 失败返回: 403 状态码和失败原因
+     */
     @PostMapping("/addUser")
     public ApiResponse addUser(@Valid @RequestBody AddUserRequest userRequest) {
 

@@ -1,20 +1,19 @@
 /**
  * File Name: DeleteUserServiceImpl.java
- * Description: Todo
+ * Description: 用户管理系统-管理员删除用户服务实现类
  * Author: lv
  * Created Date: 2025-01-24
  * Version: 1.0
- * Usage:
- * Todo
+ * Usage: 实现管理员删除用户的服务接口，包括单个删除和批量删除的具体实现
  */
 package org.example.serviceuser.admin.service.impl;
+
+import java.util.List;
 
 import org.example.serviceuser.admin.mapper.AdminUserMapper;
 import org.example.serviceuser.admin.service.DeleteUserAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class DeleteUserAdminAdminServiceImpl implements DeleteUserAdminService {
