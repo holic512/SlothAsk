@@ -76,7 +76,6 @@ public interface AdminUserMapper extends BaseMapper<User> {
             "  AND u.status = #{status};\n")
     int countUsersByStatus(String keyword, Integer status);
 
-
     /**
      * 获取满足条件的用户总数
      *
@@ -93,6 +92,40 @@ public interface AdminUserMapper extends BaseMapper<User> {
             "      OR u.phone LIKE CONCAT('%', #{keyword}, '%')\n" +
             "  )\n")
     int countUsers(String keyword);
+
+
+
+    /**
+     * 查询是否已有相同用户名的用户
+     *
+     * @param username 用户名
+     * @return 用户名重复的数量
+     */
+    @Select("SELECT COUNT(*) FROM user u WHERE u.username = #{username}")
+    Long countUsersByUsername(String username);
+
+
+    /**
+     * 查询是否已有相同邮箱的用户
+     *
+     * @param email 邮箱
+     * @return 邮箱重复的数量
+     */
+    @Select("SELECT COUNT(*) FROM user u WHERE u.email = #{email}")
+    Long countUsersByEmail(String email);
+
+
+    /**
+     * 查询是否已有相同手机号的用户
+     *
+     * @param phone 手机号
+     * @return 手机号重复的数量
+     */
+    @Select("SELECT COUNT(*) FROM user u WHERE u.phone = #{phone}")
+    Long countUsersByPhone(String phone);
+
+
+
 
     /**
      * 根据用户名更新用户密码

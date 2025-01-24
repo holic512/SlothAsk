@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { useUserListStore } from '../pinia/userListStore'
 import type { IPasswordForm } from '../types/form'
 import { passwordFormRules } from '../constants/formRules'
-import { handlePasswordFormSubmit } from '../service/handleFormSubmit'
+import { handlePasswordSubmit } from '../service/handlePassword'
 
 // 获取 store 实例
 const userListStore = useUserListStore()
@@ -33,7 +33,7 @@ const handleSubmit = async (): Promise<void> => {
     
     await formRef.value.validate(async (valid: boolean) => {
         if (valid) {
-            await handlePasswordFormSubmit(form.value)
+            await handlePasswordSubmit(form.value)
         }
     })
 }

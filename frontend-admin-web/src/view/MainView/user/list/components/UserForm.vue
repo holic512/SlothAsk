@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { Plus } from '@element-plus/icons-vue'
-import { useUserListStore } from '../pinia/userListStore'
-import type { IUserForm } from '../types/form'
-import type { IUser } from '../types/user'
-import { getUserFormRules } from '../constants/formRules'
-import { handleUserFormSubmit } from '../service/handleFormSubmit'
+import {ref, computed, watch} from 'vue'
+import {Plus} from '@element-plus/icons-vue'
+import {useUserListStore} from '../pinia/userListStore'
+import type {IUserForm} from '../types/form'
+import type {IUser} from '../types/user'
+import {getUserFormRules} from '../constants/formRules'
+import {handleAddUser} from "@/view/MainView/user/list/service/handleAddUser";
+
 
 // 获取 store 实例
 const userListStore = useUserListStore()
@@ -15,61 +16,60 @@ const formRef = ref()
 
 // 创建本地表单数据
 const formData = ref<IUserForm>({
-    username: '',
-    nickname: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    status: 1,
-    gender: 1,
-    age: undefined,
-    bio: '',
-    avatar: ''
+  id: null,
+  username: '',
+  nickname: '',
+  email: '',
+  phone: '',
+  password: '',
+  status: 1,
+  gender: 1,
+  age: undefined,
+  bio: '',
+  avatar: ''
 })
 
 // 监听编辑用户数据变化
 watch(
     () => userListStore.currentEditUser,
     (newUser: IUser | null) => {
-        if (userListStore.formType === 'edit' && newUser) {
-            // 编辑模式：使用当前编辑用户的数据
-            formData.value = {
-                ...newUser,
-                password: '',
-                confirmPassword: ''
-            }
-        } else {
-            // 新增模式：重置为默认值
-            formData.value = {
-                username: '',
-                nickname: '',
-                email: '',
-                phone: '',
-                password: '',
-                confirmPassword: '',
-                status: 1,
-                gender: 1,
-                age: undefined,
-                bio: '',
-                avatar: ''
-            }
+      if (userListStore.formType === 'edit' && newUser) {
+        // 编辑模式：使用当前编辑用户的数据
+        formData.value = {
+          ...newUser,
+          password: '',
         }
+      } else {
+        // 新增模式：重置为默认值
+        formData.value = {
+          id: null,
+          username: '',
+          nickname: '',
+          email: '',
+          phone: '',
+          password: '',
+          status: 1,
+          gender: 1,
+          age: undefined,
+          bio: '',
+          avatar: ''
+        }
+      }
     },
-    { immediate: true }
+    {immediate: true}
 )
 
 // 状态选项
 const statusOptions = [
-    { value: 1, label: '正常' },
-    { value: 0, label: '禁用' }
+  {value: 1, label: '正常'},
+  {value: 0, label: '禁用'}
 ]
 
 // 性别选项
 const genderOptions = [
-    { value: 1, label: '男' },
-    { value: 2, label: '女' },
-    { value: 0, label: '保密' }
+  {value: 1, label: '男'},
+  {value: 2, label: '女'},
+  {value: 0, label: '保密'}
 ]
 
 // 获取表单校验规则
@@ -80,44 +80,51 @@ const showPasswordFields = computed(() => userListStore.formType === 'add')
 
 // 表单提交
 const handleSubmit = async (): Promise<void> => {
-    if (!formRef.value) return
-    
-    await formRef.value.validate(async (valid: boolean) => {
-        if (valid) {
-            await handleUserFormSubmit(formData.value)
-        }
-    })
+  if (!formRef.value) return
+
+  await formRef.value.validate(async (valid: boolean) => {
+    if (!valid) return;
+
+    // 当校验成功时 判断当前什么状态 用来区别不同接口
+    if (userListStore.formType === 'edit') {
+      // 编辑状态
+
+    } else {
+      // 新增状态
+      await handleAddUser(formData.value)
+    }
+  })
 }
 
 // 重置表单
 const resetForm = (): void => {
-    if (formRef.value) {
-        formRef.value.resetFields()
-    }
+  if (formRef.value) {
+    formRef.value.resetFields()
+  }
 }
 
 // 关闭弹窗
 const handleClose = (): void => {
-    resetForm()
-    userListStore.formVisible = false
+  resetForm()
+  userListStore.formVisible = false
 }
 </script>
 
 <template>
   <el-dialog
-    :model-value="userListStore.formVisible"
-    :title="userListStore.formType === 'add' ? '新增用户' : '编辑用户'"
-    width="640px"
-    @update:model-value="handleClose"
-    class="user-form-dialog"
-    :close-on-click-modal="false"
+      :model-value="userListStore.formVisible"
+      :title="userListStore.formType === 'add' ? '新增用户' : '编辑用户'"
+      width="640px"
+      @update:model-value="handleClose"
+      class="user-form-dialog"
+      :close-on-click-modal="false"
   >
     <el-form
-      ref="formRef"
-      :model="formData"
-      :rules="rules"
-      label-width="70px"
-      class="user-form"
+        ref="formRef"
+        :model="formData"
+        :rules="rules"
+        label-width="70px"
+        class="user-form"
     >
       <div class="form-section">
         <div class="section-content">
@@ -151,21 +158,11 @@ const handleClose = (): void => {
             <el-row :gutter="16">
               <el-col :span="12">
                 <el-form-item label="密码" prop="password">
-                  <el-input 
-                    v-model="formData.password" 
-                    type="password" 
-                    placeholder="请输入密码"
-                    show-password
-                  />
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="确认密码" prop="confirmPassword">
-                  <el-input 
-                    v-model="formData.confirmPassword" 
-                    type="password" 
-                    placeholder="请确认密码"
-                    show-password
+                  <el-input
+                      v-model="formData.password"
+                      type="password"
+                      placeholder="请输入密码"
+                      show-password
                   />
                 </el-form-item>
               </el-col>
@@ -176,10 +173,10 @@ const handleClose = (): void => {
             <el-col :span="12">
               <el-form-item label="状态" prop="status">
                 <el-radio-group v-model="formData.status">
-                  <el-radio 
-                    v-for="option in statusOptions"
-                    :key="option.value"
-                    :value="option.value"
+                  <el-radio
+                      v-for="option in statusOptions"
+                      :key="option.value"
+                      :value="option.value"
                   >
                     {{ option.label }}
                   </el-radio>
@@ -189,10 +186,10 @@ const handleClose = (): void => {
             <el-col :span="12">
               <el-form-item label="性别" prop="gender">
                 <el-radio-group v-model="formData.gender">
-                  <el-radio 
-                    v-for="option in genderOptions"
-                    :key="option.value"
-                    :value="option.value"
+                  <el-radio
+                      v-for="option in genderOptions"
+                      :key="option.value"
+                      :value="option.value"
                   >
                     {{ option.label }}
                   </el-radio>

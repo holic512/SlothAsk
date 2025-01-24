@@ -77,7 +77,7 @@ const formatStatus = (status) => {
             </div>
             <div class="info-item">
               <span class="label">年龄</span>
-              <span class="value">{{ userData.age ? null : '保密' }}岁</span>
+              <span class="value">{{ userData.age ? userData.age + '岁' : '保密' }}</span>
             </div>
           </div>
         </div>

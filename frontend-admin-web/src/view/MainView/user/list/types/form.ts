@@ -5,12 +5,12 @@ export interface IPasswordForm {
 }
 
 export interface IUserForm {
+    id: number | null
     username: string
     nickname?: string
     email: string
     phone: string
     password?: string
-    confirmPassword?: string
     status: number
     gender: number
     age?: number

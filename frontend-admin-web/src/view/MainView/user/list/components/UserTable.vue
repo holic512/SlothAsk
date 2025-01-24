@@ -36,7 +36,20 @@ const formatStatus = (status) => {
   >
     <el-table-column type="selection" width="50" fixed/>
     <el-table-column prop="id" label="ID" width="80" fixed/>
-    <el-table-column prop="username" label="用户名" min-width="120"/>
+    <el-table-column prop="username" label="用户名" min-width="120">
+      <template #default="{ row }">
+
+        <div style="display: flex; align-items: center; gap: 8px">
+
+          <el-avatar size="small" shape="square" :src="row.avatar" >
+            {{ row.username.charAt(0) }}
+          </el-avatar>
+
+          {{row.username}}
+        </div>
+
+      </template>
+    </el-table-column>
     <el-table-column prop="email" label="邮箱" min-width="180" show-overflow-tooltip/>
     <el-table-column prop="phone" label="手机号" min-width="120"/>
     <el-table-column label="状态" width="90" align="center">
