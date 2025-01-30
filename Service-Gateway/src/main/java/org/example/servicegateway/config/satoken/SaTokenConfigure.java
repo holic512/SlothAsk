@@ -54,7 +54,7 @@ public class SaTokenConfigure {
                             .notMatch("/auth/**", "/user/auth/**", "/images/**")
 
                             // 放行用户登录接口和验证码接口
-                            .notMatch("/service-admin/auth/**", "/service-admin/captcha/**")
+                            .notMatch("/service-admin/auth/**", "/service-admin/captcha/**","service-ai/**")
                             .check(r -> {
                                 // 拦截管理员接口 和 各个有关于管理员操作的子服务
                                 SaRouter.match("/service-admin/**").check(StpKit.ADMIN::checkLogin);
