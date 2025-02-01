@@ -1,0 +1,1 @@
+import LogsView from '../../system/logs/index.vue' 
