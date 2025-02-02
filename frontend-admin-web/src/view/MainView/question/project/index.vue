@@ -1,13 +1,12 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import ProjectTable from './components/ProjectTable.vue'
 import SearchForm from "./components/SearchForm.vue";
 import ProjectForm from './components/ProjectForm.vue'
 import ProjectDetail from './components/ProjectDetail.vue'
-import { useProjectStore } from '../../../../stores/project'
+import { useProjectStore } from './pinia/project'
 import { storeToRefs } from 'pinia'
-import CreatorDetail from './components/CreatorDetail.vue'
 
 const projectStore = useProjectStore()
 const { projects, loading } = storeToRefs(projectStore)
@@ -23,10 +22,6 @@ const currentEditProject = ref(null)
 // 项目详情相关
 const showDetail = ref(false)
 const detailData = ref({})
-
-// 创建者详情相关
-const showCreatorDetail = ref(false)
-const currentCreatorId = ref('')
 
 const searchKeyword = ref('')
 
@@ -143,16 +138,15 @@ const handleDelete = (row) => {
   }).catch(() => {})
 }
 
-// 处理查看创建者详情
-const handleViewCreator = (creatorId) => {
-  currentCreatorId.value = creatorId
-  showCreatorDetail.value = true
-}
-
 // 在组件挂载时获取项目列表
 onMounted(async () => {
   await projectStore.fetchProjects()
 })
+
+// 添加一个调试日志
+watch(() => projects.value, (newVal) => {
+  console.log('Projects data:', newVal)
+}, { immediate: true })
 </script>
 
 <template>
@@ -175,7 +169,6 @@ onMounted(async () => {
       @edit="handleEdit"
       @delete="handleDelete"
       @selection-change="handleSelectionChange"
-      @view-creator="handleViewCreator"
     />
   
   <!-- 分页 -->
@@ -201,16 +194,6 @@ onMounted(async () => {
     v-model:visible="showDetail"
     :data="detailData"
   />
-
-  <!-- 创建者详情弹窗 -->
-  <el-dialog
-    title="创建者详情"
-    v-model="showCreatorDetail"
-    width="400px"
-    :close-on-click-modal="false"
-  >
-    <CreatorDetail :creator-id="currentCreatorId" />
-  </el-dialog>
 </template>
 
 <style scoped>

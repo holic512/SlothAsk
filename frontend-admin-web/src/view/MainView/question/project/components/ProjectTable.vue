@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { View, Edit, Delete, User } from '@element-plus/icons-vue'
+import { View, Edit, Delete, QuestionFilled, Folder, Document } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 
 const data = defineModel('data')
@@ -47,26 +47,50 @@ const handleDelete = (row) => {
       @selection-change="rows => emit('selection-change', rows)"
   >
     <el-table-column type="selection" width="50" fixed />
-    <el-table-column prop="sort_order" label="排序序号" width="60" />
-    <el-table-column prop="id" label="ID" width="80"  />
-    <el-table-column prop="project_name" label="项目名称" min-width="120" />
-    <el-table-column prop="creator_id" label="创建者ID" min-width="120" show-overflow-tooltip>
+
+    <el-table-column prop="id" label="ID" width="80" />
+
+    <el-table-column prop="project_name" label="项目名称" min-width="50" />
+
+    <el-table-column prop="description" label="项目描述" min-width="120" />
+
+    <el-table-column label="分类/问题" width="120" align="center">
       <template #default="{ row }">
-        <div class="creator-cell">
-          <div class="creator-info">
-            <el-tooltip content="创建者详情" placement="top">
-              <el-button
-                  link
-                  type="primary"
-                  :icon="User"
-                  @click="emit('view-creator', row.creator_id)"
-              />
-            </el-tooltip>
-            <span>{{ row.creator_id }}</span>
-          </div>
+        <div class="count-info">
+          <el-tooltip content="分类数量" placement="top">
+            <span class="count-item">
+              <el-icon><Folder /></el-icon>
+              {{ row.category_count }}
+            </span>
+          </el-tooltip>
+          <el-divider direction="vertical" />
+          <el-tooltip content="问题数量" placement="top">
+            <span class="count-item">
+              <el-icon><Document /></el-icon>
+              {{ row.question_count }}
+            </span>
+          </el-tooltip>
         </div>
       </template>
     </el-table-column>
+
+    <el-table-column prop="sort_order" label="权重" width="80">
+      <template #header>
+        <el-tooltip
+            content="权重值越大，排序越靠前"
+            placement="top"
+            effect="light"
+        >
+          <div class="weight-header">
+            权重
+            <el-icon class="question-icon"><QuestionFilled /></el-icon>
+          </div>
+        </el-tooltip>
+      </template>
+    </el-table-column>
+
+    
+
     <el-table-column label="状态" width="90" align="center">
       <template #default="{ row }">
         <el-tag
@@ -184,5 +208,44 @@ const handleDelete = (row) => {
 
 .creator-info .el-button:hover {
   background-color: var(--el-fill-color-light);
+}
+
+.weight-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.question-icon {
+  font-size: 14px;
+  color: var(--el-text-color-secondary);
+  cursor: help;
+}
+
+.question-icon:hover {
+  color: var(--el-color-primary);
+}
+
+.count-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.count-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--el-text-color-regular);
+}
+
+.count-item .el-icon {
+  font-size: 14px;
+}
+
+:deep(.el-divider--vertical) {
+  height: 16px;
+  margin: 0;
 }
 </style>

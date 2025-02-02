@@ -1,5 +1,5 @@
 <script setup>
-import CreatorDetail from './CreatorDetail.vue'
+import { Folder, Document } from '@element-plus/icons-vue'
 
 const visible = defineModel('visible')
 
@@ -37,21 +37,9 @@ const handleClose = () => {
       <el-descriptions-item label="项目名称">
         {{ data.project_name }}
       </el-descriptions-item>
-      
-      <el-descriptions-item label="创建者ID">
-        <el-popover
-          placement="right"
-          trigger="hover"
-          :width="320"
-          popper-class="creator-popover"
-        >
-          <template #default>
-            <CreatorDetail :creator-id="data.creator_id" />
-          </template>
-          <template #reference>
-            <span class="creator-id">{{ data.creator_id }}</span>
-          </template>
-        </el-popover>
+
+      <el-descriptions-item label="项目描述">
+        {{ data.description || '暂无描述' }}
       </el-descriptions-item>
 
       <el-descriptions-item label="排序序号">
@@ -66,6 +54,18 @@ const handleClose = () => {
         >
           {{ formatStatus(data.status).text }}
         </el-tag>
+      </el-descriptions-item>
+
+      <el-descriptions-item label="分类/问题">
+        <div class="count-info">
+          <span class="count-item">
+            分类数：{{ data.category_count ?? 0 }}
+          </span>
+          <el-divider direction="vertical" />
+          <span class="count-item">
+            问题数：{{ data.question_count ?? 0 }}
+          </span>
+        </div>
       </el-descriptions-item>
 
       <el-descriptions-item label="创建时间">
@@ -131,16 +131,26 @@ const handleClose = () => {
   --el-tag-text-color: var(--el-color-info);
 }
 
-.creator-id {
-  color: var(--el-color-primary);
-  cursor: pointer;
+.count-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-.creator-id:hover {
-  text-decoration: underline;
+.count-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--el-text-color-regular);
 }
 
-:deep(.creator-popover) {
-  padding: 0;
+.count-item .el-icon {
+  font-size: 16px;
+  color: var(--el-text-color-secondary);
+}
+
+:deep(.el-divider--vertical) {
+  height: 16px;
+  margin: 0;
 }
 </style>

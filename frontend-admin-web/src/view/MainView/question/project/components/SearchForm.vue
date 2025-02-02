@@ -34,7 +34,7 @@ const handleSort = (order) => {
       <el-form-item class="search-item">
         <el-input
             v-model="keyword"
-            placeholder="请输入项目名称/创建者"
+            placeholder="请输入项目名称"
             clearable
             style="width: 300px"
         >
@@ -53,8 +53,8 @@ const handleSort = (order) => {
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="asc">正序（序号从小到大）</el-dropdown-item>
-              <el-dropdown-item command="desc">倒序（序号从大到小）</el-dropdown-item>
+              <el-dropdown-item command="asc">正序（权重从小到大）</el-dropdown-item>
+              <el-dropdown-item command="desc">倒序（权重从大到小）</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
