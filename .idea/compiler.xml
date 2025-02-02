@@ -8,14 +8,16 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="Service-User" />
-        <module name="Service-Gateway" />
         <module name="Service-Common" />
+        <module name="Service-Image" />
+        <module name="Service-Gateway" />
       </profile>
       <profile name="Annotation profile for Service-Admin" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
         </processorPath>
         <module name="Service-Admin" />
@@ -33,6 +35,7 @@
       <module name="Service-Admin" options="-parameters" />
       <module name="Service-Common" options="-parameters" />
       <module name="Service-Gateway" options="-parameters" />
+      <module name="Service-Image" options="-parameters" />
       <module name="Service-User" options="-parameters" />
       <module name="service-registry" options="-parameters" />
       <module name="service-registry (1)" options="-parameters" />
