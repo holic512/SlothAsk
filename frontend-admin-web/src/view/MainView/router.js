@@ -18,7 +18,7 @@ import StatsSign from './stats/sign/index.vue'
 import StatsWrong from './stats/wrong/index.vue'
 import SystemAdmin from './system/admin/index.vue'
 import SystemRoles from './system/roles/index.vue'
-import SystemLogs from './system/logs/index.vue'
+import SystemLogs from '@/view/MainView/system/logsView/index.vue'
 import SystemConfig from './system/config/index.vue'
 
 export default [

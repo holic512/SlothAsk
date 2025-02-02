@@ -11,6 +11,7 @@
         <module name="Service-Common" />
         <module name="Service-Image" />
         <module name="Service-Gateway" />
+        <module name="Service-Question" />
       </profile>
       <profile name="Annotation profile for Service-Admin" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -36,6 +37,7 @@
       <module name="Service-Common" options="-parameters" />
       <module name="Service-Gateway" options="-parameters" />
       <module name="Service-Image" options="-parameters" />
+      <module name="Service-Question" options="-parameters" />
       <module name="Service-User" options="-parameters" />
       <module name="service-registry" options="-parameters" />
       <module name="service-registry (1)" options="-parameters" />

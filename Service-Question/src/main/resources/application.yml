@@ -1,0 +1,16 @@
+server:
+  port: 8086 # 用户服务的端口号
+
+spring:
+  application:
+    name: service-question # 服务名
+  datasource:
+    url: jdbc:mysql://localhost:3306/slothAsk?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka # 指向 Eureka Server 的地址

@@ -79,6 +79,6 @@ onMounted(async (): Promise<void> => {
 .pagination-container {
   margin-top: 16px;
   display: flex;
-  justify-content: center;
+  justify-content: end;
 }
 </style> 

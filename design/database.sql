@@ -65,14 +65,11 @@ CREATE TABLE `project_category` (
     `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '项目分类ID',
     `name` varchar(50) NOT NULL COMMENT '项目分类名称(如:Java面试题、软考)',
     `description` varchar(200) DEFAULT NULL COMMENT '项目描述',
-    `creator_id` bigint(20) NOT NULL COMMENT '创建者ID',
-    `sort_order` int(11) DEFAULT 0 COMMENT '排序序号',
+    `sort_order` int(11) NOT NULL DEFAULT 0 COMMENT '排序序号',
     `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态 1:正常 0:禁用',
     `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    PRIMARY KEY (`id`),
-    KEY `idx_creator` (`creator_id`),
-    CONSTRAINT `fk_project_creator` FOREIGN KEY (`creator_id`) REFERENCES `user` (`id`) ON DELETE RESTRICT
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='项目大分类表';
 
 -- 管理员表（依赖admin_role）
@@ -122,6 +119,8 @@ CREATE TABLE `question_category` (
     `project_id` bigint(20) NOT NULL COMMENT '所属项目ID',
     `name` varchar(50) NOT NULL COMMENT '分类名称(如:Java基础、多线程)',
     `description` varchar(200) DEFAULT NULL COMMENT '分类描述',
+    `creator_id` bigint(20) NOT NULL COMMENT '创建者ID',
+    `avatar_url` varchar(255) DEFAULT NULL COMMENT '分类头像URL',
     `sort_order` int(11) DEFAULT 0 COMMENT '排序序号',
     `view_count` bigint(20) NOT NULL DEFAULT '0' COMMENT '访问数量',
     `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态 1:正常 0:禁用',
@@ -129,7 +128,9 @@ CREATE TABLE `question_category` (
     `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
     KEY `idx_project` (`project_id`),
-    CONSTRAINT `fk_category_project` FOREIGN KEY (`project_id`) REFERENCES `project_category` (`id`) ON DELETE RESTRICT
+    KEY `idx_creator` (`creator_id`),
+    CONSTRAINT `fk_category_project` FOREIGN KEY (`project_id`) REFERENCES `project_category` (`id`) ON DELETE RESTRICT,
+    CONSTRAINT `fk_category_creator` FOREIGN KEY (`creator_id`) REFERENCES `user` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='题库分类表';
 
 -- 题库内容表（依赖question_category）
