@@ -9,5 +9,15 @@
  */
 package org.example.servicequestion.admin.project.service;
 
+import org.example.servicequestion.admin.project.enums.PutProjectAdminEnum;
+import org.example.servicequestion.admin.project.request.PutProjectAdminRequest;
+
 public interface PutProjectAdminService {
+
+    /**
+     * 修改项目信息
+     * @param request
+     * @return
+     */
+    PutProjectAdminEnum modifyProject(PutProjectAdminRequest request);
 }
