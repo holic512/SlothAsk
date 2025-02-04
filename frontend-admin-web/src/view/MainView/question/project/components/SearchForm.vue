@@ -1,5 +1,5 @@
 <script setup>
-import { Delete, Plus, Search, Sort, ArrowDown } from "@element-plus/icons-vue";
+import {Delete, Plus, Search, Sort, ArrowDown} from "@element-plus/icons-vue";
 
 const selectedCount = defineModel('selectedCount', {
   default: 0
@@ -30,45 +30,46 @@ const handleSort = (order) => {
 
 <template>
   <div class="search-area">
-    <el-form inline class="search-form">
-      <el-form-item class="search-item">
-        <el-input
-            v-model="keyword"
-            placeholder="请输入项目名称"
-            clearable
-            style="width: 300px"
-        >
-          <template #append>
-            <el-button :icon="Search" @click="handleSearch">
-              搜索
-            </el-button>
-          </template>
-        </el-input>
-      </el-form-item>
-      <div class="operation-buttons">
-        <el-dropdown @command="handleSort">
-          <el-button :icon="Sort">
-            排序
-            <el-icon class="el-icon--right"><arrow-down /></el-icon>
-          </el-button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="asc">正序（权重从小到大）</el-dropdown-item>
-              <el-dropdown-item command="desc">倒序（权重从大到小）</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-        <el-button
-            type="danger"
-            :icon="Delete"
-            :disabled="selectedCount === 0"
-            @click="handleBatchDelete"
-        >
-          删除选中({{ selectedCount }})
+
+    <el-input
+        v-model="keyword"
+        placeholder="请输入项目名称"
+        clearable
+        style="width: 300px"
+    >
+      <template #append>
+        <el-button :icon="Search" @click="handleSearch">
+          搜索
         </el-button>
-        <el-button type="primary" :icon="Plus" @click="handleAdd">新增项目</el-button>
-      </div>
-    </el-form>
+      </template>
+    </el-input>
+
+    <div class="operation-buttons">
+      <el-dropdown @command="handleSort">
+        <el-button :icon="Sort">
+          排序
+          <el-icon class="el-icon--right">
+            <arrow-down/>
+          </el-icon>
+        </el-button>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item command="asc">正序（权重从小到大）</el-dropdown-item>
+            <el-dropdown-item command="desc">倒序（权重从大到小）</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+      <el-button
+          type="danger"
+          :icon="Delete"
+          :disabled="selectedCount === 0"
+          @click="handleBatchDelete"
+      >
+        删除选中({{ selectedCount }})
+      </el-button>
+      <el-button type="primary" :icon="Plus" @click="handleAdd">新增项目</el-button>
+    </div>
+
   </div>
 </template>
 

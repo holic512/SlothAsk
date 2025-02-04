@@ -69,6 +69,7 @@ const handleClose = (key, keyPath) => {
           <span>题库管理</span>
         </template>
         <el-menu-item index="/main/question/project">项目分类</el-menu-item>
+        <el-menu-item index="/main/question/tags">题目标签</el-menu-item>
         <el-menu-item index="/main/question/category">题库分类</el-menu-item>
         <el-menu-item index="/main/question/list">题目列表</el-menu-item>
       </el-sub-menu>

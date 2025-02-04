@@ -1,7 +1,7 @@
 /**
  * File Name: QuestionCategory.java
  * Description: 题库分类实体类
- * Author: lv
+ * Author: holic512
  * Created Date: 2024-03-21
  * Version: 1.0
  */

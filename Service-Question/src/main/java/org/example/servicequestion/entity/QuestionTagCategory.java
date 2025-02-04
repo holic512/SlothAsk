@@ -1,6 +1,6 @@
 /**
- * File Name: ProjectCategory.java
- * Description: 项目大分类实体类
+ * File Name: QuestionTagCategory.java
+ * Description: 题目标签分类实体类
  * Author: holic512
  * Created Date: 2024-03-21
  * Version: 1.0
@@ -16,11 +16,14 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("project_category")
-public class ProjectCategory {
+@TableName("question_tag_category")
+public class QuestionTagCategory {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
+
+    @TableField("project_id")
+    private Long projectId;
 
     @TableField("name")
     private String name;

@@ -19,6 +19,7 @@ erDiagram
 
     %% 题库相关关系
     project_category ||--o{ question_category : "id = project_id"
+    project_category ||--o{ question_tag_category : "id = project_id"
     question_category ||--o{ question : "id = category_id"
     question ||--o{ question_comment : "id = question_id"
     question_category ||--o{ category_comment : "id = category_id"
@@ -27,13 +28,14 @@ erDiagram
     question ||--o{ user_question_record : "id = question_id"
     question ||--o{ wrong_question_book : "id = question_id"
     question_category ||--o{ category_rating : "id = category_id"
+    question_tag_category ||--o{ question : "id = tag_category_id"
 
     %% 会员和权限相关关系
     member_level ||--o{ user_member : "id = level_id"
+    member_level ||--o{ question_permission : "id = min_member_level"
     achievement ||--o{ user_achievement : "id = achievement_id"
     achievement ||--o| user_profile : "id = display_achievement_id"
-    question_category ||--o| question_permission : "id = category_id"
-    member_level ||--o{ question_permission : "id = min_member_level"
+    question_category ||--|| question_permission : "id = category_id"
     question_category ||--o{ user_category_permission : "id = category_id"
 
     %% 管理员相关关系
@@ -57,7 +59,7 @@ erDiagram
         bigint id PK "自增主键"
         varchar name "角色名称"
         varchar description "角色描述"
-        text permissions "权限集合(JSON)"
+        text permissions "权限集合(JSON格式)"
         tinyint status "1:正常 0:禁用"
         datetime create_time "创建时间"
         datetime update_time "更新时间"
@@ -156,7 +158,7 @@ erDiagram
         text answer "题目答案"
         tinyint difficulty "1:简单 2:中等 3:困难"
         tinyint type "1:单选 2:多选 3:判断 4:简答"
-        varchar tags "题目标签"
+        bigint tag_category_id FK "标签分类ID"
         tinyint status "1:正常 0:禁用"
         bigint view_count "浏览次数"
         datetime create_time "创建时间"
@@ -333,4 +335,15 @@ erDiagram
         datetime create_time "创建时间"
         datetime update_time "更新时间"
     }
- 
+
+    %% 标签分类表
+    question_tag_category {
+        bigint id PK "自增主键"
+        bigint project_id FK "所属项目分类ID"
+        varchar name "标签分类名称"
+        varchar description "标签分类描述"
+        int sort_order "排序序号"
+        tinyint status "1:正常 0:禁用"
+        datetime create_time "创建时间"
+        datetime update_time "更新时间"
+    }

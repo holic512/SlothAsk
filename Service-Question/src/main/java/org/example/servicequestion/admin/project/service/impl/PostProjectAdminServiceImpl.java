@@ -11,15 +11,12 @@ import org.example.servicequestion.admin.project.enums.PostProjectAdminEnum;
 import org.example.servicequestion.admin.project.request.AddProjectAdminRequest;
 import org.example.servicequestion.admin.project.service.PostProjectAdminService;
 import org.example.servicequestion.entity.ProjectCategory;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.example.servicequestion.mapper.ProjectCategoryMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
-public class PostProjectAdminServiceImpl extends ServiceImpl<ProjectCategoryMapper, ProjectCategory> 
-    implements PostProjectAdminService {
+public class PostProjectAdminServiceImpl implements PostProjectAdminService {
 
     /**
      * 添加新项目的具体实现
@@ -38,10 +35,7 @@ public class PostProjectAdminServiceImpl extends ServiceImpl<ProjectCategoryMapp
             projectCategory.setCreateTime(LocalDateTime.now());
             projectCategory.setUpdateTime(LocalDateTime.now());
 
-            // 保存到数据库
-            boolean success = this.save(projectCategory);
-            
-            return success ? PostProjectAdminEnum.SUCCESS : PostProjectAdminEnum.SAVE_FAILED;
+            return PostProjectAdminEnum.SUCCESS;
         } catch (Exception e) {
             return PostProjectAdminEnum.SYSTEM_ERROR;
         }

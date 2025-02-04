@@ -7,6 +7,7 @@ import UserFollow from './user/follow/index.vue'
 import QuestionProject from './question/project/index.vue'
 import QuestionCategory from './question/category/index.vue'
 import QuestionList from './question/list/index.vue'
+import QuestionTags from './question/tags/index.vue'
 import CommentsQuestion from './comments/question/index.vue'
 import CommentsCategory from './comments/category/index.vue'
 import CommentsRating from './comments/rating/index.vue'
@@ -69,6 +70,11 @@ export default [
                 path: 'question/list',
                 name: 'QuestionList',
                 component: QuestionList
+            },
+            {
+                path: 'question/tags',
+                name: 'QuestionTags',
+                component: QuestionTags
             },
             // 评论管理
             {

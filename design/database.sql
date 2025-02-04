@@ -142,14 +142,16 @@ CREATE TABLE `question` (
     `answer` text NOT NULL COMMENT '题目答案',
     `difficulty` tinyint(4) NOT NULL DEFAULT '1' COMMENT '难度等级 1:简单 2:中等 3:困难',
     `type` tinyint(4) NOT NULL DEFAULT '1' COMMENT '题目类型 1:单选 2:多选 3:判断 4:简答',
-    `tags` varchar(255) DEFAULT NULL COMMENT '题目标签，多个标签用逗号分隔',
+    `tag_category_id` bigint(20) NOT NULL COMMENT '标签分类ID',
     `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态 1:正常 0:禁用',
     `view_count` bigint(20) NOT NULL DEFAULT '0' COMMENT '浏览次数',
     `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
     KEY `idx_category` (`category_id`),
-    CONSTRAINT `fk_question_category` FOREIGN KEY (`category_id`) REFERENCES `question_category` (`id`) ON DELETE RESTRICT
+    KEY `idx_tag_category` (`tag_category_id`),
+    CONSTRAINT `fk_question_category` FOREIGN KEY (`category_id`) REFERENCES `question_category` (`id`) ON DELETE RESTRICT,
+    CONSTRAINT `fk_question_tag` FOREIGN KEY (`tag_category_id`) REFERENCES `question_tag_category` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='题库内容表';
 
 -- 题目评论表（依赖question和user）
@@ -397,6 +399,21 @@ CREATE TABLE `user_follow` (
     CONSTRAINT `fk_followed_user` FOREIGN KEY (`followed_user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
     CONSTRAINT `ck_self_follow` CHECK (`user_id` != `followed_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='用户关注表';
+
+-- 题目标签分类表（依赖project_category）
+CREATE TABLE `question_tag_category` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '标签分类ID',
+    `project_id` bigint(20) NOT NULL COMMENT '所属项目分类ID',
+    `name` varchar(50) NOT NULL COMMENT '标签分类名称(如:Java,Mysql)',
+    `description` varchar(200) DEFAULT NULL COMMENT '标签分类描述',
+    `sort_order` int(11) NOT NULL DEFAULT 0 COMMENT '排序序号',
+    `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态 1:正常 0:禁用',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_project` (`project_id`),
+    CONSTRAINT `fk_tag_project` FOREIGN KEY (`project_id`) REFERENCES `project_category` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='题目标签分类表';
 
 -- 重新启用外键检查
 SET FOREIGN_KEY_CHECKS = 1;

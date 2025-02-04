@@ -40,54 +40,50 @@ const onStatusChange = async (): Promise<void> => {
 
 <template>
   <div class="search-area">
-    <el-form inline class="search-form">
-      <el-form-item class="search-item">
-        <div class="search-group">
-          <el-input
-              v-model="keyword"
-              placeholder="请输入用户名/邮箱/手机号"
-              clearable
-              style="width: 300px"
-          >
-            <template #append>
-              <el-button :icon="Search" @click="onSearch">
-                搜索
-              </el-button>
-            </template>
-          </el-input>
-          <el-select
-              v-model="status"
-              placeholder="用户状态"
-              class="status-select"
-              @change="onStatusChange"
-          >
-            <el-option
-                v-for="item in statusOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-            />
-          </el-select>
-        </div>
-      </el-form-item>
-      <div class="operation-buttons">
-        <el-button
-            type="danger"
-            :icon="Delete"
-            :disabled="selectedCount === 0"
-            @click="handleBatchDelete"
-        >
-          删除选中({{ selectedCount }})
-        </el-button>
-        <el-button
-            type="primary"
-            :icon="Plus"
-            @click="handleAdd"
-        >
-          新增用户
-        </el-button>
-      </div>
-    </el-form>
+    <div class="search-group">
+      <el-input
+          v-model="keyword"
+          placeholder="请输入用户名/邮箱/手机号"
+          clearable
+          style="width: 300px"
+      >
+        <template #append>
+          <el-button :icon="Search" @click="onSearch">
+            搜索
+          </el-button>
+        </template>
+      </el-input>
+      <el-select
+          v-model="status"
+          placeholder="用户状态"
+          class="status-select"
+          @change="onStatusChange"
+      >
+        <el-option
+            v-for="item in statusOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+        />
+      </el-select>
+    </div>
+    <div class="operation-buttons">
+      <el-button
+          type="danger"
+          :icon="Delete"
+          :disabled="selectedCount === 0"
+          @click="handleBatchDelete"
+      >
+        删除选中({{ selectedCount }})
+      </el-button>
+      <el-button
+          type="primary"
+          :icon="Plus"
+          @click="handleAdd"
+      >
+        新增用户
+      </el-button>
+    </div>
   </div>
 </template>
 
