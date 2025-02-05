@@ -36,21 +36,15 @@ public class PutProjectAdminController {
      * @param request 请求对象，包含要编辑的项目信息
      * @return ApiResponse 统一响应对象
      */
-    @PutMapping("/admin/project/edit")
+    @PutMapping("/edit")
     public ApiResponse editProject(@Valid @RequestBody PutProjectAdminRequest request) {
         PutProjectAdminEnum result = putProjectAdminService.modifyProject(request);
 
-        switch (result) {
-            case SUCCESS:
-                return new ApiResponse(200, result.getValue());
-            case PROJECT_NOT_FOUND:
-                return new ApiResponse(404, result.getValue());
-            case UPDATE_FAILED:
-                return new ApiResponse(400, result.getValue());
-            case SYSTEM_ERROR:
-                return new ApiResponse(500, result.getValue());
-            default:
-                return new ApiResponse(500, "未知错误");
-        }
+        return switch (result) {
+            case SUCCESS -> new ApiResponse(200, result.getValue());
+            case PROJECT_NOT_FOUND -> new ApiResponse(404, result.getValue());
+            case UPDATE_FAILED -> new ApiResponse(400, result.getValue());
+            case SYSTEM_ERROR -> new ApiResponse(500, result.getValue());
+        };
     }
 }

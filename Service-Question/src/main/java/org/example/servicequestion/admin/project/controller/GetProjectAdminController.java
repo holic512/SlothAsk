@@ -9,21 +9,17 @@
  */
 package org.example.servicequestion.admin.project.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import jakarta.validation.Valid;
 import org.example.servicequestion.admin.project.enums.GetProjectAdminEnum;
 import org.example.servicequestion.admin.project.request.GetProjectAdminRequest;
+import org.example.servicequestion.admin.project.response.GetProjectAdminResponse;
 import org.example.servicequestion.admin.project.service.GetProjectAdminService;
 import org.example.servicequestion.config.ApiResponse.ApiResponse;
-import org.example.servicequestion.entity.ProjectCategory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/admin/project")
@@ -37,30 +33,20 @@ public class GetProjectAdminController {
     }
 
     @GetMapping("/list")
-    public ApiResponse getProjectList(@RequestParam(required = false) String search,
-                                      @RequestParam(required = false) Integer sortType) {
-        GetProjectAdminRequest request = new GetProjectAdminRequest();
-        request.setSearch(search);
-        request.setSortType(sortType);
+    public ApiResponse getProjectList(@Valid GetProjectAdminRequest request) {
 
-        // 用于接收查询结果
-        List<ProjectCategory> projectList = new ArrayList<>();
-
-        // 调用 Service 获取查询状态
-        GetProjectAdminEnum result = getProjectAdminService.getProjectList(request, projectList);
+        GetProjectAdminResponse response = new GetProjectAdminResponse();
+        GetProjectAdminEnum result = getProjectAdminService.getProjectList(request, response);
 
         switch (result) {
             case SUCCESS:
-                // 查询成功，返回查询到的项目列表
-                return new ApiResponse(200, "查询成功", projectList.isEmpty() ? null : projectList);
+                return new ApiResponse(200, "查询成功", response);
             case SEARCH_FAILED:
-                // 查询失败，暂无数据
-                return new ApiResponse(200, "暂无数据", result.getValue());
+                return new ApiResponse(200, "暂无数据", null);
             case SYSTEM_ERROR:
-                // 系统错误
-                return new ApiResponse(500, "系统错误", result.getValue());
+                return new ApiResponse(500, "系统错误", null);
             default:
-                return new ApiResponse(500, "未知错误");
+                return new ApiResponse(500, "未知错误", null);
         }
     }
 

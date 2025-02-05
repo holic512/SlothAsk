@@ -19,16 +19,16 @@ const emit = defineEmits(['submit'])
 
 // 表单数据
 const formData = ref({
-  project_name: '',
+  name: '',
   description: '',
   creator_id: '',
-  sort_order: 0,
+  sortOrder: 0,
   status: 1
 })
 
 // 表单规则
 const rules = {
-  project_name: [
+  name: [
     { required: true, message: '请输入项目名称', trigger: 'blur' },
     { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
   ],
@@ -38,7 +38,7 @@ const rules = {
   creator_id: [
     { required: true, message: '请输入创建者ID', trigger: 'blur' }
   ],
-  sort_order: [
+  sortOrder: [
     { required: true, message: '请输入权重', trigger: 'blur' },
     { type: 'number', message: '权重必须为数字', trigger: 'blur' }
   ]
@@ -56,10 +56,10 @@ watch(
     } else {
       // 新增模式下，重置表单
       formData.value = {
-        project_name: '',
+        name: '',
         description: '',
         creator_id: '',
-        sort_order: 0,
+        sortOrder: 0,
         status: 1
       }
     }
@@ -70,10 +70,10 @@ watch(
 // 重置表单
 const resetForm = () => {
   formData.value = {
-    project_name: '',
+    name: '',
     description: '',
     creator_id: '',
-    sort_order: 0,
+    sortOrder: 0,
     status: 1
   }
   formRef.value?.resetFields()
@@ -89,10 +89,15 @@ const handleClose = () => {
 const handleSubmit = async () => {
   if (!formRef.value) return
   
-  await formRef.value.validate((valid) => {
+  await formRef.value.validate(async (valid) => {
     if (valid) {
-      emit('submit', { ...formData.value })
-      handleClose()
+      const submitData = {
+        ...formData.value
+      }
+      if (props.type === 'edit' && props.data) {
+        submitData.id = props.data.id
+      }
+      emit('submit', submitData)
     }
   })
 }
@@ -119,7 +124,7 @@ const handleSubmit = async () => {
         <div class="section-title">基本信息</div>
         <el-form-item label="项目名称" prop="project_name">
           <el-input
-            v-model="formData.project_name"
+            v-model="formData.name"
             placeholder="请输入项目名称"
             maxlength="50"
             show-word-limit
@@ -151,7 +156,7 @@ const handleSubmit = async () => {
             >
               <div class="weight-wrapper">
                 <el-input-number
-                  v-model="formData.sort_order"
+                  v-model="formData.sortOrder"
                   :min="0"
                   :max="9999"
                   controls-position="right"

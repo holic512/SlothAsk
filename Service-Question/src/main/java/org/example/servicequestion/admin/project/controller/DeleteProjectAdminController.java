@@ -37,22 +37,17 @@ public class DeleteProjectAdminController {
      * @param id 项目ID
      * @return ApiResponse 统一响应对象
      */
-    @DeleteMapping("/admin/project/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ApiResponse deleteProject(@PathVariable Long id) {
         DeleteProjectAdminEnum result = deleteProjectAdminService.deleteProject(id);
 
-        switch (result) {
-            case SUCCESS:
-                return new ApiResponse(200, result.getValue());
-            case PROJECT_NOT_FOUND:
-                return new ApiResponse(404, result.getValue());
-            case DELETE_FAILED:
-                return new ApiResponse(400, result.getValue());
-            case SYSTEM_ERROR:
-                return new ApiResponse(500, result.getValue());
-            default:
-                return new ApiResponse(500, "未知错误");
-        }
+        return switch (result) {
+            case SUCCESS -> new ApiResponse(200, result.getValue());
+            case PROJECT_NOT_FOUND -> new ApiResponse(404, result.getValue());
+            case DELETE_FAILED -> new ApiResponse(400, result.getValue());
+            case SYSTEM_ERROR -> new ApiResponse(500, result.getValue());
+            default -> new ApiResponse(500, "未知错误");
+        };
     }
 
     /**
@@ -60,7 +55,7 @@ public class DeleteProjectAdminController {
      * @param ids 项目ID列表
      * @return ApiResponse 统一响应对象
      */
-    @DeleteMapping("/admin/project/delete")
+    @DeleteMapping("/delete")
     public ApiResponse deleteProjects(@RequestBody List<Long> ids) {
         DeleteProjectsAdminEnum result = deleteProjectAdminService.deleteProjects(ids);
 

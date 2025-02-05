@@ -17,21 +17,11 @@ const formatStatus = (status) => {
   }
   return statusMap[status] || { text: '未知', type: 'info', effect: 'plain' }
 }
-const emit = defineEmits(['view', 'edit', 'delete', 'selection-change', 'view-creator'])
+const emit = defineEmits(['view', 'edit', 'delete', 'selection-change'])
 
 // 删除确认
 const handleDelete = (row) => {
-  ElMessageBox.confirm(
-    '确认删除该项目吗？',
-    '删除确认',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    }
-  ).then(() => {
-    emit('delete', row)
-  }).catch(() => {})
+  emit('delete', row)
 }
 
 </script>
@@ -50,7 +40,7 @@ const handleDelete = (row) => {
 
     <el-table-column prop="id" label="ID" width="80" />
 
-    <el-table-column prop="project_name" label="项目名称" min-width="50" />
+    <el-table-column prop="name" label="项目名称" min-width="50" />
 
     <el-table-column prop="description" label="项目描述" min-width="120" />
 
@@ -74,7 +64,7 @@ const handleDelete = (row) => {
       </template>
     </el-table-column>
 
-    <el-table-column prop="sort_order" label="权重" width="80">
+    <el-table-column prop="sortOrder" label="权重" width="80">
       <template #header>
         <el-tooltip
             content="权重值越大，排序越靠前"

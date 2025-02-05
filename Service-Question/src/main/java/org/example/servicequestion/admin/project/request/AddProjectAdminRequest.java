@@ -15,6 +15,7 @@ import lombok.Data;
 
 @Data
 public class AddProjectAdminRequest {
+
     @NotBlank(message = "项目名称不能为空")
     // 项目名称
     String projectName;

@@ -17,4 +17,8 @@ public class GetProjectAdminRequest {
     private Integer sortType;
     // 搜索关键词，可以模糊匹配名称和描述
     private String search;
+    // 当前页码
+    private Integer pageNum = 1;
+    // 每页大小
+    private Integer pageSize = 10;
 }

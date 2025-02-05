@@ -8,9 +8,11 @@
 package org.example.servicequestion.admin.project.service.impl;
 
 import org.example.servicequestion.admin.project.enums.PostProjectAdminEnum;
+import org.example.servicequestion.admin.project.mapper.AdminProjectMapper;
 import org.example.servicequestion.admin.project.request.AddProjectAdminRequest;
 import org.example.servicequestion.admin.project.service.PostProjectAdminService;
 import org.example.servicequestion.entity.ProjectCategory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,8 +20,17 @@ import java.time.LocalDateTime;
 @Service
 public class PostProjectAdminServiceImpl implements PostProjectAdminService {
 
+
+    private final AdminProjectMapper adminProjectMapper;
+
+    @Autowired
+    public PostProjectAdminServiceImpl(AdminProjectMapper adminProjectMapper) {
+        this.adminProjectMapper = adminProjectMapper;
+    }
+
     /**
      * 添加新项目的具体实现
+     *
      * @param request 添加项目请求对象
      * @return PostProjectAdminEnum 返回操作结果枚举
      */
@@ -35,7 +46,10 @@ public class PostProjectAdminServiceImpl implements PostProjectAdminService {
             projectCategory.setCreateTime(LocalDateTime.now());
             projectCategory.setUpdateTime(LocalDateTime.now());
 
-            return PostProjectAdminEnum.SUCCESS;
+            // 插入
+            int result = adminProjectMapper.insert(projectCategory);
+
+            return (result > 0) ? PostProjectAdminEnum.SUCCESS : PostProjectAdminEnum.SAVE_FAILED;
         } catch (Exception e) {
             return PostProjectAdminEnum.SYSTEM_ERROR;
         }

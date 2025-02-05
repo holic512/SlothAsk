@@ -15,16 +15,16 @@ const handleSearch = () => {
   emit('search', keyword.value)
 }
 
-const handleAdd = () => {
-  emit('add')
+const handleSort = (order) => {
+  emit('sort', order)
 }
 
 const handleBatchDelete = () => {
   emit('batchDelete')
 }
 
-const handleSort = (order) => {
-  emit('sort', order)
+const handleAdd = () => {
+  emit('add')
 }
 </script>
 

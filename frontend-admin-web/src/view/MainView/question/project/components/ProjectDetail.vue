@@ -1,5 +1,4 @@
 <script setup>
-import { Folder, Document } from '@element-plus/icons-vue'
 
 const visible = defineModel('visible')
 
@@ -35,7 +34,7 @@ const handleClose = () => {
   >
     <el-descriptions :column="1" border>
       <el-descriptions-item label="项目名称">
-        {{ data.project_name }}
+        {{ data.name }}
       </el-descriptions-item>
 
       <el-descriptions-item label="项目描述">
@@ -43,7 +42,7 @@ const handleClose = () => {
       </el-descriptions-item>
 
       <el-descriptions-item label="排序序号">
-        {{ data.sort_order }}
+        {{ data.sortOrder}}
       </el-descriptions-item>
 
       <el-descriptions-item label="状态">
@@ -59,21 +58,21 @@ const handleClose = () => {
       <el-descriptions-item label="分类/问题">
         <div class="count-info">
           <span class="count-item">
-            分类数：{{ data.category_count ?? 0 }}
+            分类数：{{ data.categoryCount ?? 0 }}
           </span>
           <el-divider direction="vertical" />
           <span class="count-item">
-            问题数：{{ data.question_count ?? 0 }}
+            问题数：{{ data.questionCount ?? 0 }}
           </span>
         </div>
       </el-descriptions-item>
 
       <el-descriptions-item label="创建时间">
-        {{ data.create_time || '暂无' }}
+        {{ data.createTime || '暂无' }}
       </el-descriptions-item>
 
       <el-descriptions-item label="更新时间">
-        {{ data.update_time || '暂无' }}
+        {{ data.updateTime || '暂无' }}
       </el-descriptions-item>
     </el-descriptions>
 
