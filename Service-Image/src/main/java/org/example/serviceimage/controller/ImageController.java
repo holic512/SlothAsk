@@ -20,29 +20,29 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/images")
+@RequestMapping("/images")
 @RequiredArgsConstructor
 public class ImageController {
     private final MinioService minioService;
 
     /**
-     * 上传图片
-     * @param file 图片文件
-     * @return 包含文件名和预览URL的响应
+     * 上传图片接口
+     * @param file 要上传的图片文件
+     * @return 返回包含文件名和预览URL的Map
      */
     @PostMapping("/upload")
-    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
+    public Map<String, String> uploadImage(@RequestParam("file") MultipartFile file) {
         String fileName = minioService.uploadImage(file);
         Map<String, String> response = new HashMap<>();
         response.put("fileName", fileName);
         response.put("previewUrl", minioService.getPreviewUrl(fileName));
-        return ResponseEntity.ok(response);
+        return response;
     }
 
     /**
-     * 下载图片
-     * @param fileName 文件名
-     * @return 图片文件流
+     * 下载指定图片
+     * @param fileName 图片文件名
+     * @return 返回图片文件流
      */
     @GetMapping("/download/{fileName}")
     public ResponseEntity<InputStreamResource> downloadImage(@PathVariable String fileName) {
@@ -52,9 +52,9 @@ public class ImageController {
     }
 
     /**
-     * 删除图片
-     * @param fileName 文件名
-     * @return 空响应
+     * 删除指定图片
+     * @param fileName 要删除的图片文件名
+     * @return 返回空响应
      */
     @DeleteMapping("/{fileName}")
     public ResponseEntity<Void> deleteImage(@PathVariable String fileName) {
@@ -63,20 +63,17 @@ public class ImageController {
     }
 
     /**
-     * 获取图片预览URL
-     * @param fileName 文件名
-     * @return 预览URL
+     * 获取图片预览URL（简化版，无需参数验证）
+     * 直接通过文件名获取预览链接
      */
     @GetMapping("/preview/{fileName}")
-    public ResponseEntity<Map<String, String>> getPreviewUrl(@PathVariable String fileName) {
-        Map<String, String> response = new HashMap<>();
-        response.put("previewUrl", minioService.getPreviewUrl(fileName));
-        return ResponseEntity.ok(response);
+    public String getPreviewUrl(@PathVariable String fileName) {
+        return minioService.getPreviewUrl(fileName);
     }
 
     /**
-     * 获取图片列表
-     * @return 图片名称列表
+     * 获取所有图片列表
+     * @return 返回所有图片文件名列表
      */
     @GetMapping("/list")
     public ResponseEntity<List<String>> listImages() {

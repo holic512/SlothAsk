@@ -13,14 +13,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import io.minio.BucketExistsArgs;
 import io.minio.GetObjectArgs;
-import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.ListObjectsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.Result;
-import io.minio.http.Method;
+import io.minio.SetBucketPolicyArgs;
 import io.minio.messages.Item;
 import lombok.SneakyThrows;
 
@@ -37,6 +36,7 @@ public class MinioService {
         this.minioClient = minioClient;
         this.minioConfig = minioConfig;
         createBucketIfNotExists();
+        setBucketPolicy();
     }
 
     /**
@@ -108,19 +108,46 @@ public class MinioService {
     }
 
     /**
-     * 获取图片预览URL
+     * 获取图片预览URL（永久公共链接）
      * @param fileName 文件名
      * @return 预览URL
      */
-    @SneakyThrows
     @Cacheable(value = "previewUrls", key = "#fileName", unless = "#result == null")
     public String getPreviewUrl(String fileName) {
-        return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
-                .bucket(minioConfig.getBucketName())
-                .object(fileName)
-                .method(Method.GET)
-                .expiry(1, TimeUnit.HOURS)
-                .build());
+        // 构建永久公共访问URL
+        return String.format("%s/%s/%s",
+            minioConfig.getEndpoint().replaceAll("/$", ""),  // 移除末尾的斜杠
+            minioConfig.getBucketName(),
+            fileName
+        );
+    }
+
+    /**
+     * 初始化时设置存储桶的访问策略为公开读
+     */
+    @SneakyThrows
+    private void setBucketPolicy() {
+        String bucketName = minioConfig.getBucketName();
+        String policy = """
+            {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Principal": "*",
+                        "Action": ["s3:GetObject"],
+                        "Resource": ["arn:aws:s3:::%s/*"]
+                    }
+                ]
+            }
+            """.formatted(bucketName);
+
+        minioClient.setBucketPolicy(
+            SetBucketPolicyArgs.builder()
+                .bucket(bucketName)
+                .config(policy)
+                .build()
+        );
     }
 
     /**

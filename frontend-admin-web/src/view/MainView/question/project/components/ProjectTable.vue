@@ -42,7 +42,7 @@ const handleDelete = (row) => {
 
     <el-table-column prop="name" label="项目名称" min-width="50" />
 
-    <el-table-column prop="description" label="项目描述" min-width="120" />
+    <el-table-column prop="description" label="项目描述" min-width="120" show-overflow-tooltip/>
 
     <el-table-column label="分类/问题" width="120" align="center">
       <template #default="{ row }">
