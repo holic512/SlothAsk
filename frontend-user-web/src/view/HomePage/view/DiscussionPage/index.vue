@@ -1,6 +1,10 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { setTitle } from '../../../../utils/title'
 
+onMounted(() => {
+  setTitle('讨论')
+})
 </script>
 
 <template>
