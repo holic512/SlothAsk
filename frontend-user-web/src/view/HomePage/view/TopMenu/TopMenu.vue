@@ -1,9 +1,10 @@
 <script setup>
 import {ref} from 'vue'
-import {useRouter} from 'vue-router'
+import {useRouter, useRoute} from 'vue-router'
 import SearchBox from './components/SearchBox/SearchBox.vue'
 
 const router = useRouter()
+const route = useRoute()
 
 const handleSelect = (key) => {
   router.push(key)
@@ -17,6 +18,15 @@ const handleSearch = (searchText) => {
 const handleLogoClick = () => {
   router.push({
     name: 'StudyPage'
+  });
+};
+
+const handleLogin = () => {
+  router.push({
+    path: '/sign/email',
+    query: {
+      redirect: route.fullPath
+    }
   });
 };
 </script>
@@ -50,7 +60,7 @@ const handleLogoClick = () => {
 
     <!-- 用户操作区 -->
     <div class="user-actions">
-      <el-button text>登录</el-button>
+      <el-button text @click="handleLogin">登录</el-button>
       <el-button type="primary" class="vip-button">
         Sloth会员
       </el-button>
