@@ -15,17 +15,26 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
+
+import java.util.List;
+
 @Data
-@TableName("question")
+@TableName(value = "question", autoResultMap = true) // 启用自动结果映射
 public class Question {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+
+    @TableField("project_id")
+    private Long projectId;
+
     @TableField("category_id")
     private Long categoryId;
 
-    @TableField("title")
+    @TableField(value = "title")
     private String title;
 
     @TableField("content")
@@ -35,23 +44,24 @@ public class Question {
     private String answer;
 
     @TableField("difficulty")
-    private Integer difficulty;
+    private Integer difficulty = 1;
 
     @TableField("type")
-    private Integer type;
+    private Integer type = 1;
 
-    @TableField("tags")
-    private String tags;
+    // JSON 字段需要类型处理器
+    @TableField(value = "tag_category_id", typeHandler = JacksonTypeHandler.class)
+    private List<Integer> tagCategoryIds;
 
     @TableField("status")
-    private Integer status;
+    private Integer status = 1;
 
     @TableField("view_count")
-    private Long viewCount;
+    private Long viewCount = 0L;
 
-    @TableField("create_time")
+    @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
-    @TableField("update_time")
+    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
-} 
+}

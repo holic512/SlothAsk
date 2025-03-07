@@ -28,6 +28,8 @@ public interface ServiceImageFeign {
      *
      * @param file 要上传的图片文件
      * @return 返回包含文件名和预览URL的Map
+     *         response.put("fileName", fileName);
+     *         response.put("previewUrl", minioService.getPreviewUrl(fileName));
      */
     @PostMapping(value = "/images/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     Map<String, String> uploadImage(@RequestPart("file") MultipartFile file);

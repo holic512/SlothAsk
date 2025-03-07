@@ -7,7 +7,7 @@
  * Usage:
  * Todo
  */
-package org.example.servicequestion.mapper;
+package org.example.servicequestion.admin.project.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;

@@ -1,0 +1,107 @@
+:root {
+    /* 自定义变量，可根据需要覆盖 */
+    --editor-border-color: #ccc;
+    --editor-bg-color: #fff;
+    --editor-text-color: #333;
+    --editor-quote-border: #d0e5f2;
+    --editor-quote-bg: #f1f1f1;
+    --editor-code-bg: #eee;
+    --editor-table-border: #ccc;
+    --editor-table-head-bg: #f1f1f1;
+}
+
+html.dark {
+    /* 暗黑模式下的变量定义 */
+    --editor-border-color: #444;
+    --editor-bg-color: #2d2d2d;
+    --editor-text-color: #ccc;
+    --editor-quote-border: #3a4a5a;
+    --editor-quote-bg: #3a3a3a;
+    --editor-code-bg: #555;
+    --editor-table-border: #555;
+    --editor-table-head-bg: #444;
+}
+
+.editor-content-view {
+    overflow-x: auto;
+    background-color: var(--editor-bg-color, #fff);
+    color: var(--editor-text-color, #333);
+}
+
+/* 保持段落和列表内的空格 */
+.editor-content-view p,
+.editor-content-view li {
+    white-space: pre-wrap;
+}
+
+/* 引用样式 */
+.editor-content-view blockquote {
+    border-left: 8px solid var(--editor-quote-border, #d0e5f2);
+    padding: 10px;
+    margin: 10px 0;
+    background-color: var(--editor-quote-bg, #f1f1f1);
+}
+
+/* 内联代码样式 */
+.editor-content-view code {
+    font-family: monospace;
+    background-color: var(--editor-code-bg, #eee);
+    padding: 3px;
+    border-radius: 3px;
+}
+
+/* 代码块样式 */
+.editor-content-view pre > code {
+    display: block;
+    padding: 10px;
+}
+
+/* 表格样式 */
+.editor-content-view table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 10px;
+}
+.editor-content-view td,
+.editor-content-view th {
+    border: 1px solid var(--editor-table-border, #ccc);
+    min-width: 50px;
+    height: 20px;
+    padding: 5px;
+}
+.editor-content-view th {
+    background-color: var(--editor-table-head-bg, #f1f1f1);
+}
+
+/* 列表样式 */
+.editor-content-view ul,
+.editor-content-view ol {
+    padding-left: 20px;
+}
+
+/* 复选框样式 */
+.editor-content-view input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+/* 标题样式 */
+.editor-content-view h1,
+.editor-content-view h2,
+.editor-content-view h3,
+.editor-content-view h4,
+.editor-content-view h5,
+.editor-content-view h6 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    font-weight: 600;
+    color: var(--editor-text-color, #333);
+}
+
+/* 链接样式，采用 Element Plus 主色调 */
+.editor-content-view a {
+    color: var(--el-color-primary, #409EFF);
+    text-decoration: none;
+}
+.editor-content-view a:hover {
+    text-decoration: underline;
+}

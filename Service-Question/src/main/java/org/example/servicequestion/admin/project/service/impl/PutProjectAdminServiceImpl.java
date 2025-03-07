@@ -14,7 +14,7 @@ import org.example.servicequestion.admin.project.enums.PutProjectAdminEnum;
 import org.example.servicequestion.admin.project.request.PutProjectAdminRequest;
 import org.example.servicequestion.admin.project.service.PutProjectAdminService;
 import org.example.servicequestion.entity.ProjectCategory;
-import org.example.servicequestion.mapper.ProjectCategoryMapper;
+import org.example.servicequestion.admin.project.mapper.ProjectCategoryMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

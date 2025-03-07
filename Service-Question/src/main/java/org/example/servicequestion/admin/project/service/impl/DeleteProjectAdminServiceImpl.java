@@ -14,7 +14,7 @@ import org.example.servicequestion.admin.project.enums.DeleteProjectAdminEnum;
 import org.example.servicequestion.admin.project.enums.DeleteProjectsAdminEnum;
 import org.example.servicequestion.admin.project.service.DeleteProjectAdminService;
 import org.example.servicequestion.entity.ProjectCategory;
-import org.example.servicequestion.mapper.ProjectCategoryMapper;
+import org.example.servicequestion.admin.project.mapper.ProjectCategoryMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
