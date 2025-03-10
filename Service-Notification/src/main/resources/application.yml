@@ -1,0 +1,20 @@
+server:
+  port: 8088 # 用户服务的端口号
+
+spring:
+  application:
+    name: service-notification  # 服务名
+
+  # rabbit 配置
+  rabbitmq:
+    port: 5672
+    host: localhost
+    username: admin
+    password: admin
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka # 指向 Eureka Server 的地址
+
+

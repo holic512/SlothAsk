@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>邮箱验证 - slothAsk 账户安全</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8f9fa;">
+<table width="100%" bgcolor="#f8f9fa" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+        <td align="center" style="padding: 40px 0;">
+            <!-- 橙色头帘 -->
+            <table width="600" bgcolor="#FF6B35" height="10" style="background-color: #FF6B35;">
+                <tr><td></td></tr>
+            </table>
+
+            <!-- 主容器 -->
+            <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                <!-- 头帘间距 -->
+                <tr><td height="30"></td></tr>
+
+                <!-- 标题区块 -->
+                <tr>
+                    <td align="center" style="padding: 0 40px;">
+                        <h1 style="font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 24px; color: #2C3E50; margin: 0 0 20px 0;">
+                            <span style="color: #FF6B35;">✦</span> 账户安全验证 - SlothAsk <span style="color: #FF6B35;">✦</span>
+                        </h1>
+                    </td>
+                </tr>
+
+                <!-- 用户问候 -->
+                <tr>
+                    <td align="center" style="padding: 0 40px 15px 40px; font-family: Arial, sans-serif; font-size: 16px; color: #4A5568;">
+                        尊敬的 <strong style="color: #2C3E50;" th:text="${username}">用户</strong>，您好！
+                    </td>
+                </tr>
+
+                <!-- 正文内容 -->
+                <tr>
+                    <td style="padding: 0 40px 20px 40px; font-family: Arial, sans-serif; font-size: 15px; color: #4A5568; line-height: 1.6;">
+                        <p style="margin: 0 0 15px 0;">您正在进行<span style="color: #FF6B35; font-weight: 600;" th:text="${purpose}">账户安全操作</span>，请查收您的专属安全验证码：</p>
+
+                        <!-- 验证码区块 -->
+                        <div style="background: #F8F9FA; padding: 18px; margin: 20px 0; border: 2px dashed #E2E8F0; text-align: center;">
+                            <span style="font-size: 28px; letter-spacing: 4px; color: #FF6B35; font-weight: 700;" th:text="${verificationCode}">000000</span>
+                        </div>
+
+                        <!-- 操作指引 -->
+                        <ol style="margin: 25px 0; padding-left: 20px; color: #718096;">
+                            <li style="margin-bottom: 8px;">在验证页面输入上方6位数字</li>
+                            <li style="margin-bottom: 8px;">完成身份验证以继续操作</li>
+                            <li>请勿将验证码透露给他人</li>
+                        </ol>
+                    </td>
+                </tr>
+
+                <!-- 安全提示 -->
+                <tr>
+                    <td style="padding: 20px 40px; background: #F8FAFC; border-top: 1px solid #EDF2F7;">
+                        <p style="font-family: Arial, sans-serif; font-size: 13px; color: #718096; margin: 0; line-height: 1.5;">
+                            ⚠️ 安全提示：<br>
+                            1. 本邮件由系统自动发送，请勿直接回复<br>
+                            2. 验证码有效期 <strong style="color: #FF6B35;">5分钟</strong>，超时需重新获取<br>
+                            3. 如非本人操作，请立即修改账户密码并联系客服
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- 页脚 -->
+                <tr>
+                    <td style="padding: 30px 40px 20px 40px; text-align: center;">
+                        <p style="font-family: Arial, sans-serif; font-size: 12px; color: #A0AEC0; margin: 0 0 8px 0;">
+                            © 2023 slothAsk 知识社区<br>
+                            关注数据安全，守护知识共享
+                        </p>
+                        <div style="border-top: 1px solid #E2E8F0; margin: 20px auto 10px auto; width: 80px;"></div>
+                        <p style="font-family: Arial, sans-serif; font-size: 12px; color: #A0AEC0; margin: 0;">
+                            此为系统邮件，请勿直接回复<br>
+                            需要帮助？<a href="#" style="color: #4299E1; text-decoration: none;">联系客服</a>
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
