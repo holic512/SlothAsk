@@ -149,37 +149,42 @@ const togglePasswordVisibility = () => {
 
 .custom-input :deep(.el-input__wrapper) {
   border-radius: 8px;
-  box-shadow: 0 0 0 1px #dcdfe6, 0 2px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 0 0 1px rgba(220, 223, 230, 0.3), 0 2px 8px rgba(0, 0, 0, 0.02);
   padding: 0 15px;
   transition: all 0.3s ease;
   background-color: #fff;
   user-select: text;
+  height: 48px;
 }
 
 .custom-input :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px #c0c4cc, 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 1px rgba(192, 196, 204, 0.5), 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .custom-input :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 1px #409eff, 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: #409eff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #000;
 }
 
 .custom-input :deep(.el-input__inner) {
   user-select: text;
+  font-size: 15px;
 }
 
 .input-icon {
-  color: #909399;
+  color: #606266;
   font-size: 18px;
+  margin-right: 5px;
 }
 
 .clickable {
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .clickable:hover {
-  color: #409eff;
+  color: #000;
+  transform: scale(1.1);
 }
 
 .login-btn {
@@ -191,17 +196,22 @@ const togglePasswordVisibility = () => {
   letter-spacing: 1px;
   transition: all 0.3s ease;
   user-select: none;
+  margin-top: 10px;
+  background-color: #000;
+  color: #fff;
+  border: none;
 }
 
 .login-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 15px rgba(64, 158, 255, 0.3);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+  background-color: #222;
 }
 
 .bottom-actions {
   display: flex;
   justify-content: space-between;
-  margin-top: 20px;
+  margin-top: 24px;
   user-select: none;
 }
 
@@ -214,13 +224,21 @@ const togglePasswordVisibility = () => {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .action-link:hover {
-  color: #409eff;
+  color: #000;
+  background-color: rgba(0, 0, 0, 0.08);
 }
 
 .action-link i {
   font-size: 14px;
+}
+
+.el-form-item {
+  margin-bottom: 20px;
 }
 </style>

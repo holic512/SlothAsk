@@ -49,7 +49,7 @@ public class UserCaptchaServiceImpl implements UserCaptchaService {
         // 需要验证码到时，需要提供 可用状态的 uid 参数。
 
         // 将结果存入 5 分钟
-        String captchaUid = UuidUtil.getUuid();
+        String captchaUid = UuidUtil.generateUuid();
         redisTemplate.opsForValue().set(
                 CAPTCHA_PREFIX + captchaUid,
                 captchaResult.getXPosition(), // 获取运算结果

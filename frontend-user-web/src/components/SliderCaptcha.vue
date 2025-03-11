@@ -387,14 +387,13 @@ const verifyPosition = async () => {
     if (response.data.status === 200) {
       // 验证成功
       verificationSuccess.value = true;
-      ElMessage.success('验证成功');
 
       // 调用父组件的成功回调，传递验证码唯一标识
       props.onSuccess(captchaUid);
     } else {
       // 验证失败
       verificationFail.value = true;
-      ElMessage.error(response.data.message || '验证失败，请重试');
+      ElMessage.error('验证失败，请重试');
 
       // 失败动画后重置状态并刷新验证码
       setTimeout(() => {

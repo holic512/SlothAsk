@@ -74,7 +74,7 @@ const goToPrivacy = () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: rgb(247, 248, 250);
   position: relative;
   overflow: hidden;
   user-select: none;
@@ -90,7 +90,7 @@ const goToPrivacy = () => {
 .circle {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.03);
   backdrop-filter: blur(10px);
   animation: float 8s infinite ease-in-out;
 }
@@ -100,7 +100,7 @@ const goToPrivacy = () => {
   height: 300px;
   top: -100px;
   right: -50px;
-  background: linear-gradient(45deg, rgba(66, 133, 244, 0.1), rgba(66, 133, 244, 0.2));
+  background: rgba(0, 0, 0, 0.02);
   animation-delay: 0s;
 }
 
@@ -109,7 +109,7 @@ const goToPrivacy = () => {
   height: 200px;
   bottom: -50px;
   left: -50px;
-  background: linear-gradient(45deg, rgba(234, 67, 53, 0.1), rgba(234, 67, 53, 0.2));
+  background: rgba(0, 0, 0, 0.03);
   animation-delay: 2s;
 }
 
@@ -118,7 +118,7 @@ const goToPrivacy = () => {
   height: 150px;
   top: 50%;
   left: 15%;
-  background: linear-gradient(45deg, rgba(251, 188, 5, 0.1), rgba(251, 188, 5, 0.2));
+  background: rgba(0, 0, 0, 0.02);
   animation-delay: 4s;
 }
 
@@ -135,28 +135,24 @@ const goToPrivacy = () => {
 }
 
 .sign-content {
-  width: 360px;
+  width: 380px;
   padding: 40px;
-  background: rgba(255, 255, 255, 0.9);
+  background: #ffffff;
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   z-index: 1;
 }
 
-
-
 .logo-container {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 30px;
 }
 
 .logo {
   width: 120px;
   height: auto;
   transition: transform 0.3s ease;
-  
   border-radius: 4px;
 }
 
@@ -165,16 +161,16 @@ const goToPrivacy = () => {
 }
 
 .welcome-text {
-  font-size: 28px;
-  color: #2c3e50;
+  font-size: 26px;
+  color: #000;
   margin: 0;
   font-weight: 600;
   margin-bottom: 8px;
 }
 
 .slogan {
-  color: #7f8c8d;
-  font-size: 16px;
+  color: #606266;
+  font-size: 15px;
   margin-top: 0;
 }
 
@@ -198,7 +194,7 @@ const goToPrivacy = () => {
 .divider::after {
   content: '';
   flex: 1;
-  border-top: 1px solid #dcdfe6;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .divider span {
@@ -224,39 +220,43 @@ const goToPrivacy = () => {
   transition: all 0.3s ease;
   font-size: 20px;
   color: white;
+  background-color: #000;
 }
 
 .third-party-icon:hover {
   transform: translateY(-3px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  background-color: #222;
 }
 
 .github {
-  background: #333;
+  background: #000;
 }
 
 .google {
-  background: #DB4437;
+  background: #000;
 }
 
 .wechat {
-  background: #07C160;
+  background: #000;
 }
 
 .terms-agreement {
   margin-top: 24px;
   text-align: center;
   font-size: 14px;
+  color: #606266;
 }
 
 .terms-agreement a {
-  color: #409eff;
+  color: #000;
   text-decoration: none;
   transition: color 0.3s ease;
+  font-weight: 500;
 }
 
 .terms-agreement a:hover {
-  color: #66b1ff;
+  color: #333;
   text-decoration: underline;
 }
 
@@ -272,7 +272,7 @@ const goToPrivacy = () => {
   }
   
   .welcome-text {
-    font-size: 24px;
+    font-size: 22px;
   }
 }
 </style>

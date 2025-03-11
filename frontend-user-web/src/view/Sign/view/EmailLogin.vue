@@ -5,6 +5,8 @@ import {Message, Key, Lock} from '@element-plus/icons-vue';
 import {ElMessage} from 'element-plus';
 import SliderCaptcha from '../../../components/SliderCaptcha.vue';
 import axios from 'axios';
+import {apiSendSignVerificationCode} from "@/view/Sign/service/ApiSendSignVerificationCode";
+import {ApiVerifySignVerificationCode} from "@/view/Sign/service/ApiVerifySignVerificationCode";
 
 const router = useRouter();
 const route = useRoute();
@@ -31,7 +33,7 @@ const sendVerificationCode = async () => {
   }
 
   // 已通过验证，直接发送验证码
-  sendEmailCode();
+  await sendEmailCode();
 };
 
 // 验证码验证成功后的回调
@@ -55,11 +57,10 @@ const sendEmailCode = async () => {
   loading.value = true;
   try {
     // 调用发送验证码API
-    const response = await axios.post('/api/user/email/send-code', {
-      email: email.value
-    });
+    const response = await apiSendSignVerificationCode(email.value)
 
-    if (response.data.code === 200) {
+
+    if (response.status === 200) {
       ElMessage.success('验证码已发送，请查收邮箱');
       countdown.value = 60;
       const timer = setInterval(() => {
@@ -93,25 +94,22 @@ const handleLogin = async () => {
   loading.value = true;
   try {
     // 调用登录API
-    const response = await axios.post('/api/user/email/login', {
-      email: email.value,
-      code: verificationCode.value
-    });
+    const response = await ApiVerifySignVerificationCode(email.value, verificationCode.value);
 
-    if (response.data.code === 200) {
+    if (response.status === 200) {
       ElMessage.success('登录成功');
 
       // 获取重定向地址，如果没有则跳转到首页
-      const redirectPath = Array.isArray(route.query.redirect) 
-        ? route.query.redirect[0] 
-        : (route.query.redirect || '/');
-      
+      const redirectPath = Array.isArray(route.query.redirect)
+          ? route.query.redirect[0]
+          : (route.query.redirect || '/');
+
       // 确保redirectPath不为null
       await router.push(redirectPath ? redirectPath : '/');
 
 
     } else {
-      ElMessage.error(response.data.message || '登录失败');
+      ElMessage.error(response.message || '登录失败');
     }
   } catch (error) {
     console.error('登录失败:', error);
@@ -208,10 +206,10 @@ const captchaSuccessOn = (uid: string) => {
   </div>
 
   <!-- 滑块验证码弹窗 -->
-  <SliderCaptcha 
-    v-if="showCaptchaDialog" 
-    :on-success="captchaSuccessOn"
-    :on-close="closeCaptcha"
+  <SliderCaptcha
+      v-if="showCaptchaDialog"
+      :on-success="captchaSuccessOn"
+      :on-close="closeCaptcha"
   />
 
 
@@ -246,63 +244,84 @@ const captchaSuccessOn = (uid: string) => {
 
 .custom-input :deep(.el-input__wrapper) {
   border-radius: 8px;
-  box-shadow: 0 0 0 1px #dcdfe6, 0 2px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 0 0 1px rgba(220, 223, 230, 0.3), 0 2px 8px rgba(0, 0, 0, 0.02);
   padding: 0 15px;
   transition: all 0.3s ease;
   background-color: #fff;
   user-select: text;
+  height: 48px;
 }
 
 .custom-input :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px #c0c4cc, 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 1px rgba(192, 196, 204, 0.5), 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .custom-input :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 1px #409eff, 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: #409eff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #000;
 }
 
 .custom-input :deep(.el-input__inner) {
   user-select: text;
+  font-size: 15px;
 }
 
 .input-icon {
-  color: #909399;
+  color: #606266;
   font-size: 18px;
+  margin-right: 5px;
 }
 
 .send-code-btn {
-  width: 120px;
+  width: 130px;
   white-space: nowrap;
   border-radius: 8px;
   transition: all 0.3s ease;
   user-select: none;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  height: 48px;
+  background-color: #000;
+  color: #fff;
+  border: none;
 }
 
 .send-code-btn:not(:disabled):hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background-color: #222;
+}
+
+.send-code-btn:disabled {
+  background: #f0f0f0;
+  color: #909399;
+  border: none;
 }
 
 .login-btn {
   width: 100%;
   border-radius: 8px;
-  height: 42px;
+  height: 48px;
   font-size: 16px;
   font-weight: 500;
   letter-spacing: 1px;
   transition: all 0.3s ease;
   user-select: none;
+  margin-top: 10px;
+  background-color: #000;
+  color: #fff;
+  border: none;
 }
 
 .login-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 15px rgba(64, 158, 255, 0.3);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+  background-color: #222;
 }
 
 .switch-login-type {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 24px;
   user-select: none;
 }
 
@@ -315,10 +334,14 @@ const captchaSuccessOn = (uid: string) => {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .switch-login-type a:hover {
-  color: #409eff;
+  color: #000;
+  background-color: rgba(0, 0, 0, 0.08);
 }
 
 .switch-login-type i {
@@ -334,5 +357,9 @@ const captchaSuccessOn = (uid: string) => {
 
 :deep(.captcha-dialog .el-dialog__body) {
   padding: 20px;
+}
+
+.el-form-item {
+  margin-bottom: 20px;
 }
 </style>
