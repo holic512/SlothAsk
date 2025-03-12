@@ -233,14 +233,14 @@ const captchaSuccessOn = (uid: string) => {
 <style scoped>
 .email-login {
   width: 100%;
-  animation: fadeIn 0.5s ease;
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -250,7 +250,7 @@ const captchaSuccessOn = (uid: string) => {
 
 .verification-code-container {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .verification-code-container .el-input {
@@ -258,123 +258,114 @@ const captchaSuccessOn = (uid: string) => {
 }
 
 .custom-input :deep(.el-input__wrapper) {
-  border-radius: 8px;
-  box-shadow: 0 0 0 1px rgba(220, 223, 230, 0.3), 0 2px 8px rgba(0, 0, 0, 0.02);
-  padding: 0 15px;
-  transition: all 0.3s ease;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  padding: 0 16px;
+  transition: all 0.2s ease;
   background-color: #fff;
-  user-select: text;
-  height: 48px;
+  height: 44px;
 }
 
 .custom-input :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px rgba(192, 196, 204, 0.5), 0 4px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
 }
 
 .custom-input :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.08);
-  border-color: #000;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
 }
 
 .custom-input :deep(.el-input__inner) {
-  user-select: text;
-  font-size: 15px;
+  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.custom-input :deep(.el-input__inner::placeholder) {
+  color: #999;
+  font-weight: 400;
 }
 
 .input-icon {
-  color: #606266;
-  font-size: 18px;
-  margin-right: 5px;
+  color: #666;
+  font-size: 16px;
+  margin-right: 6px;
 }
 
 .send-code-btn {
-  width: 130px;
-  white-space: nowrap;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  user-select: none;
+  min-width: 120px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
   font-weight: 500;
-  letter-spacing: 0.5px;
-  height: 48px;
-  background-color: #000;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  height: 44px;
+  background-color: #1a1a1a;
   color: #fff;
   border: none;
+  padding: 0 16px;
 }
 
 .send-code-btn:not(:disabled):hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  background-color: #222;
+  transform: translateY(-1px);
+  background-color: #000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .send-code-btn:disabled {
-  background: #f0f0f0;
-  color: #909399;
-  border: none;
+  background-color: #f5f5f5;
+  color: #999;
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .login-btn {
   width: 100%;
-  border-radius: 8px;
-  height: 48px;
-  font-size: 16px;
+  border-radius: 12px;
+  height: 44px;
+  font-size: 15px;
   font-weight: 500;
-  letter-spacing: 1px;
-  transition: all 0.3s ease;
-  user-select: none;
-  margin-top: 10px;
-  background-color: #000;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+  background-color: #1a1a1a;
   color: #fff;
   border: none;
 }
 
 .login-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-  background-color: #222;
+  transform: translateY(-1px);
+  background-color: #000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .switch-login-type {
   text-align: center;
-  margin-top: 24px;
-  user-select: none;
+  margin-top: 20px;
 }
 
 .switch-login-type a {
-  color: #606266;
+  color: #666;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   padding: 8px 12px;
-  border-radius: 20px;
-  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  background-color: #f5f5f5;
 }
 
 .switch-login-type a:hover {
-  color: #000;
-  background-color: rgba(0, 0, 0, 0.08);
-}
-
-.switch-login-type i {
-  font-size: 14px;
-}
-
-/* 验证码弹窗样式 */
-:deep(.captcha-dialog .el-dialog__header) {
-  margin: 0;
-  padding: 15px 20px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-:deep(.captcha-dialog .el-dialog__body) {
-  padding: 20px;
+  color: #1a1a1a;
+  background-color: #eee;
 }
 
 .el-form-item {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+}
+
+.el-form-item:last-child {
+  margin-bottom: 0;
 }
 </style>

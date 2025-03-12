@@ -74,7 +74,7 @@ const goToPrivacy = () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: rgb(247, 248, 250);
+  background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
   position: relative;
   overflow: hidden;
   user-select: none;
@@ -135,51 +135,59 @@ const goToPrivacy = () => {
 }
 
 .sign-content {
-  width: 380px;
-  padding: 40px;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  width: 360px;
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.sign-content:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
 }
 
 .logo-container {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 24px;
 }
 
 .logo {
-  width: 120px;
+  width: 80px;
   height: auto;
   transition: transform 0.3s ease;
-  border-radius: 4px;
-}
-
-.logo:hover {
-  transform: scale(1.05);
+  border-radius: 12px;
+  margin-bottom: 16px;
 }
 
 .welcome-text {
-  font-size: 26px;
-  color: #000;
+  font-size: 22px;
+  color: #1a1a1a;
   margin: 0;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
+  letter-spacing: -0.5px;
 }
 
 .slogan {
-  color: #606266;
-  font-size: 15px;
-  margin-top: 0;
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+  font-weight: 400;
 }
 
 .main-content {
-  margin-bottom: 30px;
+  margin-bottom: 24px;
 }
 
 .third-party-login {
-  margin-top: 24px;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .divider {
@@ -205,28 +213,28 @@ const goToPrivacy = () => {
 .third-party-icons {
   display: flex;
   justify-content: center;
-  gap: 20px;
-  margin-top: 16px;
+  gap: 16px;
+  margin-top: 24px;
 }
 
 .third-party-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 20px;
+  font-size: 18px;
   color: white;
-  background-color: #000;
+  background-color: #1a1a1a;
 }
 
 .third-party-icon:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  background-color: #222;
+  transform: translateY(-2px);
+  background-color: #000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .github {
@@ -242,22 +250,23 @@ const goToPrivacy = () => {
 }
 
 .terms-agreement {
-  margin-top: 24px;
+  margin-top: 20px;
   text-align: center;
-  font-size: 14px;
-  color: #606266;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
 }
 
 .terms-agreement a {
-  color: #000;
+  color: #1a1a1a;
   text-decoration: none;
-  transition: color 0.3s ease;
   font-weight: 500;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid transparent;
 }
 
 .terms-agreement a:hover {
-  color: #333;
-  text-decoration: underline;
+  border-bottom-color: #1a1a1a;
 }
 
 /* 响应式设计 */

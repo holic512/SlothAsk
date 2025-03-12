@@ -11,7 +11,6 @@ package org.example.serviceuser.user.sign.controller;
 
 import org.example.serviceuser.config.ApiResponse.ApiResponse;
 import org.example.serviceuser.user.sign.enums.PostUserSignEnum;
-import org.example.serviceuser.user.sign.request.PasswordLoginRequest;
 import org.example.serviceuser.user.sign.request.RegisterRequest;
 import org.example.serviceuser.user.sign.request.VerifySignVerificationCodeRequest;
 import org.example.serviceuser.user.sign.service.PostUserSignService;
@@ -103,36 +102,6 @@ public class PostUserSignController {
             }
             default -> {
                 return new ApiResponse(401, status.getMessage());
-            }
-        }
-    }
-
-    /**
-     * 密码登录
-     * 验证用户提交的账号和密码，根据验证结果执行登录
-     *
-     * @param request 包含账号和密码的请求对象
-     * @return ApiResponse 返回验证结果
-     * - 200: 验证成功，返回token
-     * - 400: 账号不存在
-     * - 401: 密码错误
-     */
-    @PostMapping("passwordLogin")
-    public ApiResponse passwordLogin(@RequestBody @Valid PasswordLoginRequest request) {
-        Pair<PostUserSignEnum, Object> result = postUserSignService.passwordLogin(request);
-        PostUserSignEnum status = result.getFirst();
-        switch (status) {
-            case SUCCESS_LOGIN -> {
-                return new ApiResponse(200, status.getMessage(), result.getSecond());
-            }
-            case ACCOUNT_NOT_FOUND -> {
-                return new ApiResponse(400, status.getMessage());
-            }
-            case PASSWORD_INCORRECT -> {
-                return new ApiResponse(401, status.getMessage());
-            }
-            default -> {
-                return new ApiResponse(500, "系统错误");
             }
         }
     }

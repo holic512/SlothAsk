@@ -10,7 +10,6 @@
 package org.example.serviceuser.user.sign.service;
 
 import org.example.serviceuser.user.sign.enums.PostUserSignEnum;
-import org.example.serviceuser.user.sign.request.PasswordLoginRequest;
 import org.example.serviceuser.user.sign.request.RegisterRequest;
 import org.example.serviceuser.user.sign.request.VerifySignVerificationCodeRequest;
 import org.springframework.data.util.Pair;
@@ -49,16 +48,4 @@ public interface PostUserSignService {
      * @return boolean 返回注册结果，true表示成功，false表示失败
      */
     Pair<PostUserSignEnum, Object> register(RegisterRequest request);
-
-    /**
-     * 密码登录
-     * 验证用户提交的账号和密码，根据验证结果返回不同的处理结果
-     * 
-     * @param request 包含账号和密码的请求对象
-     * @return Pair<PostUserSignEnum, Object> 返回验证结果和附加信息
-     *         - SUCCESS_LOGIN: 验证成功，返回token
-     *         - ACCOUNT_NOT_FOUND: 账号不存在
-     *         - PASSWORD_INCORRECT: 密码错误
-     */
-    Pair<PostUserSignEnum, Object> passwordLogin(PasswordLoginRequest request);
 }
