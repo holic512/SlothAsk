@@ -17,6 +17,14 @@ export default [
                 path: 'password',
                 name: 'PasswordLogin',
                 component: () => import('./view/PasswordLogin.vue')
+            },
+            {
+                path: 'register',
+                name: 'Register',
+                component: () => import('./view/Register.vue'),
+                meta: {
+                    title: '用户注册'
+                }
             }
         ]
     }

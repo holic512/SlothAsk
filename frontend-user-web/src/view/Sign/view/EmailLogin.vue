@@ -106,8 +106,23 @@ const handleLogin = async () => {
 
       // 确保redirectPath不为null
       await router.push(redirectPath ? redirectPath : '/');
-
-
+    } else if (response.status === 201) {
+      // 验证成功但用户未注册，跳转到注册页面
+      ElMessage.info('请完成注册');
+      
+      // 获取重定向地址
+      const redirectPath = Array.isArray(route.query.redirect)
+          ? route.query.redirect[0]
+          : (route.query.redirect || '/');
+      
+      router.push({
+        path: '/sign/register',
+        query: {
+          email: email.value,           // 传递邮箱
+          uid: response.data,           // 传递拟注册的uid
+          redirect: redirectPath        // 传递重定向地址
+        }
+      });
     } else {
       ElMessage.error(response.message || '登录失败');
     }

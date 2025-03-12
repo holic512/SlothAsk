@@ -50,4 +50,11 @@ public class UserProfile {
 
     @TableField("update_time")
     private LocalDateTime updateTime;
+
+    public UserProfile(){}
+
+    public UserProfile(Long userId, String nickName) {
+        this.userId = userId;
+        this.nickname = nickName;
+    }
 }

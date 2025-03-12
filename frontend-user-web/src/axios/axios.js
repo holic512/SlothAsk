@@ -1,5 +1,5 @@
 import axios from "axios";
-// import {useSessionStore} from "../pinia/Session.js";
+// import {useSessionStore} from "../pinia/Session.ts";
 
 const instance = axios.create({
     // baseURL: `${window.location.origin}/api/`,  // 根据当前域名动态设置 baseURL

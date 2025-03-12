@@ -10,6 +10,7 @@
 package org.example.serviceuser.user.sign.service;
 
 import org.example.serviceuser.user.sign.enums.PostUserSignEnum;
+import org.example.serviceuser.user.sign.request.RegisterRequest;
 import org.example.serviceuser.user.sign.request.VerifySignVerificationCodeRequest;
 import org.springframework.data.util.Pair;
 
@@ -32,10 +33,19 @@ public interface PostUserSignService {
      * 验证用户提交的邮箱验证码，根据验证结果和用户注册状态返回不同的处理结果
      * 
      * @param request 包含邮箱和验证码的请求对象
-     * @return Pair<PostUserSignEnum, String> 返回验证结果和附加信息
+     * @return Pair<PostUserSignEnum, Object> 返回验证结果和附加信息
      *         - SUCCESS_LOGIN: 验证成功且用户已注册，返回token
      *         - SUCCESS_BUT_NOT_REGISTERED: 验证成功但用户未注册，返回临时UUID用于后续注册
      *         - INVALID_VERIFICATION_CODE: 验证失败，验证码错误或已过期
      */
-    Pair<PostUserSignEnum, String> verifySignVerificationCode(VerifySignVerificationCodeRequest request);
+    Pair<PostUserSignEnum, Object> verifySignVerificationCode(VerifySignVerificationCodeRequest request);
+
+    /**
+     * 用户注册
+     * 根据拟注册的uid和用户信息完成注册
+     * 
+     * @param request 注册请求，包含用户信息和拟注册的uid
+     * @return boolean 返回注册结果，true表示成功，false表示失败
+     */
+    Pair<PostUserSignEnum, Object> register(RegisterRequest request);
 }
