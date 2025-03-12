@@ -48,12 +48,12 @@ const handleSearch = () => {
       @blur="collapseSearch"
       @keyup.enter="handleSearch"
     />
-    <el-icon 
-      class="search-icon" 
-      @click="expandSearch"
-    >
-      <Search />
-    </el-icon>
+    <el-button @click="expandSearch" class="search-icon" text>
+      <el-icon>
+        <Search />
+      </el-icon>
+    </el-button>
+
   </div>
 </template>
 
@@ -71,7 +71,7 @@ const handleSearch = () => {
 
 .search-icon {
   position: absolute;
-  right: 8px;
+  right: 0;
   top: 50%;
   transform: translateY(-50%);
   font-size: 18px;

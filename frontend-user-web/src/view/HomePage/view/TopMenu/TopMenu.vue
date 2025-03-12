@@ -1,7 +1,9 @@
 <script setup>
-import {ref} from 'vue'
 import {useRouter, useRoute} from 'vue-router'
 import SearchBox from './components/SearchBox/SearchBox.vue'
+import {useSessionStore} from "@/pinia/Session";
+import {watch} from "vue";
+import {useTopMenuStore} from "@/view/HomePage/view/TopMenu/pinia/topMenuStore";
 
 const router = useRouter()
 const route = useRoute()
@@ -29,53 +31,92 @@ const handleLogin = () => {
     }
   });
 };
+
+// 获取用户session pinia实例
+const userSession = useSessionStore();
+
+// 获取用于 管理 topMenu的 pinia实例
+const topMenuStore = useTopMenuStore();
+
+watch(() => userSession.userSession, () => {
+  // 监听 用户session是否发生改变,并修改 topMenu状态
+  topMenuStore.isLogin = userSession.userSession;
+
+})
+
 </script>
 
 <template>
-  <el-menu
-      mode="horizontal"
-      :ellipsis="false"
-      class="top-menu"
-      @select="handleSelect"
-  >
-    <!-- Logo -->
-    <el-menu-item>
-      <div class="logo-container" @click="handleLogoClick">
-        <img src="/HomePage/logo.ico" alt="Logo" class="logo-img">
-        <span class="logo-text">SlothAsk</span>
+  <div style="display: flex;justify-content: center;  border-bottom: 1px solid #ebeef5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);">
+
+    <el-menu
+        mode="horizontal"
+        :ellipsis="false"
+        class="top-menu"
+        @select="handleSelect"
+        :default-active="route.path"
+    >
+      <!-- Logo -->
+      <el-menu-item>
+        <div class="logo-container" @click="handleLogoClick">
+          <img src="/HomePage/logo.ico" alt="Logo" class="logo-img">
+          <span class="logo-text">SlothAsk</span>
+        </div>
+      </el-menu-item>
+
+      <!-- 导航菜单 -->
+      <el-menu-item index="/">学习</el-menu-item>
+      <el-menu-item index="/questionbank">题库</el-menu-item>
+      <el-menu-item index="/contest">竞赛</el-menu-item>
+      <el-menu-item index="/discussion">讨论</el-menu-item>
+      <el-menu-item index="/interview">面试分享</el-menu-item>
+
+      <div class="flex-grow"/>
+
+      <!-- 搜索框 -->
+      <SearchBox @search="handleSearch"/>
+
+      <!-- 用户操作区 -->
+      <div class="user-actions" v-if="topMenuStore.isLogin">
+        <el-button text @click="handleLogin">登录</el-button>
+        <el-button type="primary" class="vip-button">
+          Sloth会员
+        </el-button>
       </div>
-    </el-menu-item>
+      <div v-else style="display: flex;align-items: center;gap: 16px">
+        <!--  消息页面  -->
+        <el-button text>
+          <el-icon size="18">
+            <Bell/>
+          </el-icon>
+        </el-button>
 
-    <!-- 导航菜单 -->
-    <el-menu-item index="/">学习</el-menu-item>
-    <el-menu-item index="/questionbank">题库</el-menu-item>
-    <el-menu-item index="/contest">竞赛</el-menu-item>
-    <el-menu-item index="/discussion">讨论</el-menu-item>
-    <el-menu-item index="/interview">面试分享</el-menu-item>
 
-    <div class="flex-grow"/>
+        <!--  头像个人信息  -->
+        <div>
+          <el-avatar
+              size='small'
+              src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+          />
+        </div>
 
-    <!-- 搜索框 -->
-    <SearchBox @search="handleSearch"/>
 
-    <!-- 用户操作区 -->
-    <div class="user-actions">
-      <el-button text @click="handleLogin">登录</el-button>
-      <el-button type="primary" class="vip-button">
-        Sloth会员
-      </el-button>
-    </div>
-  </el-menu>
+      </div>
+    </el-menu>
+
+  </div>
+
+
 </template>
 
 <style scoped>
 .top-menu {
   height: 50px;
-  padding: 0 10vw;
+  width: 1300px;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid #ebeef5;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
 }
 
 .logo-container {
@@ -121,7 +162,7 @@ const handleLogin = () => {
 }
 
 :deep(.el-menu--horizontal) {
-  border-bottom: none;
+  border-bottom: none !important;
 }
 
 :deep(.el-menu-item) {

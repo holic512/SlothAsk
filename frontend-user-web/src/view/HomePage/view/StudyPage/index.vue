@@ -11,17 +11,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <title>SlothAsk - 树懒问答(SlothAsk),碎片知识整理的高效神器</title>
   <div class="page-container">
-    <div class="category-section">
-      <Category/>
-    </div>
-
     <div class="content-section">
-      <div class="main-container">
-        <Question/>
+      <div class="main-content">
+        <div class="category-section">
+          <Category/>
+        </div>
+        <div class="main-container">
+          <Question/>
+        </div>
       </div>
-      
       <div class="side-container">
         <div class="side-content">
           <Sidebar/>
@@ -39,19 +38,26 @@ onMounted(() => {
   padding: 0 16px;
 }
 
-.category-section {
-  margin-bottom: 24px;
-}
-
 .content-section {
   display: flex;
+  justify-content: space-between;
   gap: 24px;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.category-section {
+  flex: 1;
 }
 
 .main-container {
   flex: 1;
-  min-width: 0; /* 防止内容溢出 */
-  max-width: calc(100% - 260px); /* 确保主内容区域有足够空间 */
+  min-width: 0;
 }
 
 .side-container {
