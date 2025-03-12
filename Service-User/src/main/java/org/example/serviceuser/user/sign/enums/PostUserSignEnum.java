@@ -50,7 +50,17 @@ public enum PostUserSignEnum {
     /**
      * 用户名已被注册
      */
-    USERNAME_ALREADY_EXISTS("用户名已被注册，请更换其他用户名");
+    USERNAME_ALREADY_EXISTS("用户名已被注册，请更换其他用户名"),
+
+    /**
+     * 账号不存在
+     */
+    ACCOUNT_NOT_FOUND("账号不存在"),
+
+    /**
+     * 密码错误
+     */
+    PASSWORD_INCORRECT("密码错误");
 
     /**
      * 状态对应的提示信息

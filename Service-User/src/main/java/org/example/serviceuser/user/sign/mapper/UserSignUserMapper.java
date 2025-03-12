@@ -42,4 +42,13 @@ public interface UserSignUserMapper extends BaseMapper<User> {
      */
     @Select("select * from user where username = #{username} ")
     User getUserByUsername(@Param("username") String username);
+
+    /**
+     * 通过账号（邮箱或用户名）获取用户信息
+     *
+     * @param account 账号（可以是邮箱或用户名）
+     * @return 用户信息
+     */
+    @Select("SELECT * FROM user WHERE email = #{account} OR username = #{account}")
+    User getUserByAccount(String account);
 }

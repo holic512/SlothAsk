@@ -3,31 +3,46 @@ import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { Message, Lock, View, Hide } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
+import { useSessionStore } from "@/pinia/Session";
+import axios from "@/axios/axios";
 
 const router = useRouter();
 const route = useRoute();
-const email = ref('');
+const account = ref('');
 const password = ref('');
 const loading = ref(false);
 const showPassword = ref(false);
 
 // 登录
 const handleLogin = async () => {
-  if (!email.value || !password.value) {
+  if (!account.value || !password.value) {
     ElMessage.warning('请填写完整信息');
     return;
   }
   
   loading.value = true;
   try {
-    // TODO: 调用登录API
-    ElMessage.success('登录成功');
-    
-    // 获取重定向地址，如果没有则跳转到首页
-    const redirectPath = route.query.redirect || '/';
-    router.push(redirectPath);
+    const response = await axios.post('service-user/user/sign/passwordLogin', {
+      account: account.value,
+      password: password.value
+    });
+
+    if (response.data.status === 200) {
+      ElMessage.success('登录成功');
+      
+      // 保存token
+      const store = useSessionStore();
+      store.setSession(response.data.data);
+      
+      // 获取重定向地址，如果没有则跳转到首页
+      const redirectPath = route.query.redirect || '/';
+      router.push(redirectPath);
+    } else {
+      ElMessage.error(response.data.message);
+    }
   } catch (error) {
-    ElMessage.error('登录失败');
+    console.error('登录失败:', error);
+    ElMessage.error(error.response?.data?.message || '登录失败');
   } finally {
     loading.value = false;
   }
@@ -56,12 +71,11 @@ const togglePasswordVisibility = () => {
 <template>
   <div class="password-login">
     <el-form @submit.prevent="handleLogin">
-      <!-- 邮箱输入 -->
+      <!-- 账号输入 -->
       <el-form-item>
         <el-input
-          v-model="email"
-          placeholder="请输入邮箱"
-          type="email"
+          v-model="account"
+          placeholder="请输入邮箱或用户名"
           size="large"
           class="custom-input"
           :autofocus="false"
@@ -230,14 +244,6 @@ const togglePasswordVisibility = () => {
   background-color: #eee;
 }
 
-.el-form-item {
-  margin-bottom: 16px;
-}
-
-.el-form-item:last-child {
-  margin-bottom: 0;
-}
-
 .forgot-password {
   color: #666 !important;
   text-decoration: none;
@@ -255,5 +261,13 @@ const togglePasswordVisibility = () => {
 .forgot-password:hover {
   color: #1a1a1a !important;
   background-color: #eee;
+}
+
+.el-form-item {
+  margin-bottom: 16px;
+}
+
+.el-form-item:last-child {
+  margin-bottom: 0;
 }
 </style>

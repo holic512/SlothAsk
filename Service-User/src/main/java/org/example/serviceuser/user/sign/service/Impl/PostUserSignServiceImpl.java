@@ -18,6 +18,7 @@ import org.example.serviceuser.feign.MailFeign;
 import org.example.serviceuser.user.sign.enums.PostUserSignEnum;
 import org.example.serviceuser.user.sign.mapper.UserProfileMapper;
 import org.example.serviceuser.user.sign.mapper.UserSignUserMapper;
+import org.example.serviceuser.user.sign.request.PasswordLoginRequest;
 import org.example.serviceuser.user.sign.request.RegisterRequest;
 import org.example.serviceuser.user.sign.request.VerifySignVerificationCodeRequest;
 import org.example.serviceuser.user.sign.service.PostUserSignService;
@@ -204,5 +205,24 @@ public class PostUserSignServiceImpl implements PostUserSignService {
 
     }
 
+    @Override
+    public Pair<PostUserSignEnum, Object> passwordLogin(PasswordLoginRequest request) {
+        // 根据账号查询用户
+        User user = userSignUserMapper.getUserByAccount(request.getAccount());
+        
+        // 用户不存在
+        if (user == null) {
+            return Pair.of(PostUserSignEnum.ACCOUNT_NOT_FOUND, "null");
+        }
 
+        // 验证密码
+        if (!SCryptUtil.verifyPassword(request.getPassword(), user.getPassword())) {
+            return Pair.of(PostUserSignEnum.PASSWORD_INCORRECT, "null");
+        }
+
+        // 登录成功，返回token
+        StpKit.USER.login(user.getId());
+        SaTokenInfo saTokenInfo = StpKit.USER.getTokenInfo();
+        return Pair.of(PostUserSignEnum.SUCCESS_LOGIN, saTokenInfo);
+    }
 }
