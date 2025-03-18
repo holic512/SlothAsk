@@ -63,11 +63,15 @@ const topMenuStore = useTopMenuStore();
 watch(() => userSession.userSession, async (newValue) => {
   // 监听 用户session是否发生改变,并修改 topMenu状态  根据这个 token 获取个人信息
   // 存在使用这个token 到后端验证是否有效  目前是 获取 用户姓名和头像
+
+
   if (newValue === null) {
     topMenuStore.isLogin = false;
     return
+  } else {
+    // 先更新状态
+    topMenuStore.isLogin = true;
   }
-
   const status = await fetchUserInfo()
   // 如果用户已登录，则获取用户信息
   if (status === 200) {

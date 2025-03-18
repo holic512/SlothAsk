@@ -11,7 +11,9 @@ import {
   Collection,
   Setting,
   Brush,
-  SwitchButton, Link
+  SwitchButton,
+  Link,
+  User
 } from '@element-plus/icons-vue';
 
 const router = useRouter();
@@ -45,6 +47,7 @@ const toolItems = [
 
 // 设置项目
 const settingItems = [
+  { name: '个人资料', icon: User, path: '/account/profile' },
   { name: '显示项目', icon: Link, path: '/account/projects' },
   { name: '账号设置', icon: Setting, path: '/account/settings' },
   { name: '外观', icon: Brush, path: '/account/appearance' },

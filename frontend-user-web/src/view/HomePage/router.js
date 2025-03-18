@@ -8,7 +8,7 @@ import CategoryDetail from './view/QuestionBankPage/components/CategoryDetail.vu
 import QuestionDetail from './view/QuestionBankPage/components/QuestionDetail.vue'
 
 import AccountPage from './view/AccountPage/index.vue'
-import AccountProfile from '@/view/HomePage/view/AccountPage/components/Profile.vue'
+import AccountProfile from '@/view/HomePage/view/AccountPage/components/Profile/Profile.vue'
 import AccountProblemList from '@/view/HomePage/view/AccountPage/components/ProblemList.vue'
 import AccountFavorites from '@/view/HomePage/view/AccountPage/components/Favorites.vue'
 import AccountWrongQuestions from '@/view/HomePage/view/AccountPage/components/WrongQuestions.vue'
@@ -68,7 +68,7 @@ export default [
                 component: AccountPage,
                 children: [
                     {
-                        path: '',
+                        path: 'profile',
                         name: 'AccountProfile',
                         component: AccountProfile
                     },

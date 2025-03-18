@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { setTitle } from '@/utils/title';
-import { useRouter, useRoute } from 'vue-router';
-import { ElMessage } from 'element-plus';
+import {onMounted, ref, watch} from 'vue';
+import {setTitle} from '@/utils/title';
+import {useRouter, useRoute} from 'vue-router';
+import {ElMessage} from 'element-plus';
 import {
   User,
   List,
@@ -16,36 +16,67 @@ import {
   Brush,
   SwitchButton
 } from '@element-plus/icons-vue';
+import {getUserNameAndAvatar} from "@/view/HomePage/view/TopMenu/Api/ApiUserInfo";
+import {useSessionStore} from "@/pinia/Session";
 
 const router = useRouter();
 const route = useRoute();
 
 const userInfo = ref({
-  avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
-  nickname: '测试用户'
+  avatar: '',
+  nickname: ''
 });
 
 // 学习相关
 const studyMenuItems = [
-  { path: '/account/problem-list', name: '题单', icon: List },
-  { path: '/account/favorites', name: '收藏夹', icon: Star },
-  { path: '/account/wrong-questions', name: '错题本', icon: Warning },
-  { path: '/account/progress', name: '进展分析', icon: DataLine },
-  { path: '/account/history', name: '答题记录', icon: Timer },
-  { path: '/account/my-bank', name: '我的题库', icon: Collection },
+  {path: '/account/problem-list', name: '题单', icon: List},
+  {path: '/account/favorites', name: '收藏夹', icon: Star},
+  {path: '/account/wrong-questions', name: '错题本', icon: Warning},
+  {path: '/account/progress', name: '进展分析', icon: DataLine},
+  {path: '/account/history', name: '答题记录', icon: Timer},
+  {path: '/account/my-bank', name: '我的题库', icon: Collection},
 ];
 
 // 项目相关
 const projectMenuItems = [
-  { path: '/account/projects', name: '显示项目', icon: Folder },
+  {path: '/account/projects', name: '显示项目', icon: Folder},
 ];
 
 // 设置相关
 const settingMenuItems = [
-  { path: '/account', name: '个人资料', icon: User },
-  { path: '/account/settings', name: '账号设置', icon: Setting },
-  { path: '/account/appearance', name: '外观设置', icon: Brush },
+  {path: '/account', name: '个人资料', icon: User},
+  {path: '/account/settings', name: '账号设置', icon: Setting},
+  {path: '/account/appearance', name: '外观设置', icon: Brush},
 ];
+
+// 获取用户信息的方法
+const fetchUserInfo = async () => {
+  try {
+    const response = await getUserNameAndAvatar();
+    if (response.status === 200) {
+      userInfo.value = response.data;
+
+      return 200;
+    }
+  } catch (error) {
+    console.error('获取用户信息失败:', error);
+  }
+};
+
+// 获取用户session pinia实例
+const userSession = useSessionStore();
+
+watch(() => userSession.userSession, async (newValue) => {
+  // 监听 用户session是否发生改变,并修改 topMenu状态  根据这个 token 获取个人信息
+  // 存在使用这个token 到后端验证是否有效  目前是 获取 用户姓名和头像
+  if (newValue === null) {
+    await router.push("/")
+    return
+  }
+
+  await fetchUserInfo()
+}, {immediate: true})
+
 
 const handleLogout = () => {
   ElMessage.success('退出登录成功');
@@ -63,54 +94,63 @@ onMounted(() => {
       <!-- 左侧导航 -->
       <div class="account-sidebar">
         <div class="user-info">
-          <el-avatar :size="64" :src="userInfo.avatar" />
+          <el-avatar :size="64" :src="userInfo.avatar" v-if="userInfo.avatar"/>
+          <el-avatar :size="64" v-else>{{ userInfo.nickname[0] }}  </el-avatar>
           <div class="nickname">{{ userInfo.nickname }}</div>
         </div>
         <el-menu
-          :default-active="route.path"
-          class="account-menu"
-          router
+            :default-active="route.path"
+            class="account-menu"
+            router
         >
           <!-- 学习相关 -->
           <div class="menu-group">
             <div class="menu-group-title">学习相关</div>
             <el-menu-item v-for="item in studyMenuItems" :key="item.path" :index="item.path">
-              <el-icon><component :is="item.icon" /></el-icon>
+              <el-icon>
+                <component :is="item.icon"/>
+              </el-icon>
               <span>{{ item.name }}</span>
             </el-menu-item>
           </div>
 
-          <el-divider />
+          <el-divider/>
 
           <!-- 项目相关 -->
           <div class="menu-group">
             <div class="menu-group-title">项目相关</div>
             <el-menu-item v-for="item in projectMenuItems" :key="item.path" :index="item.path">
-              <el-icon><component :is="item.icon" /></el-icon>
+              <el-icon>
+                <component :is="item.icon"/>
+              </el-icon>
               <span>{{ item.name }}</span>
             </el-menu-item>
           </div>
 
-          <el-divider />
+          <el-divider/>
 
           <!-- 设置相关 -->
           <div class="menu-group">
             <div class="menu-group-title">设置相关</div>
             <el-menu-item v-for="item in settingMenuItems" :key="item.path" :index="item.path">
-              <el-icon><component :is="item.icon" /></el-icon>
+              <el-icon>
+                <component :is="item.icon"/>
+              </el-icon>
               <span>{{ item.name }}</span>
             </el-menu-item>
           </div>
         </el-menu>
         <div class="logout-btn" @click="handleLogout">
-          <el-icon><SwitchButton /></el-icon>
+          <el-icon>
+            <SwitchButton/>
+          </el-icon>
           <span>退出登录</span>
         </div>
       </div>
-      
+
       <!-- 右侧内容区 -->
       <div class="account-content">
-        <router-view />
+        <router-view/>
       </div>
     </div>
   </div>
@@ -122,12 +162,14 @@ onMounted(() => {
   min-height: calc(100vh - 60px);
   background-color: #F7F8FA;
   padding: 20px;
+
+  display: flex;
+  justify-content: center;
 }
 
 .account-layout {
+  width: 1000px;
   display: flex;
-  gap: 24px;
-  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -211,9 +253,6 @@ onMounted(() => {
 
 .account-content {
   flex: 1;
-  background: #fff;
-  border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
 </style>
