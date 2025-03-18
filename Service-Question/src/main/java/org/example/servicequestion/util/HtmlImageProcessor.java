@@ -9,7 +9,7 @@
  */
 package org.example.servicequestion.util;
 
-import org.example.servicequestion.config.Feign.ServiceImageFeign;
+import org.example.servicequestion.feign.ServiceImageFeign;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

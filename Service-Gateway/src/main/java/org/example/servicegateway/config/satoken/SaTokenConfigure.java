@@ -9,6 +9,7 @@
  */
 package org.example.servicegateway.config.satoken;
 
+import cn.dev33.satoken.stp.StpUtil;
 import org.example.servicegateway.util.StpKit;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,7 @@ import cn.dev33.satoken.context.SaHolder;
 import cn.dev33.satoken.reactor.filter.SaReactorFilter;
 import cn.dev33.satoken.router.SaHttpMethod;
 import cn.dev33.satoken.router.SaRouter;
+import org.springframework.web.server.ServerWebExchange;
 
 
 @Configuration
@@ -54,7 +56,7 @@ public class SaTokenConfigure {
                             .notMatch("/auth/**", "/user/auth/**", "/images/**")
 
                             // 放行用户登录接口和验证码接口
-                            .notMatch("/service-admin/auth/**", "/service-admin/captcha/**","service-ai/**")
+                            .notMatch("/service-admin/auth/**", "/service-admin/captcha/**", "service-ai/**")
                             .check(r -> {
                                 // 拦截管理员接口 和 各个有关于管理员操作的子服务
                                 SaRouter.match("/service-admin/**").check(StpKit.ADMIN::checkLogin);
@@ -63,7 +65,6 @@ public class SaTokenConfigure {
 
                                 SaRouter.match("/service-user/users/**").check(StpKit.ADMIN::checkLogin);
                             });
-                })
-                ;
+                });
     }
 }

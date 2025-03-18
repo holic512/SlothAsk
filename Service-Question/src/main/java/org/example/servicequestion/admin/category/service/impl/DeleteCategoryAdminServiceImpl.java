@@ -3,7 +3,7 @@ package org.example.servicequestion.admin.category.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.example.servicequestion.admin.category.mapper.AdminCategoryMapper;
 import org.example.servicequestion.admin.category.service.DeleteCategoryAdminService;
-import org.example.servicequestion.config.Feign.ServiceImageFeign;
+import org.example.servicequestion.feign.ServiceImageFeign;
 import org.example.servicequestion.entity.QuestionCategory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

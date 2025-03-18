@@ -11,7 +11,7 @@ import org.example.servicequestion.admin.category.dto.ProjectOptionDTO;
 import org.example.servicequestion.admin.category.mapper.AdminCategoryMapper;
 import org.example.servicequestion.admin.category.service.GetCategoryAdminService;
 import org.example.servicequestion.config.ApiResponse.ApiResponse;
-import org.example.servicequestion.config.Feign.ServiceImageFeign;
+import org.example.servicequestion.feign.ServiceImageFeign;
 import org.example.servicequestion.entity.QuestionCategory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;

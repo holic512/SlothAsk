@@ -1,6 +1,7 @@
 <script setup>
-import { ref } from 'vue';
+import {onMounted, ref} from 'vue';
 import { useRouter } from 'vue-router';
+import {setTitle} from "@/utils/title";
 
 const router = useRouter();
 const isAgreeTerms = ref(false);
@@ -19,6 +20,10 @@ const goToTerms = () => {
 const goToPrivacy = () => {
   // TODO: 实现跳转到隐私政策页面
 };
+
+onMounted(() => {
+  setTitle('登录');
+});
 </script>
 
 <template>
@@ -157,11 +162,9 @@ const goToPrivacy = () => {
 }
 
 .logo {
-  width: 80px;
+  width: 120px;
   height: auto;
-  transition: transform 0.3s ease;
-  border-radius: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .welcome-text {

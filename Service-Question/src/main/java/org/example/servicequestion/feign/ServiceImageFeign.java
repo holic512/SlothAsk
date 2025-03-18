@@ -7,7 +7,7 @@
  * Usage:
  * Todo
  */
-package org.example.servicequestion.config.Feign;
+package org.example.servicequestion.feign;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;

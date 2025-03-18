@@ -11,12 +11,15 @@ package org.example.serviceuser.user.sign.service.Impl;
 
 import java.util.concurrent.TimeUnit;
 
+import cn.dev33.satoken.session.SaSession;
 import org.example.serviceuser.config.Redis.RedisConfig;
 import org.example.serviceuser.entity.User;
 import org.example.serviceuser.entity.UserProfile;
+import org.example.serviceuser.entity.UserProjectCategory;
 import org.example.serviceuser.feign.MailFeign;
 import org.example.serviceuser.user.sign.enums.PostUserSignEnum;
-import org.example.serviceuser.user.sign.mapper.UserProfileMapper;
+import org.example.serviceuser.user.sign.mapper.UserSignProfileMapper;
+import org.example.serviceuser.user.sign.mapper.UserSignUpcMapper;
 import org.example.serviceuser.user.sign.mapper.UserSignUserMapper;
 import org.example.serviceuser.user.sign.request.PasswordLoginRequest;
 import org.example.serviceuser.user.sign.request.RegisterRequest;
@@ -44,7 +47,8 @@ public class PostUserSignServiceImpl implements PostUserSignService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final MailFeign mailFeign;
     private final UserSignUserMapper userSignUserMapper;
-    private final UserProfileMapper userProfileMapper;
+    private final UserSignProfileMapper userSignProfileMapper;
+    private final UserSignUpcMapper userSignUpcMapper;
 
     // 代表着用作于 验证
     private static final String VER_PREFIX = RedisConfig.getKey() + "verification:";
@@ -62,11 +66,14 @@ public class PostUserSignServiceImpl implements PostUserSignService {
     @Autowired
     public PostUserSignServiceImpl(RedisTemplate<String, Object> redisTemplate,
                                    MailFeign mailFeign, UserSignUserMapper userSignUserMapper,
-                                   UserProfileMapper userProfileMapper) {
+                                   UserSignProfileMapper userSignProfileMapper,
+                                   UserSignUpcMapper userSignUpcMapper
+    ) {
         this.redisTemplate = redisTemplate;
         this.mailFeign = mailFeign;
         this.userSignUserMapper = userSignUserMapper;
-        this.userProfileMapper = userProfileMapper;
+        this.userSignProfileMapper = userSignProfileMapper;
+        this.userSignUpcMapper = userSignUpcMapper;
     }
 
     /**
@@ -192,7 +199,7 @@ public class PostUserSignServiceImpl implements PostUserSignService {
             String nickName = NicknameGenerator.generateNickname();
             UserProfile userProfile = new UserProfile(userIdid, nickName);
             // 保存用户详情信息
-            userProfileMapper.insert(userProfile);
+            userSignProfileMapper.insert(userProfile);
 
 
             // 返回token
@@ -209,7 +216,7 @@ public class PostUserSignServiceImpl implements PostUserSignService {
     public Pair<PostUserSignEnum, Object> passwordLogin(PasswordLoginRequest request) {
         // 根据账号查询用户
         User user = userSignUserMapper.getUserByAccount(request.getAccount());
-        
+
         // 用户不存在
         if (user == null) {
             return Pair.of(PostUserSignEnum.ACCOUNT_NOT_FOUND, "null");
@@ -220,9 +227,27 @@ public class PostUserSignServiceImpl implements PostUserSignService {
             return Pair.of(PostUserSignEnum.PASSWORD_INCORRECT, "null");
         }
 
-        // 登录成功，返回token
+        // 验证成功,进行登录
         StpKit.USER.login(user.getId());
         SaTokenInfo saTokenInfo = StpKit.USER.getTokenInfo();
+
+        // 插入用户选择的项目id
+        Long userUpcId = userSignUpcMapper.selectPidByUid(user.getId());
+
+        // 如果用户项目id为空 则设置为 默认 1
+        if (userUpcId == null) {
+            UserProjectCategory userPc = new UserProjectCategory();
+            userPc.setUserId(user.getId());
+            userPc.setProjectId(1L);
+            userSignUpcMapper.insert(userPc);
+
+            userUpcId = 1L;
+        }
+
+        SaSession session = StpKit.USER.getSession();
+        session.set("userUpcId", userUpcId);
+
+        // 返回token
         return Pair.of(PostUserSignEnum.SUCCESS_LOGIN, saTokenInfo);
     }
 }

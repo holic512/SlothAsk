@@ -491,5 +491,21 @@ CREATE TABLE `question_tag_category`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci COMMENT ='题目标签分类表';
 
+
+CREATE TABLE user_project_category
+(
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '自增主键',
+    user_id     BIGINT   NOT NULL COMMENT '用户ID，外键关联 user 表',
+    project_id  BIGINT   NOT NULL COMMENT '项目分类ID，外键关联 project_category 表',
+    uptime      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间，记录最后修改时间',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间，记录首次插入时间',
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES user (id),
+    CONSTRAINT fk_project FOREIGN KEY (project_id) REFERENCES project_category (id),
+    UNIQUE KEY uk_user (user_id) COMMENT '每个用户只能选择一个项目分类'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+    COMMENT ='用户项目分类表，记录用户选择的唯一项目分类';
+
+
 -- 重新启用外键检查
 SET FOREIGN_KEY_CHECKS = 1;

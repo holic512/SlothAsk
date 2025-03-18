@@ -10,7 +10,7 @@
 package org.example.servicequestion.admin.category.service.impl;
 
 import org.example.servicequestion.admin.category.service.PostCategoryAdminService;
-import org.example.servicequestion.config.Feign.ServiceImageFeign;
+import org.example.servicequestion.feign.ServiceImageFeign;
 import org.example.servicequestion.entity.QuestionCategory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

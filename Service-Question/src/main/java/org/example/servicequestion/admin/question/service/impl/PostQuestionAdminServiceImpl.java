@@ -14,7 +14,7 @@ import org.example.servicequestion.admin.question.enmus.PostQuestionAdminEnum;
 import org.example.servicequestion.admin.question.mapper.AdminQuestionMapper;
 import org.example.servicequestion.admin.question.request.AddQuestionRequest;
 import org.example.servicequestion.admin.question.service.PostQuestionAdminService;
-import org.example.servicequestion.config.Feign.ServiceImageFeign;
+import org.example.servicequestion.feign.ServiceImageFeign;
 import org.example.servicequestion.entity.Question;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -13,13 +13,10 @@ import jakarta.validation.Valid;
 import org.example.servicequestion.admin.category.dto.CategoryAddRequest;
 import org.example.servicequestion.admin.category.service.PostCategoryAdminService;
 import org.example.servicequestion.config.ApiResponse.ApiResponse;
-import org.example.servicequestion.config.Feign.ServiceImageFeign;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
