@@ -1,11 +1,11 @@
 /**
  * File Name: UserProfile.java
- * Description: Todo
+ * Description: 用户个人资料实体类
  * Author: lv
- * Created Date: 2025-01-21
- * Version: 1.0
+ * Created Date: 2025-03-18
+ * Version: 1.2
  * Usage:
- * Todo
+ * 用户的扩展信息，包括头像、昵称、性别、生日等
  */
 package org.example.serviceuser.entity;
 
@@ -14,13 +14,18 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @TableName("user_profile")
 public class UserProfile {
+
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
@@ -39,22 +44,31 @@ public class UserProfile {
     @TableField("age")
     private Integer age;
 
+    @TableField("birthday")
+    private LocalDate birthday; // 生日，使用 LocalDate 只存 年-月-日
+
+    @TableField("location")
+    private String location; // 所属地（城市/国家）
+
+    @TableField("occupation")
+    private Integer occupation; // 对应职业枚举
+
+
     @TableField("bio")
     private String bio;
 
     @TableField("display_achievement_id")
     private Long displayAchievementId;
 
-    @TableField("create_time")
+    @TableField(value = "create_time", exist = false)
     private LocalDateTime createTime;
 
-    @TableField("update_time")
+    @TableField(value = "update_time", exist = false)
     private LocalDateTime updateTime;
 
-    public UserProfile(){}
-
-    public UserProfile(Long userId, String nickName) {
+    // 便捷构造方法
+    public UserProfile(Long userId, String nickname) {
         this.userId = userId;
-        this.nickname = nickName;
+        this.nickname = nickname;
     }
 }

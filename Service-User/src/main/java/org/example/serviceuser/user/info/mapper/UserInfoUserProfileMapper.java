@@ -11,6 +11,7 @@ package org.example.serviceuser.user.info.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.example.serviceuser.entity.UserProfile;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -26,4 +27,28 @@ public interface UserInfoUserProfileMapper extends BaseMapper<UserProfile> {
      */
     @Select("SELECT * FROM user_profile WHERE user_id = #{userId}")
     UserProfile selectByUserId(Long userId);
+
+
+    @Update("UPDATE user_profile SET avatar = #{avatarFileName} WHERE user_id = #{userId}")
+    void updateUserAvatar(Long userId, String avatarFileName);
+
+    @Update("UPDATE user_profile SET avatar = null WHERE user_id = #{userId}")
+    void deleteAvatar(Long userId);
+
+    /**
+     * 更新用户资料
+     * 
+     * @param userProfile 用户资料对象
+     * @return 影响的行数
+     */
+    @Update("UPDATE user_profile SET " +
+            "nickname = #{nickname}, " +
+            "gender = #{gender}, " +
+            "age = #{age}, " +
+            "birthday = #{birthday}, " +
+            "location = #{location}, " +
+            "occupation = #{occupation}, " +
+            "bio = #{bio} " +
+            "WHERE user_id = #{userId}")
+    int updateUserProfile(UserProfile userProfile);
 } 

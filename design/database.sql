@@ -113,19 +113,22 @@ CREATE TABLE `admin_user`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci COMMENT ='管理员表';
 
--- 用户个人资料表（依赖user和achievement）
+-- 用户个人资料表（优化后）
 CREATE TABLE `user_profile`
 (
-    `id`                     bigint(20) NOT NULL AUTO_INCREMENT COMMENT '资料ID',
-    `user_id`                bigint(20) NOT NULL COMMENT '用户ID',
-    `nickname`               varchar(32)         DEFAULT NULL COMMENT '昵称',
-    `avatar`                 varchar(255)        DEFAULT NULL COMMENT '头像URL',
-    `gender`                 tinyint(4)          DEFAULT '0' COMMENT '性别 0:未知 1:男 2:女',
-    `age`                    int(11)             DEFAULT NULL COMMENT '年龄',
-    `bio`                    varchar(500)        DEFAULT NULL COMMENT '个人简介',
-    `display_achievement_id` bigint(20)          DEFAULT NULL COMMENT '展示的成就ID',
-    `create_time`            datetime   NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`            datetime   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `id`                     BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '资料ID',
+    `user_id`                BIGINT(20) NOT NULL COMMENT '用户ID，外键关联 user 表',
+    `nickname`               VARCHAR(32)         DEFAULT NULL COMMENT '昵称',
+    `avatar`                 VARCHAR(255)        DEFAULT NULL COMMENT '头像URL',
+    `gender`                 TINYINT(4)          DEFAULT '0' COMMENT '性别 0:未知 1:男 2:女',
+    `birthday`               DATE                DEFAULT NULL COMMENT '生日',
+    `age`                    INT(11)             DEFAULT NULL COMMENT '年龄（根据生日自动计算）',
+    `location`               VARCHAR(100)        DEFAULT NULL COMMENT '所属地（城市/国家）',
+    `occupation`             INT(11)             DEFAULT NULL COMMENT '职业（枚举类型）',
+    `bio`                    VARCHAR(500)        DEFAULT NULL COMMENT '个人简介',
+    `display_achievement_id` BIGINT(20)          DEFAULT NULL COMMENT '展示的成就ID',
+    `create_time`            DATETIME   NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`            DATETIME   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `idx_user_id` (`user_id`),
     CONSTRAINT `fk_profile_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -133,6 +136,7 @@ CREATE TABLE `user_profile`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci COMMENT ='用户个人资料表';
+
 
 -- 题库分类表（依赖project_category）
 CREATE TABLE `question_category`
