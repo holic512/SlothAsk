@@ -10,6 +10,10 @@ spring:
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  cache:
+    caffeine:
+      spec: recommendedCategories=expireAfterWrite=10m
+
 eureka:
   client:
     service-url:

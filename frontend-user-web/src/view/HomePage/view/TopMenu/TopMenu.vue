@@ -191,7 +191,7 @@ const getAvatarText = (nickname) => {
 <style scoped>
 .top-menu {
   height: 50px;
-  width: 1300px;
+  width: 1380px;
   display: flex;
   align-items: center;
 

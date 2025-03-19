@@ -1,19 +1,6 @@
 <template>
   <div class="question-container">
     <div v-if="showCategorySelect" class="select-list-container">
-      <div class="select-list" ref="selectList">
-        <div class="select-item" :class="{ active: selectedCategory === 'all' }" @click="handleSelect('all')">
-          <span class="icon">📚</span>
-          <span class="name">全部题目</span>
-        </div>
-
-        <div class="select-item" v-for="item in displayedCategories" :key="item.id"
-          :class="{ active: selectedCategory === item.id }" @click="handleSelect(item.id)">
-          <img class="category-icon" :src="item.avatar_url" alt="Category Icon">
-          <span class="name">{{ item.name }}</span>
-        </div>
-      </div>
-
       <div v-show="showScrollButton" class="scroll-button-container">
         <button class="scroll-button" @click="scrollRight" ref="scrollButton">
           <el-icon>
@@ -424,6 +411,8 @@ const handleQuestionClick = (questionId: number) => {
   -ms-overflow-style: none;
   scrollbar-width: none;
   scroll-behavior: smooth;
+
+  max-width: 1300px;
 }
 
 .scroll-button-container {
@@ -488,6 +477,9 @@ const handleQuestionClick = (questionId: number) => {
   flex-shrink: 0;
   height: 36px;
   box-sizing: border-box;
+
+  max-width: 140px;
+  overflow: hidden;
 }
 
 .select-item:hover {
@@ -565,12 +557,15 @@ const handleQuestionClick = (questionId: number) => {
 .question-list {
   width: 100%;
   overflow-x: auto;
+  max-width: 100%; /* 确保不超出父容器 */
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
+  min-width: auto; /* 防止表格强制最小宽度 */
+  table-layout: fixed; /* 使用固定表格布局优化性能和宽度控制 */
 }
 
 th,

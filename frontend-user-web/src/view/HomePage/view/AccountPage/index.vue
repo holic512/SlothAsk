@@ -44,7 +44,7 @@ const projectMenuItems = [
 
 // 设置相关
 const settingMenuItems = [
-  {path: '/account', name: '个人资料', icon: User},
+  {path: '/account/profile', name: '个人资料', icon: User},
   {path: '/account/settings', name: '账号设置', icon: Setting},
   {path: '/account/appearance', name: '外观设置', icon: Brush},
 ];
@@ -159,7 +159,7 @@ onMounted(() => {
 <style scoped>
 .account-contain {
   width: 100%;
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 430px);
   background-color: #F7F8FA;
   padding: 20px;
 

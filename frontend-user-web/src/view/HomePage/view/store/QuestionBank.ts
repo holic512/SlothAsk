@@ -376,7 +376,6 @@ export const useQuestionBankStore = defineStore('questionBank', {
                     "update_time": "2023-01-16T00:00:00Z"
                 }
         ],
-
         pagination: {
             currentPage: 1,
             pageSize: 20,
