@@ -4,22 +4,21 @@
       <h2 class="title">题库推荐</h2>
       <button class="view-more" @click="handleViewMore">
         查看更多
-        <el-icon class="view-more-icon"><ArrowRight /></el-icon>
+        <el-icon class="view-more-icon">
+          <ArrowRight />
+        </el-icon>
       </button>
     </div>
 
     <div class="category-list">
-      <div class="category-item" 
-        v-for="item in displayedCategories" 
-        :key="item.id"
-        @click="handleCategoryClick(item.id)"
-      >
+      <div class="category-item" v-for="item in displayedCategories" :key="item.id"
+        @click="handleCategoryClick(item.id)">
         <div class="icon-wrapper">
-          <span class="icon">{{ item.icon }}</span>
+          <img class="category-icon" :src="item.avatar_url" alt="Category Icon">
         </div>
         <div class="content">
           <h3 class="category-item-title">{{ item.name }}</h3>
-          <p class="count">{{ item.count }}个问题</p>
+          <p class="count">{{ getQuestionCount(item.id) }}个问题</p>
         </div>
       </div>
     </div>
@@ -27,15 +26,32 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watchEffect, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useQuestionBankStore } from '../../pinia/QuestionBank';
+import { useQuestionBankStore } from '@/view/HomePage/view/store/QuestionBank';
 import { ArrowRight } from '@element-plus/icons-vue'
-
 const router = useRouter();
 const questionBank = useQuestionBankStore();
 
+// 使用Map存储每个分类的问题数量
+const categoryQuestionCounts = ref(new Map<number, number>());
+
+// 先定义computed属性
 const displayedCategories = computed(() => questionBank.getDisplayCategories);
+
+// 监听分类变化并更新问题数量
+watchEffect(() => {
+  displayedCategories.value?.forEach(category => {
+    categoryQuestionCounts.value.set(
+      category.id,
+      questionBank.getQuestionCountByCategory(category.id)
+    );
+  });
+});
+
+const getQuestionCount = (categoryId: number): number => {
+  return categoryQuestionCounts.value.get(categoryId) || 0;
+};
 
 const handleViewMore = (): void => {
   router.push('/questionbank');
@@ -56,7 +72,8 @@ const handleCategoryClick = (categoryId: number): void => {
 }
 
 /* 确保内容在渐变层之上 */
-.header, .category-list {
+.header,
+.category-list {
   position: relative;
   z-index: 1;
 }

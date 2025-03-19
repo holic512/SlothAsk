@@ -5,7 +5,7 @@ import DiscussionPage from './view/DiscussionPage/index.vue'
 import InterviewPage from './view/InterviewPage/index.vue'
 import QuestionBankPage from './view/QuestionBankPage/index.vue'
 import CategoryDetail from './view/QuestionBankPage/components/CategoryDetail.vue'
-import QuestionDetail from './view/QuestionBankPage/components/QuestionDetail.vue'
+import QuestionPage from './view/QuestionPage/index.vue'
 
 import AccountPage from './view/AccountPage/index.vue'
 import AccountProfile from '@/view/HomePage/view/AccountPage/components/Profile.vue'
@@ -43,8 +43,8 @@ export default [
             },
             {
                 path: '/questionbank/question/:questionId',
-                name: 'QuestionDetail',
-                component: QuestionDetail,
+                name: 'QuestionPage',
+                component: QuestionPage,
                 props: true
             },
             {

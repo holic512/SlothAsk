@@ -1,14 +1,8 @@
 <template>
   <div class="question-content">
-    <div class="question-text">{{ question.content }}</div>
     <div class="options-list">
-      <div 
-        v-for="option in question.options" 
-        :key="option.label"
-        class="option-item"
-        :class="{ selected: selectedOption === option.label }"
-        @click="selectOption(option.label)"
-      >
+      <div v-for="option in options" :key="option.label" class="option-item"
+           :class="{ selected: selectedOption === option.label }" @click="selectOption(option.label)">
         <span class="option-label">{{ option.label }}</span>
         <span class="option-text">{{ option.text }}</span>
       </div>
@@ -17,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 const props = defineProps<{
   question: any;
@@ -25,19 +19,33 @@ const props = defineProps<{
 
 const selectedOption = ref('');
 
+// 解析题目内容并提取选项
+const options = computed(() => {
+  if (!props.question.content) return [];
+
+  // 使用正则从 content 中提取选项 A、B、C、D 等
+  const optionRegex = /([A-D])\.\s*(.*?)(?=\n|$)/g;
+  const optionsArray: { label: string; text: string }[] = [];
+  let match;
+
+  // 提取所有选项
+  while ((match = optionRegex.exec(props.question.content)) !== null) {
+    optionsArray.push({
+      label: match[1],  // 选项的标签（A、B、C、D）
+      text: match[2]    // 选项的文本内容
+    });
+  }
+
+  return optionsArray;
+});
+
+// 选择选项
 const selectOption = (label: string) => {
   selectedOption.value = label;
 };
 </script>
 
 <style scoped>
-.question-text {
-  font-size: 15px;
-  line-height: 1.6;
-  color: #333;
-  margin-bottom: 24px;
-}
-
 .options-list {
   display: flex;
   flex-direction: column;
@@ -75,3 +83,4 @@ const selectOption = (label: string) => {
   line-height: 1.6;
 }
 </style>
+

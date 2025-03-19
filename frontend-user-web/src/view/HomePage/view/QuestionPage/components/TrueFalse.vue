@@ -1,13 +1,12 @@
 <template>
   <div class="question-content">
-    <div class="question-text">{{ question.content }}</div>
     <div class="options-list">
-      <div 
-        v-for="option in options" 
-        :key="option.id"
-        class="option-item"
-        :class="{ selected: selectedAnswer === option.id }"
-        @click="selectAnswer(option.id)"
+      <div
+          v-for="option in options"
+          :key="option.id"
+          class="option-item"
+          :class="{ selected: selectedAnswer === option.id }"
+          @click="selectAnswer(option.id)"
       >
         {{ option.label }}
       </div>
@@ -41,12 +40,7 @@ const selectAnswer = (id: string) => {
 </script>
 
 <style scoped>
-.question-text {
-  font-size: 15px;
-  line-height: 1.6;
-  color: #333;
-  margin-bottom: 24px;
-}
+
 
 .options-list {
   display: flex;

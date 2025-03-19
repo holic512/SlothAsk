@@ -2,79 +2,56 @@
   <div class="question-container">
     <div v-if="showCategorySelect" class="select-list-container">
       <div class="select-list" ref="selectList">
-        <div class="select-item" 
-          :class="{ active: selectedCategory === 'all' }"
-          @click="handleSelect('all')"
-        >
+        <div class="select-item" :class="{ active: selectedCategory === 'all' }" @click="handleSelect('all')">
           <span class="icon">📚</span>
           <span class="name">全部题目</span>
         </div>
 
-        <div class="select-item" 
-          v-for="item in displayedCategories" 
-          :key="item.id"
-          :class="{ active: selectedCategory === item.id }"
-          @click="handleSelect(item.id)"
-        >
-          <span class="icon">{{ item.icon }}</span>
+        <div class="select-item" v-for="item in displayedCategories" :key="item.id"
+          :class="{ active: selectedCategory === item.id }" @click="handleSelect(item.id)">
+          <img class="category-icon" :src="item.avatar_url" alt="Category Icon">
           <span class="name">{{ item.name }}</span>
         </div>
       </div>
-      
+
       <div v-show="showScrollButton" class="scroll-button-container">
-        <button 
-          class="scroll-button"
-          @click="scrollRight"
-          ref="scrollButton"
-        >
-          <el-icon><ArrowRight /></el-icon>
+        <button class="scroll-button" @click="scrollRight" ref="scrollButton">
+          <el-icon>
+            <ArrowRight />
+          </el-icon>
         </button>
       </div>
     </div>
 
     <div class="filter-row">
       <div class="search-box">
-        <input 
-          type="text" 
-          v-model="searchText"
-          placeholder="搜索题目ID或标题..."
-          class="search-input"
-        >
+        <input type="text" v-model="searchText" placeholder="搜索题目ID或标题..." class="search-input">
       </div>
-      
+
       <div class="filter-group">
         <select v-model="filterCategory" class="filter-select">
-          <option value="">全部分类</option>
-          <option v-for="category in allCategories" 
-            :key="category.id" 
-            :value="category.id"
-          >
+          <option :value="0">全部分类</option>
+          <option v-for="category in allCategories" :key="category.id" :value="category.id">
             {{ category.name }}
           </option>
         </select>
 
         <select v-model="filterType" class="filter-select">
-          <option value="">全部类型</option>
-          <option v-for="type in allTypes" 
-            :key="type" 
-            :value="type"
-          >
-            {{ type }}
-          </option>
+          <option :value="0">全部类型</option>
+          <option :value="1">单选</option>
+          <option :value="2">多选</option>
+          <option :value="3">判断</option>
+          <option :value="4">简答</option>
         </select>
 
         <select v-model="filterDifficulty" class="filter-select">
-          <option value="">全部难度</option>
-          <option value="简单">简单</option>
-          <option value="中等">中等</option>
-          <option value="困难">困难</option>
+          <option :value="0">全部难度</option>
+          <option :value="1">简单</option>
+          <option :value="2">中等</option>
+          <option :value="3">困难</option>
         </select>
 
-        <button 
-          class="tag-button"
-          :class="{ active: showTagFilter }"
-          @click="toggleTagFilter"
-        >
+        <button class="tag-button" :class="{ active: showTagFilter }" @click="toggleTagFilter">
           标签
           <span v-if="filterTag" class="selected-tag">{{ filterTag }}</span>
         </button>
@@ -84,29 +61,18 @@
     <div v-if="showTagFilter" class="tag-filter-container">
       <div class="tag-search">
         <div class="search-input-wrapper">
-          <el-icon class="search-icon"><Search /></el-icon>
-          <input 
-            type="text" 
-            v-model="tagSearchText"
-            placeholder="搜索标签..."
-            class="tag-search-input"
-          >
-          <el-icon 
-            v-if="tagSearchText" 
-            class="clear-icon"
-            @click="tagSearchText = ''"
-          >
+          <el-icon class="search-icon">
+            <Search />
+          </el-icon>
+          <input type="text" v-model="tagSearchText" placeholder="搜索标签..." class="tag-search-input">
+          <el-icon v-if="tagSearchText" class="clear-icon" @click="tagSearchText = ''">
             <Close />
           </el-icon>
         </div>
       </div>
       <div class="tag-filter">
-        <span 
-          v-for="tag in filteredTags" 
-          :key="tag"
-          :class="['filter-tag', { active: filterTag === tag }]"
-          @click="handleTagSelect(tag)"
-        >
+        <span v-for="tag in filteredTags" :key="tag" :class="['filter-tag', { active: filterTag === tag }]"
+          @click="handleTagSelect(tag)">
           {{ tag }}
         </span>
       </div>
@@ -124,46 +90,44 @@
               类型
             </th>
             <th class="number-col sortable" @click="handleSort('comments')" :data-active="sortField === 'comments'">
-              评论
+              浏览量
               <component :is="getSortIcon('comments')" class="sort-icon" />
             </th>
             <th class="number-col sortable" @click="handleSort('passRate')" :data-active="sortField === 'passRate'">
               通过率
               <component :is="getSortIcon('passRate')" class="sort-icon" />
             </th>
-            <th class="difficulty-col sortable" @click="handleSort('difficulty')" :data-active="sortField === 'difficulty'">
+            <th class="difficulty-col sortable" @click="handleSort('difficulty')"
+              :data-active="sortField === 'difficulty'">
               难度
               <component :is="getSortIcon('difficulty')" class="sort-icon" />
             </th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="question in paginatedQuestions" 
-            :key="question.id"
-            @click="handleQuestionClick(question.id)"
-            class="question-row"
-          >
+          <tr v-for="question in paginatedQuestions" :key="question.id" @click="handleQuestionClick(question.id)"
+            class="question-row">
             <td class="title-col">
               <span class="question-id">{{ question.id }}.</span>
               {{ question.title }}
               <div class="tags">
-                <span v-for="tag in question.tags" 
-                  :key="tag" 
+                <span v-for="(tag, index) in question?.tags.split(',').map(tag => tag.trim()) " :key="index"
                   class="tag">
                   {{ tag }}
                 </span>
               </div>
             </td>
             <td class="type-col">
-              <span :class="['type-tag', question.type]">
-                {{ question.type }}
+              <span
+                :class="['type-tag', question.type === 1 ? '单选' : question.type === 2 ? '多选' : question.type === 3 ? '判断' : '简答']">
+                {{ question.type === 1 ? '单选' : question.type === 2 ? '多选' : question.type === 3 ? '判断' : '简答' }}
               </span>
             </td>
-            <td class="number-col">{{ question.comments }}</td>
-            <td class="number-col">{{ question.passRate }}%</td>
+            <td class="number-col">{{ question.view_count }}</td>
+            <td class="number-col">{{ }}%</td>
             <td class="difficulty-col">
-              <span :class="['difficulty', question.difficulty]">
-                {{ question.difficulty }}
+              <span :class="['difficulty', question.difficulty === 1 ? '简单' : question.difficulty === 2 ? '中等' : '困难']">
+                {{ question.difficulty === 1 ? '简单' : question.difficulty === 2 ? '中等' : '困难' }}
               </span>
             </td>
           </tr>
@@ -171,29 +135,23 @@
       </table>
 
       <div class="pagination-container">
-        <el-pagination
-          v-model:current-page="currentPage"
-          :page-size="20"
-          :total="totalQuestions"
-          @current-change="handlePageChange"
-          layout="prev, pager, next"
-        />
+        <el-pagination v-model:current-page="currentPage" :page-size="20" :total="totalQuestions"
+          @current-change="handlePageChange" layout="prev, pager, next" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, h, onMounted, onUnmounted, watch } from 'vue';
-import { useQuestionBankStore } from '../../pinia/QuestionBank';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { useQuestionBankStore } from '@/view/HomePage/view/store/QuestionBank';
 import { useRouter } from 'vue-router';
-import { 
-  ArrowUp, 
-  ArrowDown, 
-  Search, 
-  Close, 
+import {
+  ArrowUp,
+  ArrowDown,
+  Search,
+  Close,
   ArrowRight,
-  ChatLineRound 
 } from '@element-plus/icons-vue';
 import { ElPagination, ElIcon } from 'element-plus';
 
@@ -202,6 +160,7 @@ interface SortableField {
   comments: number;
   passRate: number;
   difficulty: string;
+  view_count: number;
 }
 
 interface Props {
@@ -217,34 +176,28 @@ const props = withDefaults(defineProps<Props>(), {
 const questionBank = useQuestionBankStore();
 const displayedCategories = computed(() => questionBank.getDisplayCategories);
 const allCategories = computed(() => questionBank.getAllCategories);
-const allTypes = computed(() => questionBank.getAllTypes);
 const selectedCategory = ref(props.selectedCategory);
 const searchText = ref('');
-const filterDifficulty = ref('');
-const filterCategory = ref('');
+const filterDifficulty = ref<number>(0);
+const filterCategory = ref<number>(0);
 const filterTag = ref('');
-const filterType = ref('');
+const filterType = ref<number>(0);
 const sortField = ref<keyof SortableField | ''>('');
 const sortOrder = ref<'asc' | 'desc'>('asc');
 
 // 修改获取标签的计算属性
 const availableTags = computed(() => {
-  // 如果是在分类详情页面（非全部分类）
-  if (selectedCategory.value !== 'all') {
-    const currentCategory = questionBank.categories.find(
-      c => c.id === Number(selectedCategory.value)
-    );
-    if (currentCategory) {
-      // 获取当前分类下所有题目的标签
-      const tagSet = new Set<string>();
-      currentCategory.questions.forEach(question => {
-        question.tags?.forEach(tag => tagSet.add(tag));
-      });
-      return Array.from(tagSet).sort();
-    }
-  }
-  // 如果是全部分类，则返回所有标签
-  return questionBank.getAllTags;
+  // 获取当前分类下的所有题目
+  const questions = selectedCategory.value === 'all'
+    ? questionBank.questions
+    : questionBank.questions.filter(q => q.category_id === Number(selectedCategory.value));
+
+  // 从筛选后的题目中获取所有标签
+  const tagSet = new Set<string>();
+  questions.forEach(question => {
+    question.tags.split(',').forEach(tag => tagSet.add(tag.trim()));
+  });
+  return Array.from(tagSet).sort();
 });
 
 const selectList = ref<HTMLElement | null>(null);
@@ -297,24 +250,27 @@ onUnmounted(() => {
 
 // 计算筛选后的题目
 const filteredQuestions = computed(() => {
-  let questions = selectedCategory.value === 'all' 
-    ? questionBank.getAllQuestions 
-    : questionBank.getCategoryQuestions(selectedCategory.value);
+  // 确保数据已加载
+  if (!questionBank.questions) return [];
+
+  let questions = selectedCategory.value === 'all'
+    ? questionBank.questions
+    : questionBank.questions.filter(q => q.category_id === Number(selectedCategory.value));
 
   // 按分类筛选
-  if (filterCategory.value) {
-    questions = questionBank.getCategoryQuestions(filterCategory.value);
+  if (filterCategory.value !== 0) {
+    questions = questions.filter(q => q.category_id === Number(filterCategory.value));
   }
 
   // 按难度筛选
-  if (filterDifficulty.value) {
+  if (filterDifficulty.value !== 0) {
     questions = questions.filter(q => q.difficulty === filterDifficulty.value);
   }
 
   // 按题目名称或ID搜索
   if (searchText.value) {
     const searchLower = searchText.value.toLowerCase();
-    questions = questions.filter(q => 
+    questions = questions.filter(q =>
       // 匹配题目ID
       q.id.toString().includes(searchText.value) ||
       // 匹配题目标题
@@ -324,25 +280,34 @@ const filteredQuestions = computed(() => {
 
   // 按标签筛选
   if (filterTag.value) {
-    questions = questions.filter(q => 
+    questions = questions.filter(q =>
       q.tags?.includes(filterTag.value)
     );
   }
 
   // 按类型筛选
-  if (filterType.value) {
+  if (filterType.value !== 0) {
     questions = questions.filter(q => q.type === filterType.value);
   }
 
   // 排序
   if (sortField.value) {
     questions = [...questions].sort((a, b) => {
-      let aValue = sortField.value === 'difficulty' 
-        ? getDifficultyValue(a[sortField.value])
-        : a[sortField.value];
-      let bValue = sortField.value === 'difficulty'
-        ? getDifficultyValue(b[sortField.value])
-        : b[sortField.value];
+      let aValue, bValue;
+
+      switch (sortField.value) {
+        case 'difficulty':
+          aValue = a.difficulty;
+          bValue = b.difficulty;
+          break;
+        case 'view_count':
+          aValue = a.view_count || 0;
+          bValue = b.view_count || 0;
+          break;
+        default:
+          aValue = a[sortField.value];
+          bValue = b[sortField.value];
+      }
 
       if (sortOrder.value === 'asc') {
         return aValue > bValue ? 1 : -1;
@@ -380,15 +345,6 @@ const getSortIcon = (field: keyof SortableField | '') => {
   return sortOrder.value === 'asc' ? ArrowUp : ArrowDown;
 };
 
-// 获取难度值
-const getDifficultyValue = (difficulty: string): number => {
-  switch (difficulty) {
-    case '简单': return 1;
-    case '中等': return 2;
-    case '困难': return 3;
-    default: return 0;
-  }
-};
 
 const showTagFilter = ref(false);
 
@@ -406,9 +362,9 @@ const tagSearchText = ref('');
 // 过滤标签
 const filteredTags = computed(() => {
   if (!tagSearchText.value) return availableTags.value;
-  
+
   const searchText = tagSearchText.value.toLowerCase();
-  return availableTags.value.filter(tag => 
+  return availableTags.value.filter(tag =>
     tag.toLowerCase().includes(searchText)
   );
 });
@@ -441,8 +397,8 @@ const router = useRouter();
 
 const handleQuestionClick = (questionId: number) => {
   router.push({
-    name: 'QuestionDetail',
-    params: { 
+    name: 'QuestionPage',
+    params: {
       questionId: questionId.toString()
     }
   });
@@ -617,7 +573,8 @@ table {
   text-align: left;
 }
 
-th, td {
+th,
+td {
   padding: 12px 16px;
   border-bottom: 1px solid #eee;
 }
@@ -635,16 +592,20 @@ th {
 .difficulty-col {
   width: 100px;
   text-align: center;
-  padding-right: 24px; /* 给排序图标留出空间 */
+  padding-right: 24px;
+  /* 给排序图标留出空间 */
 }
 
 .difficulty {
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
-  display: inline-block; /* 确保标签居中 */
-  min-width: 36px; /* 设置最小宽度使标签对齐 */
-  text-align: center; /* 标签文字居中 */
+  display: inline-block;
+  /* 确保标签居中 */
+  min-width: 36px;
+  /* 设置最小宽度使标签对齐 */
+  text-align: center;
+  /* 标签文字居中 */
 }
 
 .difficulty.简单 {
@@ -907,7 +868,9 @@ td {
 
 .number-col {
   text-align: right;
-  padding-right: 24px; /* 给排序图标留出空间 */
-  width: 100px; /* 固定宽度，使列对齐 */
+  padding-right: 24px;
+  /* 给排序图标留出空间 */
+  width: 100px;
+  /* 固定宽度，使列对齐 */
 }
 </style>

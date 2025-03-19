@@ -2,7 +2,7 @@
   <div class="category-detail">
     <div class="category-header">
       <div class="category-info">
-        <div class="category-icon">{{ category?.icon }}</div>
+        <img class="category-icon" :src="category?.avatar_url" alt="Category Icon">
         <div class="title-section">
           <h2 class="category-name">{{ category?.name }}</h2>
           <p class="category-description">{{ category?.description }}</p>
@@ -10,34 +10,53 @@
       </div>
       <div class="category-stats">
         <div class="stat-item">
-          <span class="stat-value">{{ category?.questions.length }}</span>
+          <span class="stat-value">{{ questionCount }}</span>
           <span class="stat-label">题目数量</span>
         </div>
       </div>
     </div>
 
     <div class="question-list">
-      <Question 
-        :selected-category="categoryId"
-        :show-category-select="false"
-      />
+      <Question :selected-category="categoryId" :show-category-select="false" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useQuestionBankStore } from '../../pinia/QuestionBank';
+import { useQuestionBankStore } from '@/view/HomePage/view/store/QuestionBank';
 import Question from '../../StudyPage/components/Question.vue';
+import { setTitle } from "@/utils/title";
 
 const route = useRoute();
 const questionBank = useQuestionBankStore();
 
+// 获取分类 ID
 const categoryId = computed(() => Number(route.params.id));
 
+// 获取分类详情
 const category = computed(() => {
   return questionBank.categories.find(c => c.id === categoryId.value);
+});
+
+// 获取题目数量，依赖 categoryId
+const questionCount = computed(() => {
+  return questionBank.getQuestionCountByCategory(categoryId.value);
+});
+
+// 设置页面标题
+onMounted(() => {
+  if (category.value) {
+    setTitle(`${category.value?.name}`);
+  }
+});
+
+// 当分类名称变化时更新标题
+watch(() => category.value?.name, (newTitle) => {
+  if (newTitle) {
+    setTitle(newTitle);
+  }
 });
 </script>
 
@@ -71,6 +90,7 @@ const category = computed(() => {
   background: #f8f9fa;
   border-radius: 16px;
   line-height: 1;
+  cursor: default;
 }
 
 .title-section {
@@ -118,4 +138,4 @@ const category = computed(() => {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
   padding: 24px;
 }
-</style> 
+</style>

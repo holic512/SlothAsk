@@ -1,35 +1,27 @@
 <template>
   <div class="category-class">
     <div class="categories-grid">
-      <div v-for="category in categories" 
-        :key="category.id" 
-        class="category-card"
-      >
+      <div v-for="category in categories" :key="category.id" class="category-card">
         <div class="category-header">
-          <div class="category-icon">{{ category.icon }}</div>
+          <div class="category-icon">{{ category.avatar_url }}</div>
           <h3 class="category-name">{{ category.name }}</h3>
         </div>
-        
+
         <div class="category-info">
           <p class="category-description">{{ category.description }}</p>
           <div class="tags">
-            <span v-for="tag in getTopTags(category)" 
-              :key="tag" 
-              class="tag"
-            >
+            <span v-for="tag in getTopTags(category)" :key="tag" class="tag">
               {{ tag }}
             </span>
           </div>
         </div>
 
         <div class="category-footer">
-          <el-button 
-            type="primary" 
-            text
-            @click="handleCategoryClick(category.id)"
-          >
+          <el-button type="primary" text @click="handleCategoryClick(category.id)">
             开始学习
-            <el-icon class="el-icon--right"><ArrowRight /></el-icon>
+            <el-icon class="el-icon--right">
+              <ArrowRight />
+            </el-icon>
           </el-button>
         </div>
       </div>
@@ -40,7 +32,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useQuestionBankStore } from '../../pinia/QuestionBank';
+import { useQuestionBankStore } from '@/view/HomePage/view/store/QuestionBank';
 import { ArrowRight } from '@element-plus/icons-vue';
 
 const router = useRouter();
@@ -55,13 +47,18 @@ const handleCategoryClick = (categoryId: number) => {
 };
 
 const getTopTags = (category: any) => {
+  if (!category || !category.questions) return [];
+
   const tagCount = new Map();
   category.questions.forEach(q => {
-    q.tags.forEach(tag => {
-      tagCount.set(tag, (tagCount.get(tag) || 0) + 1);
-    });
+    if (q.tags) {
+      const tags = typeof q.tags === 'string' ? q.tags.split(',').map(t => t.trim()) : q.tags;
+      tags.forEach(tag => {
+        if (tag) tagCount.set(tag, (tagCount.get(tag) || 0) + 1);
+      });
+    }
   });
-  
+
   return Array.from(tagCount.entries())
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
