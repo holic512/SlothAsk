@@ -3,7 +3,7 @@ import Category from './components/Category.vue'
 import Question from './components/Question.vue'
 import Sidebar from './components/Sidebar.vue'
 import {onMounted} from 'vue';
-import {setTitle} from '../../../../utils/title';
+import {setTitle} from '@/utils/title';
 
 onMounted(() => {
   setTitle('学习');
@@ -88,7 +88,8 @@ onMounted(() => {
   .side-container {
     display: none;
   }
-  .page-container{
+
+  .page-container {
     max-width: 1000px;
   }
 }

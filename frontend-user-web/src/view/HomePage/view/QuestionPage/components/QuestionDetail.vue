@@ -50,7 +50,7 @@
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { useQuestionBankStore } from '../../store/QuestionBank';
+import { useQuestionBankStore } from '@/view/HomePage/view/StudyPage/store/QuestionBank';
 import SingleChoice from './SingleChoice.vue';
 import MultipleChoice from './MultipleChoice.vue';
 import TrueFalse from './TrueFalse.vue';

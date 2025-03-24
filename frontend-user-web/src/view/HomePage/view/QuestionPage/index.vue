@@ -15,7 +15,7 @@
 
 <script setup>
 import { onMounted } from 'vue';
-import { setTitle } from '../../../../utils/title';
+import { setTitle } from '@/utils/title';
 import QuestionDetail from '../QuestionPage/components/QuestionDetail.vue'
 import CommentSection from '../QuestionPage/components/CommentSection.vue'
 import SidebarLeft from '../QuestionPage/components/SidebarLeft.vue'

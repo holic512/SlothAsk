@@ -25,7 +25,7 @@
 <script setup lang="ts">
 import { computed, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useQuestionBankStore } from '@/view/HomePage/view/store/QuestionBank';
+import { useQuestionBankStore } from '@/view/HomePage/view/StudyPage/store/QuestionBank';
 import Question from '../../StudyPage/components/Question.vue';
 import { setTitle } from "@/utils/title";
 

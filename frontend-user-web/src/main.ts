@@ -35,7 +35,4 @@ app.use(ElementPlus, {
     locale: zhCn,
 })
 
-
-app.use(ElementPlus)
-app.use(pinia)
 app.mount('#app')

@@ -6,6 +6,7 @@ import {watch, ref} from "vue";
 import {useTopMenuStore} from "@/view/HomePage/view/TopMenu/pinia/topMenuStore";
 import UserUtil from "@/view/HomePage/view/TopMenu/components/UserUtil/UserUtil.vue";
 import {getUserNameAndAvatar} from '@/view/HomePage/view/TopMenu/Api/ApiUserInfo';
+import {Bell} from "@element-plus/icons-vue";
 
 const router = useRouter()
 const route = useRoute()
@@ -134,7 +135,7 @@ const getAvatarText = (nickname) => {
             trigger="click"
             popper-class="custom-avatar-popover"
             width="300"
-            hide-after="0"
+            :hide-after="0"
         >
           <UserUtil :userInfo="userInfo"/>
 

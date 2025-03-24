@@ -48,7 +48,7 @@
 import { computed, ref } from "vue";
 import { useRoute } from 'vue-router';
 import { ElMessage } from "element-plus";
-import { useQuestionBankStore } from '@/view/HomePage/view/store/QuestionBank';
+import { useQuestionBankStore } from '@/view/HomePage/view/StudyPage/store/QuestionBank';
 interface Comment {
   id: number;
   username: string;

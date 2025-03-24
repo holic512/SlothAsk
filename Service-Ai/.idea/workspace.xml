@@ -5,19 +5,35 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="45f2b19d-f6d6-45b0-8a07-d7b0f8358ef3" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/Service-Ai.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/CoolRequestEnvironmentPersistentComponent.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/CoolRequestEnvironmentPersistentComponent.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Service-Question/src/main/java/org/example/servicequestion/config/MyBatisPlus/JsonListTypeHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Service-Question/src/main/java/org/example/servicequestion/config/MyBatisPlus/ListTypeHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Service-Question/src/main/java/org/example/servicequestion/config/Redis/RedisConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Service-Question/src/main/java/org/example/servicequestion/user/category/dto/CategoryIdAndNameDto.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Service-Question/src/main/java/org/example/servicequestion/user/category/dto/QuestionListDto.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Service-Question/src/main/java/org/example/servicequestion/user/category/dto/TagIdAndNameDto.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Service-Question/src/main/java/org/example/servicequestion/user/category/mapper/UserQuestionMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Service-Question/src/main/java/org/example/servicequestion/user/category/request/GetQuestionListRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Service-Question/src/main/java/org/example/servicequestion/util/UuidUtil.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/StudyPage/service/ApiGetCategoryIdAndNameByProjectId.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/StudyPage/service/ApiGetTagIdAndName.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/CommonStatePersistent.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../.idea/CoolRequestHistoryPersistent.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/CoolRequestHistoryPersistent.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Service-Gateway/src/main/java/org/example/servicegateway/config/satoken/SaTokenConfigure.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Service-Gateway/src/main/java/org/example/servicegateway/config/satoken/SaTokenConfigure.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SlothAsk.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../SlothAsk.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Service-Question/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Service-Question/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Service-Question/src/main/java/org/example/servicequestion/user/category/controller/GetUserCategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Service-Question/src/main/java/org/example/servicequestion/user/category/controller/GetUserCategoryController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Service-Question/src/main/java/org/example/servicequestion/user/category/mapper/QuestionCategoryMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Service-Question/src/main/java/org/example/servicequestion/user/category/mapper/QuestionCategoryMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Service-Question/src/main/java/org/example/servicequestion/user/category/service/GetUserCategoryService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Service-Question/src/main/java/org/example/servicequestion/user/category/service/GetUserCategoryService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Service-Question/src/main/java/org/example/servicequestion/user/category/service/Impl/GetUserCategoryServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Service-Question/src/main/java/org/example/servicequestion/user/category/service/Impl/GetUserCategoryServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Service-Question/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../Service-Question/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/QuestionBankPage/components/CategoryClass.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/QuestionBankPage/components/CategoryClass.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/QuestionBankPage/components/CategoryDetail.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/QuestionBankPage/components/CategoryDetail.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/QuestionPage/components/CommentSection.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/QuestionPage/components/CommentSection.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/QuestionPage/components/QuestionDetail.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/QuestionPage/components/QuestionDetail.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/QuestionPage/components/SidebarLeft.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/QuestionPage/components/SidebarLeft.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/QuestionPage/components/SidebarRight.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/QuestionPage/components/SidebarRight.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/StudyPage/components/FilterSection.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/StudyPage/components/FilterSection.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/StudyPage/components/Question.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/StudyPage/components/Question.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/store/QuestionBank.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend-user-web/src/view/HomePage/view/StudyPage/store/QuestionBank.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,9 +50,9 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 2
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
   <component name="ProjectId" id="2sLxs5zw5azRYNKeo5uKSoi0cP7" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -46,7 +62,7 @@
   "keyToString": {
     "Flask 服务器.Service-Ai.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "UserAccount",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -90,6 +106,7 @@
       <option name="presentableId" value="Default" />
       <updated>1738248860387</updated>
       <workItem from="1738248862232" duration="1685000" />
+      <workItem from="1742786164925" duration="119000" />
     </task>
     <servers />
   </component>

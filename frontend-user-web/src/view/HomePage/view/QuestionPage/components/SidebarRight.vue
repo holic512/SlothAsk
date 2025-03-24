@@ -9,7 +9,7 @@
             class="question-item">
           <div class="question-title">{{ question.title }}</div>
           <div class="view-count">
-            <img src="/public/QuestionPage/hot.png" alt="View" class="el-icon" />
+            <img src="../image/hot.png" alt="View" class="el-icon" />
             {{ question.view_count }}
           </div>
         </li>
@@ -21,7 +21,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useQuestionBankStore } from '../../store/QuestionBank';
+import { useQuestionBankStore } from '@/view/HomePage/view/StudyPage/store/QuestionBank';
 
 const router = useRouter();
 const questionBank = useQuestionBankStore();

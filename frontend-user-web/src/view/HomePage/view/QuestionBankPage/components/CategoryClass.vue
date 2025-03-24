@@ -32,7 +32,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useQuestionBankStore } from '@/view/HomePage/view/store/QuestionBank';
+import { useQuestionBankStore } from '@/view/HomePage/view/StudyPage/store/QuestionBank';
 import { ArrowRight } from '@element-plus/icons-vue';
 
 const router = useRouter();

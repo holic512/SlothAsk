@@ -23,7 +23,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useQuestionBankStore } from '../../store/QuestionBank';
+import { useQuestionBankStore } from '@/view/HomePage/view/StudyPage/store/QuestionBank';
 import { Search } from '@element-plus/icons-vue';
 
 // 获取路由信息和题库的题目
