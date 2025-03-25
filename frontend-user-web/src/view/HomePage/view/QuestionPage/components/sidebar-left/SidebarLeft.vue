@@ -14,7 +14,7 @@
     </div>
 
     <!-- 分页器 -->
-    <div class="pagination-container" v-if="questionList?.totalPages > 1">
+    <div class="pagination-container" v-if="questionList?.totalCount > 1">
       <el-pagination
           v-model:current-page="currentPage"
           :page-size="questionList?.pageSize"
@@ -26,35 +26,33 @@
 
     <!-- 题目列表 -->
     <div class="question-list-container" v-loading="loading">
-      <el-scrollbar>
-        <ul class="question-list" v-if="filteredQuestions.length">
-          <li
-              v-for="question in filteredQuestions"
-              :key="question.virtualId"
-              class="question-item"
-              :class="{ 
+      <ul class="question-list" v-if="filteredQuestions.length">
+        <li
+            v-for="question in filteredQuestions"
+            :key="question.virtualId"
+            class="question-item"
+            :class="{
                 'active': question.current,
                 'easy': question.difficulty === 1,
                 'medium': question.difficulty === 2,
                 'hard': question.difficulty === 3
               }"
-              @click="handleQuestionClick(question.virtualId)"
-          >
-            <div class="question-item-content">
-              <div class="question-title">{{ question.id }}.{{ question.title }}</div>
-              <div class="question-meta">
-                <el-tag
-                    size="small"
-                    :type="getQuestionTypeTag(question.type)"
-                >
-                  {{ getQuestionTypeText(question.type) }}
-                </el-tag>
-              </div>
+            @click="handleQuestionClick(question.virtualId)"
+        >
+          <div class="question-item-content">
+            <div class="question-title">{{ question.id }}.{{ question.title }}</div>
+            <div class="question-meta">
+              <el-tag
+                  size="small"
+                  :type="getQuestionTypeTag(question.type)"
+              >
+                {{ getQuestionTypeText(question.type) }}
+              </el-tag>
             </div>
-          </li>
-        </ul>
-        <el-empty v-else description="暂无题目"/>
-      </el-scrollbar>
+          </div>
+        </li>
+      </ul>
+      <el-empty v-else description="暂无题目"/>
     </div>
   </div>
 </template>
@@ -62,7 +60,6 @@
 <script setup lang="ts">
 import {ref, computed, onMounted, watch} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
-import {Search} from '@element-plus/icons-vue';
 import {ElMessage} from 'element-plus';
 import {QuestionListInterface} from '../../interface/QuestionListInterface';
 import {ApiGetCategoryQuestions} from '../../service/ApiGetCategoryQuestions';
@@ -91,7 +88,7 @@ const filteredQuestions = computed(() => {
 const fetchQuestionList = async (virtualId: string) => {
   try {
     loading.value = true;
-    const response = await ApiGetCategoryQuestions(virtualId, 20);
+    const response = await ApiGetCategoryQuestions(virtualId);
     questionList.value = response.data;
     currentPage.value = questionList.value?.currentPage || 1;
   } catch (error) {
@@ -118,10 +115,16 @@ const handleSearchClear = () => {
 };
 
 // 处理分页变化
-const handlePageChange = (page: number) => {
+const handlePageChange = async (page: number) => {
   currentPage.value = page;
-  // 这里需要调用接口获取新页的数据
-  // TODO: 实现分页加载逻辑
+  loading.value = true;
+  const response = await ApiGetCategoryQuestions(route.params.questionId as string, page);
+  if (response.status === 200) {
+    questionList.value = response.data;
+  }
+
+  loading.value = false;
+
 };
 
 // 获取题目类型标签
@@ -159,17 +162,74 @@ const getQuestionTypeText = (type: number): string => {
 // 监听路由变化
 watch(
     () => route.params.questionId,
-    (newId) => {
+    async (newId) => {
       if (newId) {
-        fetchQuestionList(newId as string);
+        loading.value = true;
+        try {
+          // 先获取数据，不指定页码，使用默认值1或当前页
+          const response = await ApiGetCategoryQuestions(newId as string);
+
+          if (response.status === 200) {
+            // 检查返回的数据中是否包含当前题目所在页码
+            const data = response.data;
+
+
+            // 如果返回了questionPage且与当前页不同，则加载该页数据
+            if (data.questionPage && data.questionPage !== data.currentPage) {
+              // 使用题目所在页码重新加载数据
+              const pageResponse = await ApiGetCategoryQuestions(newId as string, data.questionPage);
+              if (pageResponse.status === 200) {
+                questionList.value = pageResponse.data;
+                currentPage.value = pageResponse.data.currentPage;
+              }
+            } else {
+              // 正常使用返回的数据
+              questionList.value = data;
+              currentPage.value = data.currentPage;
+            }
+          }
+        } catch (error) {
+          ElMessage.error('获取题目列表失败');
+          console.error('获取题目列表失败:', error);
+        } finally {
+          loading.value = false;
+        }
       }
     }
 );
 
 // 组件挂载时获取数据
-onMounted(() => {
+onMounted(async () => {
   if (route.params.questionId) {
-    fetchQuestionList(route.params.questionId as string);
+    loading.value = true;
+    try {
+      // 先获取数据，不指定页码，使用默认值1或当前页
+      const response = await ApiGetCategoryQuestions(route.params.questionId as string);
+
+      if (response.status === 200) {
+        // 检查返回的数据中是否包含当前题目所在页码
+        const data = response.data;
+
+        // 如果返回了questionPage且与当前页不同，则加载该页数据
+        if (data.questionPage && data.questionPage !== data.currentPage) {
+          // 使用题目所在页码重新加载数据
+          const pageResponse = await ApiGetCategoryQuestions(route.params.questionId as string, data.questionPage);
+          if (pageResponse.status === 200) {
+            questionList.value = pageResponse.data;
+            currentPage.value = pageResponse.data.currentPage;
+          }
+        } else {
+          // 正常使用返回的数据
+          questionList.value = data;
+          currentPage.value = data.currentPage;
+        }
+      }
+    } catch (error) {
+      ElMessage.error('获取题目列表失败');
+      console.error('获取题目列表失败:', error);
+    } finally {
+      loading.value = false;
+    }
   }
 });
 </script>
@@ -178,7 +238,7 @@ onMounted(() => {
 .sidebar {
   width: 300px;
   min-width: 300px;
-  height: 95vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   background: white;
@@ -222,11 +282,10 @@ onMounted(() => {
 }
 
 .question-item {
-  padding: 12px 16px;
+  padding: 10px 14px;
   margin: 4px 0;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .question-item:hover {
@@ -293,8 +352,8 @@ onMounted(() => {
     height: 100vh; /* 在移动视图中占满高度 */
     border-radius: 0; /* 移除圆角 */
   }
-  
-  
+
+
   .question-list-container {
     margin: 0;
     padding: 0 8px;

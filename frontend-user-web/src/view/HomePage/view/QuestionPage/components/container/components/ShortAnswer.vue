@@ -2,27 +2,44 @@
   <div class="short-answer-container">
     <!-- 安全渲染HTML内容 -->
     <div class="question-content" v-html="sanitizedContent"></div>
-    
-    <!-- 答题区域 -->
-    <div class="answer-area">
-      <el-input
-        v-model="answer"
-        type="textarea"
-        :rows="8"
-        placeholder="请输入你的答案..."
-        resize="vertical"
-        class="answer-input"
-      />
-      <div class="submit-actions">
-        <el-button type="primary" @click="submitAnswer">提交答案</el-button>
+
+    <!--    &lt;!&ndash; 答题区域 &ndash;&gt;-->
+    <!--    <div class="answer-area">-->
+    <!--      <el-input-->
+    <!--        v-model="answer"-->
+    <!--        type="textarea"-->
+    <!--        :rows="8"-->
+    <!--        placeholder="请输入你的答案..."-->
+    <!--        resize="vertical"-->
+    <!--        class="answer-input"-->
+    <!--      />-->
+    <!--      <div class="submit-actions">-->
+    <!--        <el-button type="primary" @click="submitAnswer">提交答案</el-button>-->
+    <!--      </div>-->
+    <!--    </div>-->
+
+    <!-- 答案区域 -->
+    <div class="question-answer" v-if="showAnswer">
+      <div class="section-header">
+        <h2 class="section-title">答案解析</h2>
+        <el-button type="primary" plain @click="toggleAnswer">隐藏答案</el-button>
       </div>
+      <div class="answer-content">
+        <div class="answer-text" v-html="sanitizedAnswer"></div>
+      </div>
+    </div>
+    <div v-else class="section-header">
+      <el-button type="primary" plain @click="toggleAnswer">查看答案</el-button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed} from 'vue';
+import {ref, computed, watch} from 'vue';
 import DOMPurify from 'dompurify';
+import {
+  ApiGetQuestionAnswerByVirtualId
+} from "@/view/HomePage/view/QuestionPage/service/ApiGetQuestionAnswerByVirtualId";
 
 const props = defineProps({
   question: {
@@ -31,12 +48,28 @@ const props = defineProps({
   }
 });
 
+
 const answer = ref('');
+const showAnswer = ref(false);
+
+// 监控页面 当页面问题发生改变的时候 清空回答 和 关闭答案展示
+watch(() => props.question, (value) => {
+  if (value) {
+    answer.value = '';
+    showAnswer.value = false;
+  }
+})
 
 // 使用DOMPurify净化HTML内容，防止XSS攻击
 const sanitizedContent = computed(() => {
   if (!props.question?.content) return '';
   return DOMPurify.sanitize(props.question.content);
+});
+
+// 使用DOMPurify净化答案HTML内容
+const sanitizedAnswer = computed(() => {
+  if (!props.question?.answer) return '';
+  return DOMPurify.sanitize(props.question.answer);
 });
 
 // 提交答案方法
@@ -45,10 +78,23 @@ const submitAnswer = () => {
   // TODO: 实现提交逻辑
 };
 
+const toggleAnswer = async () => {
+  showAnswer.value = !showAnswer.value;
+
+  if (props.question.answer == null) {
+    const response = await ApiGetQuestionAnswerByVirtualId(props.question.virtualId);
+    if (response.status === 200) {
+      props.question.answer = response.data;
+    }
+  }
+};
+
 // 暴露获取答案的方法供父组件调用
 defineExpose({
   getAnswer: () => answer.value
 });
+
+
 </script>
 
 <style scoped>
@@ -64,30 +110,34 @@ defineExpose({
   color: #333;
   line-height: 1.7;
   font-size: 1.05rem;
-  
+
   /* 段落样式 */
+
   p {
     margin-bottom: 1.2em;
   }
-  
+
   /* 首字母样式 */
+
   p:first-of-type::first-letter {
     font-size: 1.5em;
     font-weight: 500;
     color: #3b82f6;
   }
-  
+
   /* 列表样式 */
+
   ul, ol {
     padding-left: 1.5em;
     margin-bottom: 1.2em;
   }
-  
+
   li {
     margin-bottom: 0.5em;
   }
-  
+
   /* 代码块样式 */
+
   pre, code {
     background-color: #f5f7fa;
     border-radius: 4px;
@@ -95,21 +145,23 @@ defineExpose({
     padding: 0.2em 0.4em;
     font-size: 0.9em;
   }
-  
+
   pre {
     padding: 1em;
     overflow-x: auto;
     margin: 1.2em 0;
   }
-  
+
   /* 图片样式 */
+
   img {
     max-width: 100%;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
-  
+
   /* 引用样式 */
+
   blockquote {
     border-left: 4px solid #3b82f6;
     padding-left: 1em;
@@ -117,8 +169,9 @@ defineExpose({
     color: #555;
     font-style: italic;
   }
-  
+
   /* 标题样式 */
+
   h1, h2, h3, h4 {
     margin-top: 1.5em;
     margin-bottom: 0.8em;
@@ -161,9 +214,41 @@ defineExpose({
   .short-answer-container {
     gap: 1.5rem;
   }
-  
+
   :deep(.question-content) {
     font-size: 1rem;
   }
 }
+
+.question-answer {
+  margin-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 2rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.answer-content {
+  background-color: #f9fafb;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.answer-text {
+  color: #374151;
+  line-height: 1.6;
+}
+
 </style>

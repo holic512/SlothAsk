@@ -34,18 +34,6 @@
       <!--  答题页面  -->
       <component :is="questionComponent" :question="question"/>
     </div>
-
-    <div class="question-answer">
-      <div class="section-header">
-        <h2 class="section-title">答案解析</h2>
-        <el-button type="primary" plain>查看答案</el-button>
-      </div>
-      <div class="answer-content">
-        <div class="answer-text">
-          {{ question.answer }}
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -205,7 +193,6 @@ const hasMoreTags = computed(() => {
 }
 
 
-.question-answer,
 .question-content,
 .question-detail {
   background: white;

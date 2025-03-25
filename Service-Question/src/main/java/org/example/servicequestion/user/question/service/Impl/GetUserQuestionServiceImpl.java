@@ -245,7 +245,10 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
     }
 
     @Override
-    public QuestionListDTO getCategoryQuestionsByVirtualId(String virtualId, int pageSize) {
+    public QuestionListDTO getCategoryQuestionsByVirtualId(String virtualId, int page) {
+        // 固定每页显示20条记录
+        final int pageSize = 20;
+
         // 缓存键
         final String CATEGORY_QUESTIONS_CACHE_KEY = RedisConfig.getKey() + "Question:CategoryQuestions:";
         final String CATEGORY_COUNT_CACHE_KEY = RedisConfig.getKey() + "Category:Count:";
@@ -270,7 +273,7 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
         }
 
         // 2. 尝试从缓存获取完整的结果
-        String resultCacheKey = CATEGORY_QUESTIONS_CACHE_KEY + originalId + ":" + pageSize;
+        String resultCacheKey = CATEGORY_QUESTIONS_CACHE_KEY + originalId + ":" + page + ":" + pageSize;
         Object cachedResult = redisTemplate.opsForValue().get(resultCacheKey);
 
         if (cachedResult != null) {
@@ -345,17 +348,27 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
             redisTemplate.opsForValue().set(indexKey, currentIndex, 1, TimeUnit.DAYS);
         }
 
-        // 8. 计算当前页码（确保当前题目在当前页中）
-        int currentPage = (currentIndex / pageSize) + 1;
+        // 8. 计算当前题目所在页码
+        int questionPage = (currentIndex / pageSize) + 1;
 
-        // 9. 计算总页数
+        // 9. 如果请求的是0或负数页码，设为1
+        if (page <= 0) {
+            page = 1;
+        }
+
+        // 10. 计算总页数
         int totalPages = (totalCount + pageSize - 1) / pageSize;
 
-        // 10. 计算当前页的起始索引
-        int startIndex = (currentPage - 1) * pageSize;
+        // 11. 如果请求的页码超过总页数，则设为最后一页
+        if (page > totalPages && totalPages > 0) {
+            page = totalPages;
+        }
 
-        // 11. 尝试从缓存获取当前页的题目列表
-        String pageKey = CATEGORY_QUESTIONS_CACHE_KEY + categoryId + ":" + currentPage + ":" + pageSize;
+        // 12. 计算当前页的起始索引
+        int startIndex = (page - 1) * pageSize;
+
+        // 13. 尝试从缓存获取当前页的题目列表
+        String pageKey = CATEGORY_QUESTIONS_CACHE_KEY + categoryId + ":" + page + ":" + pageSize;
         List<Question> pageQuestions = null;
         Object cachedPageQuestions = redisTemplate.opsForValue().get(pageKey);
 
@@ -388,7 +401,7 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
         if (pageQuestions == null) {
             // 从数据库获取当前页的题目列表，包含标签字段
             QueryWrapper<Question> pageQueryWrapper = new QueryWrapper<>();
-            pageQueryWrapper.select( "id","title", "type", "difficulty", "tag_category_ids")
+            pageQueryWrapper.select("id", "title", "type", "difficulty", "tag_category_ids")
                     .eq("category_id", categoryId)
                     .orderByAsc("id")
                     .last("LIMIT " + startIndex + ", " + pageSize);
@@ -399,14 +412,13 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
             redisTemplate.opsForValue().set(pageKey, pageQuestions, 30, TimeUnit.MINUTES);
         }
 
-
-        // 12. 转换为DTO列表 (使用安全的方式处理可能的Map对象)
+        // 14. 转换为DTO列表 (使用安全的方式处理可能的Map对象)
         Long finalOriginalId = originalId;
         List<QuestionBriefDTO> questionDTOs = new ArrayList<>(pageQuestions.size());
 
         // 记录当前页面中的序号，从1开始
         int sequentialIndex = startIndex + 1;
-        
+
         for (Object questionObj : pageQuestions) {
             try {
                 Question q;
@@ -423,7 +435,7 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
 
                 QuestionBriefDTO dto = new QuestionBriefDTO();
                 // 直接将递进的序号设置为id
-                dto.setId((long)sequentialIndex++);
+                dto.setId((long) sequentialIndex++);
 
                 // 获取虚拟ID (使用缓存)
                 String qVirtualId = (String) redisTemplate.opsForValue().get(VidKey + q.getId());
@@ -447,18 +459,21 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
             }
         }
 
-        // 13. 构建结果
+        // 15. 构建结果
         QuestionListDTO result = new QuestionListDTO();
         result.setCurrentIndex(currentIndex + 1); // 转为从1开始计数
         result.setTotalCount(totalCount);
-        result.setCurrentPage(currentPage);
+        result.setCurrentPage(page);
         result.setTotalPages(totalPages);
         result.setPageSize(pageSize);
         result.setCategoryId(categoryId);
         result.setCategoryName(categoryName);
         result.setQuestions(questionDTOs);
+        
+        // 添加当前题目所在页码信息，方便前端判断
+        result.setQuestionPage(questionPage);
 
-        // 14. 缓存最终结果
+        // 16. 缓存最终结果
         redisTemplate.opsForValue().set(resultCacheKey, result, 15, TimeUnit.MINUTES);
 
         return result;

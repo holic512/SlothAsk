@@ -32,9 +32,9 @@ public interface GetUserQuestionService {
      * 根据虚拟ID获取同分类下的题目列表，并确保当前题目在返回的列表中
      * 
      * @param virtualId 虚拟题目ID
-     * @param pageSize 每页显示的题目数量
+     * @param page 请求的页码（从1开始）
      * @return 题目列表DTO，包含当前页题目和分页信息
      */
-    QuestionListDTO getCategoryQuestionsByVirtualId(String virtualId, int pageSize);
+    QuestionListDTO getCategoryQuestionsByVirtualId(String virtualId, int page);
 
 }

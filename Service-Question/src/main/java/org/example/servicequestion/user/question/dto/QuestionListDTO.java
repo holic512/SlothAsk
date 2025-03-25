@@ -53,4 +53,14 @@ public class QuestionListDTO {
      * 题目列表（简化版，不包含完整内容和答案）
      */
     private List<QuestionBriefDTO> questions;
+    
+    private Integer questionPage; // 当前题目所在的页码
+    
+    public Integer getQuestionPage() {
+        return questionPage;
+    }
+    
+    public void setQuestionPage(Integer questionPage) {
+        this.questionPage = questionPage;
+    }
 } 

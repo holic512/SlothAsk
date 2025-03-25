@@ -10,14 +10,15 @@
 package org.example.servicequestion.user.question.controller;
 
 import org.example.servicequestion.config.ApiResponse.ApiResponse;
-import org.example.servicequestion.entity.Question;
 import org.example.servicequestion.user.question.dto.QuestionDTO;
 import org.example.servicequestion.user.question.dto.QuestionListDTO;
 import org.example.servicequestion.user.question.service.GetUserQuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/user/question")
@@ -53,7 +54,7 @@ public class GetUserQuestionController {
      * @param virtualId 虚拟题目ID
      * @return 包含题目答案的API响应
      */
-    @GetMapping("/question/{virtualId}/answer")
+    @GetMapping("/question/answer/{virtualId}")
     public ApiResponse getQuestionAnswerByVirtualId(
             @PathVariable String virtualId) {
         String answer = getUserQuestionService.getQuestionAnswerByVirtualId(virtualId);
@@ -67,15 +68,15 @@ public class GetUserQuestionController {
      * 根据虚拟ID获取同分类下的题目列表，并确保当前题目在返回的列表中
      *
      * @param virtualId 虚拟题目ID
-     * @param pageSize 每页显示的题目数量，默认为10
+     * @param page 请求的页码，默认为1
      * @return 包含题目列表的API响应
      */
     @GetMapping("/category-questions/{virtualId}")
     public ApiResponse getCategoryQuestionsByVirtualId(
             @PathVariable String virtualId,
-            @RequestParam(defaultValue = "10") int pageSize) {
+            @RequestParam(defaultValue = "1") int page) {
         
-        QuestionListDTO result = getUserQuestionService.getCategoryQuestionsByVirtualId(virtualId, pageSize);
+        QuestionListDTO result = getUserQuestionService.getCategoryQuestionsByVirtualId(virtualId, page);
         
         if (result == null) {
             return new ApiResponse(404, "题目不存在", null);
