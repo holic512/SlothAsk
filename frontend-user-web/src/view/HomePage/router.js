@@ -1,121 +1,101 @@
-import StudyPage from './view/StudyPage/index.vue'
-import HomePage from './index.vue'
-import ContestPage from './view/ContestPage/index.vue'
-import DiscussionPage from './view/DiscussionPage/index.vue'
-import InterviewPage from './view/InterviewPage/index.vue'
-import QuestionBankPage from './view/QuestionBankPage/index.vue'
-import CategoryDetail from './view/QuestionBankPage/components/CategoryDetail.vue'
-import QuestionPage from './view/QuestionPage/index.vue'
-
-import AccountPage from './view/AccountPage/index.vue'
-import AccountProfile from '@/view/HomePage/view/AccountPage/components/Profile/Profile.vue'
-import AccountProblemList from '@/view/HomePage/view/AccountPage/components/ProblemList.vue'
-import AccountFavorites from '@/view/HomePage/view/AccountPage/components/Favorites.vue'
-import AccountWrongQuestions from '@/view/HomePage/view/AccountPage/components/WrongQuestions.vue'
-import AccountProgress from '@/view/HomePage/view/AccountPage/components/Progress.vue'
-import AccountHistory from '@/view/HomePage/view/AccountPage/components/History.vue'
-import AccountMyBank from '@/view/HomePage/view/AccountPage/components/MyBank.vue'
-import AccountProjects from '@/view/HomePage/view/AccountPage/components/Projects.vue'
-import AccountSettings from '@/view/HomePage/view/AccountPage/components/Settings.vue'
-import AccountAppearance from '@/view/HomePage/view/AccountPage/components/Appearance.vue'
-
 export default [
     {
         path: '/',
         name: 'HomePage',
-        component: HomePage,
+        component: () => import(/* webpackChunkName: "home" */ './index.vue'),
+        redirect: '/study', // 避免默认加载所有子页面
         children: [
             {
-                path: '/',
+                path: '/study',
                 name: 'StudyPage',
-                component: StudyPage
+                component: () => import(/* webpackChunkName: "study" */ './view/StudyPage/index.vue')
             },
             {
                 path: '/questionbank',
                 name: 'QuestionBankPage',
-                component: QuestionBankPage,
+                component: () => import(/* webpackChunkName: "questionbank" */ './view/QuestionBankPage/index.vue'),
             },
             {
                 path: '/questionbank/category/:id',
                 name: 'CategoryDetail',
-                component: CategoryDetail,
+                component: () => import(/* webpackChunkName: "category" */ './view/QuestionBankPage/components/CategoryDetail.vue'),
                 props: true
             },
             {
-                path: '/questionbank/question/:questionId',
+                path: '/questionpage/question/:questionId',
                 name: 'QuestionPage',
-                component: QuestionPage,
+                component: () => import(/* webpackChunkName: "question" */ './view/QuestionPage/index.vue'),
                 props: true
             },
             {
                 path: '/contest',
                 name: 'ContestPage',
-                component: ContestPage
+                component: () => import(/* webpackChunkName: "contest" */ './view/ContestPage/index.vue')
             },
             {
                 path: '/discussion',
                 name: 'DiscussionPage',
-                component: DiscussionPage
+                component: () => import(/* webpackChunkName: "discussion" */ './view/DiscussionPage/index.vue')
             },
             {
                 path: '/interview',
                 name: 'InterviewPage',
-                component: InterviewPage
+                component: () => import(/* webpackChunkName: "interview" */ './view/InterviewPage/index.vue')
             },
             {
                 path: '/account',
                 name: 'AccountPage',
-                component: AccountPage,
+                component: () => import(/* webpackChunkName: "account" */ './view/AccountPage/index.vue'),
                 children: [
                     {
                         path: 'profile',
                         name: 'AccountProfile',
-                        component: AccountProfile
+                        component: () => import(/* webpackChunkName: "account-profile" */ '@/view/HomePage/view/AccountPage/components/Profile/Profile.vue')
                     },
                     {
                         path: 'problem-list',
                         name: 'AccountProblemList',
-                        component: AccountProblemList
+                        component: () => import(/* webpackChunkName: "account-problem-list" */ '@/view/HomePage/view/AccountPage/components/ProblemList.vue')
                     },
                     {
                         path: 'favorites',
                         name: 'AccountFavorites',
-                        component: AccountFavorites
+                        component: () => import(/* webpackChunkName: "account-favorites" */ '@/view/HomePage/view/AccountPage/components/Favorites.vue')
                     },
                     {
                         path: 'wrong-questions',
                         name: 'AccountWrongQuestions',
-                        component: AccountWrongQuestions
+                        component: () => import(/* webpackChunkName: "account-wrong-questions" */ '@/view/HomePage/view/AccountPage/components/WrongQuestions.vue')
                     },
                     {
                         path: 'progress',
                         name: 'AccountProgress',
-                        component: AccountProgress
+                        component: () => import(/* webpackChunkName: "account-progress" */ '@/view/HomePage/view/AccountPage/components/Progress.vue')
                     },
                     {
                         path: 'history',
                         name: 'AccountHistory',
-                        component: AccountHistory
+                        component: () => import(/* webpackChunkName: "account-history" */ '@/view/HomePage/view/AccountPage/components/History.vue')
                     },
                     {
                         path: 'my-bank',
                         name: 'AccountMyBank',
-                        component: AccountMyBank
+                        component: () => import(/* webpackChunkName: "account-my-bank" */ '@/view/HomePage/view/AccountPage/components/MyBank.vue')
                     },
                     {
                         path: 'projects',
                         name: 'AccountProjects',
-                        component: AccountProjects
+                        component: () => import(/* webpackChunkName: "account-projects" */ '@/view/HomePage/view/AccountPage/components/Projects.vue')
                     },
                     {
                         path: 'settings',
                         name: 'AccountSettings',
-                        component: AccountSettings
+                        component: () => import(/* webpackChunkName: "account-settings" */ '@/view/HomePage/view/AccountPage/components/Settings.vue')
                     },
                     {
                         path: 'appearance',
                         name: 'AccountAppearance',
-                        component: AccountAppearance
+                        component: () => import(/* webpackChunkName: "account-appearance" */ '@/view/HomePage/view/AccountPage/components/Appearance.vue')
                     }
                 ]
             }

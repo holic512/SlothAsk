@@ -12,8 +12,8 @@
       >
         <el-table-column prop="title" label="标题" min-width="280" :show-overflow-tooltip="true">
           <template #default="scope">
-            <el-link>
-              <span class="question-index">{{ scope.$index + 1 }}. </span>
+            <el-link @click="handleQuestionClick(scope.row.virtualId)">
+              <span class="question-index">{{ scope.row.id }}. </span>
               {{ scope.row.title }}
             </el-link>
           </template>

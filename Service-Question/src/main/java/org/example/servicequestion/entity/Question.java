@@ -50,7 +50,7 @@ public class Question {
     private Integer type = 1;
 
     // JSON 字段需要类型处理器
-    @TableField(value = "tag_category_id", typeHandler = JacksonTypeHandler.class)
+    @TableField(value = "tag_category_ids", typeHandler = JacksonTypeHandler.class)
     private List<Integer> tagCategoryIds;
 
     @TableField("status")
@@ -64,4 +64,11 @@ public class Question {
 
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
+
+
+    /**
+     * 虚拟ID，不存在于数据库中
+     */
+    @TableField(exist = false)
+    private String virtualId;
 }

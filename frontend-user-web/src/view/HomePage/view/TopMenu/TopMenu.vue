@@ -137,6 +137,8 @@ const getAvatarText = (nickname) => {
             width="300"
             :hide-after="0"
         >
+
+          <!--  用户信息工具  -->
           <UserUtil :userInfo="userInfo"/>
 
           <!-- 头像作为 reference -->

@@ -46,4 +46,13 @@ public class UuidUtil {
         }
         return sb.toString();
     }
+
+    /**
+     * 生成 1 到 Integer.MAX_VALUE 之间的随机整数
+     *
+     * @return 随机整数
+     */
+    public static int generateRandomInt() {
+        return 1 + random.nextInt(Integer.MAX_VALUE - 1);
+    }
 }

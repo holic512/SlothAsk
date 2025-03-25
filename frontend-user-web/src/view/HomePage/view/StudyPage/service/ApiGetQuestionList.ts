@@ -3,7 +3,7 @@ import {QuestionFilter} from "@/view/HomePage/view/StudyPage/store/QuestionBank"
 
 export const apiGetQuestionList = async (pagination: QuestionFilter) => {
     const response = await axios.get(
-        "service-question/user/category/questionList",
+        "service-question/user/study/questionList",
         {
             params: {
                 searchText: pagination.searchText,
