@@ -13,7 +13,7 @@ onMounted(() => {
 <template>
   <div class="page-container">
     <div class="content-section">
-      <!--  左边  -->
+      <!--  左边  题库推荐 和 列表 -->
       <div class="main-content">
         <div class="category-section">
           <Category/>

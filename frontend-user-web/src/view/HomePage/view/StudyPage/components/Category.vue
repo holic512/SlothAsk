@@ -1,3 +1,4 @@
+<!--题库推荐页面-->
 <script setup lang="ts">
 import {ref, onMounted} from 'vue';
 import {useRouter} from 'vue-router';
@@ -115,6 +116,7 @@ const handleCategoryClick = (categoryId: number): void => {
   color: #1a1a1a;
   position: relative;
   padding-left: 16px;
+  letter-spacing: 1px;
 }
 
 .title::before {

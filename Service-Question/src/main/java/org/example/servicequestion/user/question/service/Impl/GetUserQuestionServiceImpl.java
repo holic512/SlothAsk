@@ -247,7 +247,7 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
     @Override
     public QuestionListDTO getCategoryQuestionsByVirtualId(String virtualId, int page) {
         // 固定每页显示20条记录
-        final int pageSize = 20;
+        final int pageSize = 10;
 
         // 缓存键
         final String CATEGORY_QUESTIONS_CACHE_KEY = RedisConfig.getKey() + "Question:CategoryQuestions:";
