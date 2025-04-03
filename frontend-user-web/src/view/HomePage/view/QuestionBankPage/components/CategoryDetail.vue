@@ -77,7 +77,7 @@ watch(() => category.value?.name, (newTitle) => {
   justify-content: space-between;
   align-items: center;
   padding: 28px 32px;
-  background: linear-gradient(to right, #ffffff, #f7f9fc);
+  background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   margin-bottom: 28px;
@@ -97,9 +97,8 @@ watch(() => category.value?.name, (newTitle) => {
 }
 
 .category-icon {
-  width: 80px;
-  height: 80px;
-  padding: 16px;
+  width: 100px;
+  height: 100px;
   background: linear-gradient(135deg, #f6f8fc, #eef2f7);
   border-radius: 20px;
   object-fit: contain;
