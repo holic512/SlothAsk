@@ -50,7 +50,7 @@ export default [
                     {
                         path: 'profile',
                         name: 'AccountProfile',
-                        component: () => import(/* webpackChunkName: "account-profile" */ '@/view/HomePage/view/AccountPage/components/Profile/Profile.vue')
+                        component: () => import('@/view/HomePage/view/AccountPage/components/Profile/index.vue')
                     },
                     {
                         path: 'problem-list',

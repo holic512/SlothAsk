@@ -8,7 +8,19 @@ import {apiDeleteAvatar} from "@/view/HomePage/view/AccountPage/components/Profi
 import {getUserProfile} from "@/view/HomePage/view/AccountPage/components/Profile/service/ApiGetUserProfile";
 import {updateUserProfile} from "@/view/HomePage/view/AccountPage/components/Profile/service/ApiUpdateUserProfile";
 
-const userInfo = ref({
+
+interface UserProfileData {
+  avatar: string;
+  nickname: string;
+  gender: number;
+  age: number | null;
+  bio: string | null;
+  birthday: string | null;
+  location: string | null;
+  occupation: number | null;
+}
+
+const userInfo = ref<UserProfileData>({
   avatar: '',
   nickname: '',
   gender: 0, // 性别：男性、女性、保密
@@ -111,8 +123,10 @@ const provinces = [
 
 onMounted(async () => {
   const response = await getUserProfile();
+  if(response.status === 200){
+    userInfo.value = response.data as UserProfileData;
+  }
 
-  userInfo.value = response.data;
 
 })
 </script>
