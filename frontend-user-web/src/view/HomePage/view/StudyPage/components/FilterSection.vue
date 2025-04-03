@@ -22,6 +22,16 @@ onMounted(async () => {
     questionBank.FilterTagList = tagResult.data
   }
 })
+// 恢复筛选状态
+onMounted(() => {
+  searchText.value = questionBank.pagination.searchText || '';
+  filterCategory.value = questionBank.pagination.filterCategory ?? 0;
+  filterTag.value = new Set(questionBank.pagination.filterTags || []);
+  filterType.value = questionBank.pagination.filterType ?? 0;
+  filterDifficulty.value = questionBank.pagination.filterDifficulty ?? 0;
+});
+
+
 
 // 过滤搜索的变量 - 直接从 store 获取
 const searchText = ref('');

@@ -2,7 +2,7 @@
   <div class="category-detail">
     <div class="category-header">
       <div class="category-info">
-        <img class="category-icon" :src="category?.avatar_url" alt="Category Icon">
+        <el-image class="category-icon" :src="category?.avatarUrl"/>
         <div class="title-section">
           <h2 class="category-name">{{ category?.name }}</h2>
           <p class="category-description">{{ category?.description }}</p>
@@ -17,39 +17,44 @@
     </div>
 
     <div class="question-list">
-      <Question :selected-category="categoryId" :show-category-select="false" />
+      <QuestionList :selected-category="categoryId" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import QuestionList from "@/view/HomePage/view/QuestionBankPage/components/QuestionList.vue";
+import { useCategoryStore} from "@/view/HomePage/view/QuestionBankPage/store/CategoryStore";
+import { useQuestionStore } from "@/view/HomePage/view/QuestionBankPage/store/QuestionStore";
 import { computed, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useQuestionBankStore } from '@/view/HomePage/view/StudyPage/store/QuestionBank';
-import Question from '../../StudyPage/components/Question.vue';
 import { setTitle } from "@/utils/title";
 
 const route = useRoute();
-const questionBank = useQuestionBankStore();
+const questionStore = useQuestionStore();
+const categoryStore = useCategoryStore();
 
 // 获取分类 ID
-const categoryId = computed(() => Number(route.params.id));
-
+const categoryId = computed<number>(() => Number(route.params.id));
 // 获取分类详情
-const category = computed(() => {
-  return questionBank.categories.find(c => c.id === categoryId.value);
-});
+const category = computed(() => categoryStore.category);
+// 获取题目数量
+const questionCount = computed(() => questionStore.questionCount);
 
-// 获取题目数量，依赖 categoryId
-const questionCount = computed(() => {
-  return questionBank.getQuestionCountByCategory(categoryId.value);
-});
+// 在组件挂载时获取题目数量
+onMounted(async () => {
+  // 获取分类详情和题目数量
+  await categoryStore.fetchCategoryById(categoryId.value);
+  await questionStore.fetchQuestionCount(categoryId.value);
 
-// 设置页面标题
-onMounted(() => {
   if (category.value) {
-    setTitle(`${category.value?.name}`);
+    setTitle(`${category.value.name}`);
   }
+});
+
+// 当分类ID变化时重新获取题目数量
+watch(categoryId, async (newId: number) => {
+  await questionStore.fetchQuestionCount(newId);
 });
 
 // 当分类名称变化时更新标题
@@ -71,26 +76,40 @@ watch(() => category.value?.name, (newTitle) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 32px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-  margin-bottom: 24px;
+  padding: 28px 32px;
+  background: linear-gradient(to right, #ffffff, #f7f9fc);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  margin-bottom: 28px;
+  transition: all 0.3s ease;
+  border: 1px solid #eaeef5;
+}
+
+.category-header:hover {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }
 
 .category-info {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 28px;
 }
 
 .category-icon {
-  font-size: 64px;
-  padding: 24px;
-  background: #f8f9fa;
-  border-radius: 16px;
-  line-height: 1;
-  cursor: default;
+  width: 80px;
+  height: 80px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f6f8fc, #eef2f7);
+  border-radius: 20px;
+  object-fit: contain;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid #eaeef5;
+  transition: all 0.3s ease;
+}
+
+.category-icon:hover {
+  transform: scale(1.05);
 }
 
 .title-section {
@@ -98,44 +117,101 @@ watch(() => category.value?.name, (newTitle) => {
 }
 
 .category-name {
-  font-size: 32px;
-  font-weight: 600;
+  font-size: 30px;
+  font-weight: 700;
   margin: 0 0 12px 0;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
 }
 
 .category-description {
-  color: #666;
+  color: #5a6a85;
   margin: 0;
   font-size: 16px;
   line-height: 1.6;
+  max-width: 80%;
 }
 
 .category-stats {
   display: flex;
   gap: 32px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #eaeef5;
 }
 
 .stat-item {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .stat-value {
   display: block;
-  font-size: 32px;
-  font-weight: 600;
-  color: #1a1a1a;
+  font-size: 34px;
+  font-weight: 700;
+  color: black;
+  margin-bottom: 4px;
 }
 
 .stat-label {
-  font-size: 16px;
-  color: #666;
-  margin-top: 4px;
+  font-size: 14px;
+  color: #5a6a85;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .question-list {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-  padding: 24px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  padding: 28px;
+  border: 1px solid #eaeef5;
+  transition: all 0.3s ease;
+}
+
+.question-list:hover {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+}
+
+
+@media (max-width: 768px) {
+  .category-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 24px;
+  }
+
+  .category-stats {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .category-name {
+    font-size: 26px;
+  }
+
+  .category-description {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .category-icon {
+    width: 64px;
+    height: 64px;
+    padding: 12px;
+  }
 }
 </style>
