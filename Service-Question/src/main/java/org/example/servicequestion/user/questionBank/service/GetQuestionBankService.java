@@ -3,7 +3,6 @@ package org.example.servicequestion.user.questionBank.service;
 import org.example.servicequestion.entity.ProjectCategory;
 import org.example.servicequestion.entity.Question;
 import org.example.servicequestion.entity.QuestionCategory;
-import org.example.servicequestion.user.question.dto.QuestionDTO;
 
 import java.util.List;
 

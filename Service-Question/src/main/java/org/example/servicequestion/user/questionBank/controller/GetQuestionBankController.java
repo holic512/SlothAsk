@@ -2,7 +2,6 @@ package org.example.servicequestion.user.questionBank.controller;
 
 
 
-import jakarta.annotation.Resource;
 import org.example.servicequestion.config.ApiResponse.ApiResponse;
 import org.example.servicequestion.user.questionBank.service.GetQuestionBankService;
 import org.springframework.beans.factory.annotation.Autowired;

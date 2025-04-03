@@ -5,7 +5,6 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.example.servicequestion.entity.Question;
-import org.example.servicequestion.entity.QuestionCategory;
 
 import java.util.List;
 
@@ -21,8 +20,6 @@ public interface QuestionBankQuestionMapper extends BaseMapper<Question> {
     @Select("SELECT * FROM question WHERE category_id = #{categoryId} AND status = 1")
     List<Question> findQuestionsByCategoryId(@Param("categoryId") Long categoryId);
 
-    // 查询单个题目（添加此方法）
-    @Select("SELECT * FROM question WHERE id = #{id} AND status = 1")
-    Question findQuestionById(@Param("id") Long id);
+
 }
 
