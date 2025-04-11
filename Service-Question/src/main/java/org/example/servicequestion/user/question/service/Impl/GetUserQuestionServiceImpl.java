@@ -8,16 +8,13 @@
 package org.example.servicequestion.user.question.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.servicequestion.config.Redis.RedisConfig;
 import org.example.servicequestion.entity.Question;
-import org.example.servicequestion.user.question.dto.QuestionBriefDTO;
-import org.example.servicequestion.user.question.dto.QuestionDTO;
-import org.example.servicequestion.user.question.dto.QuestionListDTO;
-import org.example.servicequestion.user.question.dto.TagDTO;
+import org.example.servicequestion.entity.QuestionComment;
+import org.example.servicequestion.user.question.dto.*;
 import org.example.servicequestion.user.question.mapper.UserQuestionCategoryMapper;
+import org.example.servicequestion.user.question.mapper.UserQuestionCommentMapper;
 import org.example.servicequestion.user.question.mapper.UserQuestionQuestionMapper;
 import org.example.servicequestion.user.question.mapper.UserQuestionTagMapper;
 import org.example.servicequestion.user.question.service.GetUserQuestionService;
@@ -28,7 +25,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 public class GetUserQuestionServiceImpl implements GetUserQuestionService {
@@ -45,37 +41,50 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
     private final UserQuestionQuestionMapper userQuestionQuestionMapper;
     private final UserQuestionCategoryMapper userQuestionCategoryMapper;
     private final UserQuestionTagMapper userQuestionTagMapper;
+    private final UserQuestionCommentMapper userQuestionCommentMapper;
 
     @Autowired
     public GetUserQuestionServiceImpl(
             RedisTemplate<String, Object> redisTemplate,
             UserQuestionQuestionMapper userQuestionQuestionMapper,
             UserQuestionCategoryMapper userQuestionCategoryMapper,
-            UserQuestionTagMapper userQuestionTagMapper) {
+            UserQuestionTagMapper userQuestionTagMapper,
+            UserQuestionCommentMapper userQuestionCommentMapper) {
         this.redisTemplate = redisTemplate;
         this.userQuestionQuestionMapper = userQuestionQuestionMapper;
         this.userQuestionCategoryMapper = userQuestionCategoryMapper;
         this.userQuestionTagMapper = userQuestionTagMapper;
+        this.userQuestionCommentMapper = userQuestionCommentMapper;
     }
 
-    @Override
-    public QuestionDTO getQuestionByVirtualId(String virtualId) {
+    // 根据VirtualId获取原始ID
+    public Long getOriginalIdFromVirtualId(String virtualId) {
         // 1.  先从 Redis 获取原始 ID，如果 Redis 里有，尝试解析
         String originalIdStr = (String) redisTemplate.opsForValue().get(VidKey + virtualId);
         Long originalId = null;
 
-        if (originalIdStr != null && originalIdStr.matches("\\d+")) { // 确保是数字格式
+        // 如果 Redis 没有，则解析 virtualId
+        if (originalIdStr != null && originalIdStr.matches("\\d+")) {
             originalId = Long.parseLong(originalIdStr);
         }
 
-        // 如果 Redis 没有，则解析 virtualId
         if (originalId == null) {
             originalId = IdEncryptor.decryptId(virtualId);
-
-            // 解析成功才存入 Redis
-            redisTemplate.opsForValue().set(VidKey + virtualId, String.valueOf(originalId), 1, TimeUnit.DAYS);
-            redisTemplate.opsForValue().set(VidKey + originalId, virtualId, 1, TimeUnit.DAYS);
+            if (originalId != null) {
+                // 解析成功才存入 Redis
+                redisTemplate.opsForValue().set(VidKey + virtualId, String.valueOf(originalId), 1, TimeUnit.DAYS);
+                redisTemplate.opsForValue().set(VidKey + originalId, virtualId, 1, TimeUnit.DAYS);
+            }
         }
+
+        return originalId;
+    }
+
+
+    @Override
+    public QuestionDTO getQuestionByVirtualId(String virtualId) {
+        // 1.  解析虚拟ID
+        Long originalId = getOriginalIdFromVirtualId(virtualId);
 
         // 2.  尝试从缓存获取题目信息
         String questionCacheKey = QUESTION_CACHE_KEY + originalId;
@@ -132,22 +141,8 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
 
     @Override
     public String getQuestionAnswerByVirtualId(String virtualId) {
-        // 先从 Redis 获取原始 ID，如果 Redis 里有，尝试解析
-        String originalIdStr = (String) redisTemplate.opsForValue().get(VidKey + virtualId);
-        Long originalId = null;
-
-        if (originalIdStr != null && originalIdStr.matches("\\d+")) { // 确保是数字格式
-            originalId = Long.parseLong(originalIdStr);
-        }
-
-        // 如果 Redis 没有，则解析 virtualId
-        if (originalId == null) {
-            originalId = IdEncryptor.decryptId(virtualId);
-
-            // 解析成功才存入 Redis
-            redisTemplate.opsForValue().set(VidKey + virtualId, String.valueOf(originalId), 1, TimeUnit.DAYS);
-            redisTemplate.opsForValue().set(VidKey + originalId, virtualId, 1, TimeUnit.DAYS);
-        }
+        // 解析虚拟ID
+        long originalId = getOriginalIdFromVirtualId(virtualId);
 
         // 尝试从缓存获取答案
         String answerCacheKey = ANSWER_CACHE_KEY + originalId;
@@ -254,23 +249,8 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
         final String CATEGORY_COUNT_CACHE_KEY = RedisConfig.getKey() + "Category:Count:";
         final String QUESTION_INDEX_CACHE_KEY = RedisConfig.getKey() + "Question:CategoryIndex:";
 
-        // 1. 根据虚拟ID获取真实ID (使用已有的缓存逻辑)
-        String originalIdStr = (String) redisTemplate.opsForValue().get(VidKey + virtualId);
-        Long originalId;
-
-        if (originalIdStr != null && originalIdStr.matches("\\d+")) {
-            originalId = Long.parseLong(originalIdStr);
-        } else {
-            originalId = IdEncryptor.decryptId(virtualId);
-
-            if (originalId != null) {
-                // 缓存虚拟ID和真实ID的映射关系
-                redisTemplate.opsForValue().set(VidKey + virtualId, String.valueOf(originalId), 1, TimeUnit.DAYS);
-                redisTemplate.opsForValue().set(VidKey + originalId, virtualId, 1, TimeUnit.DAYS);
-            } else {
-                return null; // 无效的虚拟ID
-            }
-        }
+        // 1.解析虚拟ID
+        long originalId = getOriginalIdFromVirtualId(virtualId);
 
         // 2. 尝试从缓存获取完整的结果
         String resultCacheKey = CATEGORY_QUESTIONS_CACHE_KEY + originalId + ":" + page + ":" + pageSize;
@@ -469,7 +449,7 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
         result.setCategoryId(categoryId);
         result.setCategoryName(categoryName);
         result.setQuestions(questionDTOs);
-        
+
         // 添加当前题目所在页码信息，方便前端判断
         result.setQuestionPage(questionPage);
 
@@ -478,4 +458,38 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
 
         return result;
     }
+
+
+    @Override
+    public List<CommentGetDTO> getCommentsByVirtualId(String virtualId) {
+        // 1.解析虚拟ID
+        long originalId = getOriginalIdFromVirtualId(virtualId);
+
+        List<CommentGetDTO> topLevel = userQuestionCommentMapper.getTopLevelComments(originalId);
+        for (CommentGetDTO comment : topLevel) {
+            List<CommentGetDTO> replies = userQuestionCommentMapper.getReplies(comment.getId());
+            comment.setReplies(replies);
+        }
+        return topLevel;
+    }
+
+    @Override
+    public void addComment(String questionId,Long userId,String content,Long parentId) {
+        long originalId = getOriginalIdFromVirtualId(questionId);
+        QuestionComment comment = new QuestionComment();
+        comment.setQuestionId(originalId);
+        comment.setUserId(userId);
+        comment.setContent(content);
+        comment.setParentId(parentId);
+        comment.setStatus(1);
+        comment.setLikeCount(0);
+        userQuestionCommentMapper.insertComment(comment);
+    }
+
+    @Override
+    public void updateLikeCount(Long commentId) {
+        userQuestionCommentMapper.updateLikeCount(commentId);
+    }
+
+
 }

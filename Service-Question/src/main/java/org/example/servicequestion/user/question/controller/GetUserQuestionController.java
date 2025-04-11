@@ -10,15 +10,15 @@
 package org.example.servicequestion.user.question.controller;
 
 import org.example.servicequestion.config.ApiResponse.ApiResponse;
+import org.example.servicequestion.user.question.dto.CommentGetDTO;
+import org.example.servicequestion.user.question.dto.CommentPostDTO;
 import org.example.servicequestion.user.question.dto.QuestionDTO;
 import org.example.servicequestion.user.question.dto.QuestionListDTO;
 import org.example.servicequestion.user.question.service.GetUserQuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/user/question")
@@ -83,5 +83,40 @@ public class GetUserQuestionController {
         }
         
         return new ApiResponse(200, "获取分类题目列表成功", result);
+    }
+
+    /**
+     * 根据虚拟ID获取评论列表
+     *
+     * @param virtualId 虚拟题目ID
+     * @return 包含评论列表的API响应
+     */
+    @GetMapping("/comment/{virtualId}")
+    public ApiResponse getCommentsByVirtualId(
+            @PathVariable String virtualId) {
+        List<CommentGetDTO> comments = getUserQuestionService.getCommentsByVirtualId(virtualId);
+        if (comments == null) {
+            return new ApiResponse(404, "评论不存在", null);
+        }
+        return new ApiResponse(200, "获取评论列表成功", comments);
+    }
+
+    @PostMapping("/comment/add")
+    public ApiResponse addComment(@RequestBody CommentPostDTO dto) {
+        System.out.println("接收到评论请求：" + dto.getQuestionId() + " " + dto.getUserId() + " " + dto.getContent());
+        try {
+            getUserQuestionService.addComment(dto.getQuestionId(), dto.getUserId(), dto.getContent(), dto.getParentId());
+            return new ApiResponse(200, "添加评论成功", null);
+        } catch (Exception e) {
+            return new ApiResponse(500, "添加评论失败: " + e.getMessage(), null);
+        }
+    }
+
+    @PostMapping("/comment/like")
+    public ApiResponse updateLikeCount(
+            @RequestParam Long commentId) {
+        System.out.println("点赞ID：" + commentId);
+        getUserQuestionService.updateLikeCount(commentId);
+        return new ApiResponse(200, "更新点赞数成功", null);
     }
 }

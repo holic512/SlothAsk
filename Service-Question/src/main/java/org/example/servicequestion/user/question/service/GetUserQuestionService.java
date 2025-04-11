@@ -7,8 +7,11 @@
  */
 package org.example.servicequestion.user.question.service;
 
+import org.example.servicequestion.user.question.dto.CommentGetDTO;
 import org.example.servicequestion.user.question.dto.QuestionDTO;
 import org.example.servicequestion.user.question.dto.QuestionListDTO;
+
+import java.util.List;
 
 public interface GetUserQuestionService {
 
@@ -36,5 +39,29 @@ public interface GetUserQuestionService {
      * @return 题目列表DTO，包含当前页题目和分页信息
      */
     QuestionListDTO getCategoryQuestionsByVirtualId(String virtualId, int page);
+
+    /**
+     * 根据虚拟ID获取同分类下的评论
+     *
+     * @param virtualId 虚拟题目ID
+     * @return 评论列表
+     */
+
+    List<CommentGetDTO> getCommentsByVirtualId(String virtualId);
+
+    /**
+     * 添加评论
+     *
+     * @param
+     */
+    void addComment(String questionId,Long userId,String content,Long parentId);
+
+
+    /**
+     * 更新评论点赞数
+     *
+     * @param commentId 评论ID
+     */
+    void updateLikeCount(Long commentId);
 
 }
