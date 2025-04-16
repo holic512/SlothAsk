@@ -83,8 +83,8 @@ import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useSessionStore } from '@/pinia/Session'
-import {ApiPostCommentLike} from "@/view/HomePage/view/QuestionPage/service/ApiPostCommentLike";
-import { ApiPostQuestionComment} from "../../service/ApiPostQuestionComment";
+// import {ApiPostCommentLike} from "@/view/HomePage/view/QuestionPage/service/ApiPostCommentLike";
+// import { ApiPostQuestionComment} from "../../service/ApiPostQuestionComment";
 import { ApiGetQuestionCommentByVirtualId } from '@/view/HomePage/view/QuestionPage/service/ApiGetQuestionCommentByVirtualId'
 import { CommentInterface } from '@/view/HomePage/view/QuestionPage/interface/CommentInterface'
 import likeIcon from '@/view/HomePage/view/QuestionPage/image/like.png';
@@ -133,7 +133,7 @@ watch(() => route.params.questionId as string, async (newValue) => {
 //发布评论
 const submitComment = async () => {
 
-  if (!userSession.userSession.userId) {
+  if (!userSession.userSession.tokenValue) {
     ElMessage.warning('请先登录！');
     return;
   }

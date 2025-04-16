@@ -50,7 +50,7 @@ export default [
                     {
                         path: 'profile',
                         name: 'AccountProfile',
-                        component: () => import('@/view/HomePage/view/AccountPage/components/Profile/index.vue')
+                        component: () => import('@/view/HomePage/view/AccountPage/components/Profile/Profile.vue')
                     },
                     {
                         path: 'problem-list',
@@ -73,9 +73,14 @@ export default [
                         component: () => import(/* webpackChunkName: "account-progress" */ '@/view/HomePage/view/AccountPage/components/Progress.vue')
                     },
                     {
-                        path: 'history',
+                        path: 'record',
                         name: 'AccountHistory',
-                        component: () => import(/* webpackChunkName: "account-history" */ '@/view/HomePage/view/AccountPage/components/History.vue')
+                        component: () => import(/* webpackChunkName: "account-history" */ '@/view/HomePage/view/AccountPage/components/Record.vue')
+                    },
+                    {
+                        path: 'history',
+                        name: 'AccountBrowseHistory',
+                        component: () => import(/* webpackChunkName: "account-browse-history" */ '@/view/HomePage/view/AccountPage/components/History/History.vue')
                     },
                     {
                         path: 'my-bank',

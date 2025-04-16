@@ -32,9 +32,10 @@ const studyMenuItems = [
   {path: '/account/problem-list', name: '题单', icon: List},
   {path: '/account/favorites', name: '收藏夹', icon: Star},
   {path: '/account/wrong-questions', name: '错题本', icon: Warning},
+  {path: '/account/history', name: '历史浏览', icon: Timer},
   {path: '/account/progress', name: '进展分析', icon: DataLine},
-  {path: '/account/history', name: '答题记录', icon: Timer},
-  {path: '/account/my-bank', name: '我的题库', icon: Collection},
+  {path: '/account/record', name: '答题记录', icon: Collection},
+  {path: '/account/my-bank', name: '我的题库', icon: Folder},
 ];
 
 // 项目相关
@@ -160,41 +161,60 @@ onMounted(() => {
 .account-contain {
   width: 100%;
   min-height: calc(100vh - 430px);
-  background-color: #F7F8FA;
-  padding: 20px;
-
+  height: 100%; /* 确保高度继承 */
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 12px 0;
   display: flex;
   justify-content: center;
 }
 
 .account-layout {
-  width: 1000px;
+  width: 1100px;
   display: flex;
   margin: 0 auto;
+  gap: 25px;
+  height: 100%; /* 继承父容器高度 */
+}
+
+.account-content {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  height: 100%; /* 继承父容器高度 */
 }
 
 .account-sidebar {
-  width: 240px;
-  background: transparent;
+  width: 250px;
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 12px;
-  padding: 20px;
+  padding: 12px 8px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.25s ease;
 }
 
 .user-info {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 20px 0;
+  gap: 14px;
+  padding: 12px 0;
 }
 
+
+
 .nickname {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
-  color: #333;
+  color: var(--el-text-color-primary);
+  letter-spacing: 0.5px;
 }
 
 .account-menu {
@@ -203,56 +223,87 @@ onMounted(() => {
 }
 
 .menu-group {
-  margin-bottom: 8px;
+  margin-bottom: 14px;
 }
 
 .menu-group-title {
   padding: 0 20px;
-  font-size: 12px;
-  color: #909399;
-  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--el-text-color-secondary);
+  margin-bottom: 10px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 .account-menu :deep(.el-menu-item) {
   height: 48px;
   line-height: 48px;
-  color: #666;
-  border-radius: 8px;
-  margin-bottom: 4px;
+  color: var(--el-text-color-regular);
+  border-radius: 10px;
+  margin-bottom: 2px;
+  transition: all 0.25s ease;
+  font-weight: 400;
 }
 
 .account-menu :deep(.el-menu-item.is-active) {
-  background-color: #ecf5ff;
-  color: #409eff;
+  background: linear-gradient(135deg, var(--el-color-primary-light-9) 0%, var(--el-color-primary-light-8) 100%);
+  color: var(--el-color-primary);
+  font-weight: 500;
 }
 
 .account-menu :deep(.el-menu-item:hover) {
-  background-color: #f5f7fa;
+  background-color: #f0e9e2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .account-menu :deep(.el-divider) {
-  margin: 12px 0;
+  margin: 18px 0;
+  border-color: var(--el-border-color-lighter);
 }
 
 .logout-btn {
   margin-top: auto;
   padding: 12px 20px;
-  color: #666;
+  color: var(--el-text-color-regular);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  border-radius: 8px;
-  transition: all 0.3s;
+  gap: 10px;
+  border-radius: 10px;
+  transition: all 0.25s ease;
 }
 
 .logout-btn:hover {
-  background-color: #f5f7fa;
-  color: #f56c6c;
+  background-color: #f0e0dd;
+  color: var(--el-color-danger);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 108, 108, 0.1);
 }
 
-.account-content {
-  flex: 1;
-  padding: 24px;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.2;
+  }
 }
 </style>

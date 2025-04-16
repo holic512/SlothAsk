@@ -13,7 +13,7 @@ export default defineConfig({
   plugins: [
     vue(),
     vueJsx(),
-    visualizer({open: true}) // 打包分析工具
+    visualizer({ open: true }) // 打包分析工具
   ],
   build: {
     sourcemap: false, // 关闭 sourcemap 提高构建速度
@@ -29,7 +29,6 @@ export default defineConfig({
   },
   server: {
     port: 3000, // 指定端口
-    open: true, // 自动打开浏览器
-  }
-}
-);
+    hmr: true,
+  },
+});

@@ -1,6 +1,7 @@
 <template>
   <div class="page-wrapper">
-    <div class="sidebar-left" :class="{ 'sidebar-hidden': isMobileView }">
+    <!-- 左侧栏固定 -->
+    <div class="sidebar-left-container" :class="{ 'sidebar-hidden': isMobileView }">
       <el-button
           v-if="isMobileView"
           class="sidebar-toggle"
@@ -10,14 +11,20 @@
       />
       <SidebarLeft :class="{ 'sidebar-mobile': isMobileView && showLeftSidebar }"/>
     </div>
-    <div class="content-wrapper">
-      <div class="container">
-        <QuestionDetail/>
-        <CommentSection/>
+
+    <!-- 中间内容区 -->
+    <div class="main-content">
+      <div class="content-wrapper" :class="{ 'content-full': isMobileView }">
+        <div class="container">
+          <QuestionDetail/>
+          <CommentSection/>
+        </div>
       </div>
-    </div>
-    <div class="sidebar-right" :class="{ 'sidebar-hidden': isTabletView }">
-      <SidebarRight/>
+
+      <!-- 右侧栏 -->
+      <div class="sidebar-right-container" :class="{ 'sidebar-hidden': isTabletView }">
+        <SidebarRight/>
+      </div>
     </div>
   </div>
 </template>
@@ -68,70 +75,78 @@ onBeforeUnmount(() => {
   min-height: 100vh;
   position: relative;
   background-color: #f9fafb;
+  width: 100%;
+  max-width: 100%;
+  justify-content: flex-start; /* 左对齐 */
 }
 
-.sidebar-left {
-  width: 300px; /* 稍微减小宽度 */
+/* 左侧边栏容器 - 固定在左侧 */
+.sidebar-left-container {
+  width: 300px;
+  height: 100%;
   flex-shrink: 0;
   position: relative;
-  transition: all 0.2s ease; /* 将动画时间从0.3s减少到0.2s，让切换更加利索 */
+  transition: width 0.2s ease, margin 0.2s ease;
   background-color: #ffffff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   padding: 16px;
-  overflow: hidden; /* 防止内容溢出 */
 }
 
-.sidebar-right {
-  width: 240px;
-  flex-shrink: 0;
-  margin-top: 16px;
-  margin-right: 20px; /* 增加右侧留白 */
-  margin-left: 20px;
-  transition: all 0.3s ease;
-}
-
-/* 新增内容包装器，用于居中固定宽度的容器 */
-.content-wrapper {
+/* 主内容区域包含内容和右侧边栏 */
+.main-content {
   flex: 1;
   display: flex;
+  justify-content: center; /* 主内容区内部居中 */
+}
+
+/* 内容区包装器 */
+.content-wrapper {
+  width: 950px; /* 固定主内容宽度 */
+  transition: width 0.3s ease;
+  display: flex;
   justify-content: center;
-  transition: all 0.3s ease;
 }
 
 .container {
-  width: 950px; /* 固定最大宽度 */
-  margin: 16px 0; /* 只设置上下边距 */
-  padding: 0 12px; /* 内部左右留白 */
+  width: 100%;
+  margin: 16px 0;
+  padding: 0 16px;
   transition: all 0.3s ease;
 }
 
+/* 右侧边栏容器 */
+.sidebar-right-container {
+  width: 240px;
+  flex-shrink: 0;
+  margin: 24px 16px 0 24px;
+  transition: width 0.2s ease, margin 0.2s ease;
+}
+
+
 /* 平板视图样式 */
 @media (max-width: 1600px) {
-  /* 调整阈值 */
   .sidebar-hidden {
     width: 0;
-    overflow: hidden;
     margin: 0;
     padding: 0;
+    overflow: hidden;
   }
 
-  .container {
-    margin: 16px;
-    padding: 0 24px; /* 减小内部留白 */
+  .content-wrapper {
+    width: 950px; /* 保持固定宽度 */
   }
 }
 
 /* 中等屏幕视图样式 */
 @media (max-width: 1550px) {
-  .container {
-    padding: 0 20px; /* 进一步减小内部留白 */
+  .content-wrapper {
+    width: 900px; /* 稍微缩小一点 */
   }
 }
 
-/* 移动端视图样式 */
+/* 小屏视图样式 */
 @media (max-width: 1350px) {
-  /* 调整阈值 */
-  .sidebar-hidden {
+  .sidebar-left-container.sidebar-hidden {
     width: 0;
     padding: 0;
     margin: 0;
@@ -139,13 +154,11 @@ onBeforeUnmount(() => {
   }
 
   .content-wrapper {
-    padding: 0 12px;
+    width: 850px; /* 左侧边栏隐藏时保持主内容固定宽度 */
   }
 
-  .container {
-    margin: 12px 0;
+  .content-full {
     padding: 0 16px;
-    width: 100%; /* 确保在移动视图中占满宽度 */
   }
 
   .sidebar-toggle {
@@ -161,26 +174,50 @@ onBeforeUnmount(() => {
     position: fixed;
     top: 0;
     left: 0;
-    height: 99vh;
+    height: 100vh;
     width: 280px;
     background: white;
     z-index: 999;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
-    padding: 16px; /* 恢复内边距 */
-    transition: all 0.2s ease; /* 为移动端侧边栏也添加更快的过渡效果 */
+    padding: 16px;
+    border-radius: 0;
+    transition: all 0.2s ease;
+  }
+}
+
+/* 平板视图样式 */
+@media (max-width: 900px) {
+  .content-wrapper {
+    width: 700px; /* 再缩小 */
+  }
+}
+
+/* 移动设备视图样式 */
+@media (max-width: 768px) {
+  .main-content {
+    justify-content: flex-start; /* 小屏幕下内容靠左 */
+  }
+
+  .content-wrapper {
+    width: 100%; /* 小屏幕下占满 */
+    padding: 0 16px;
+  }
+
+  .container {
+    margin: 12px 0;
+    padding: 0;
   }
 }
 
 /* 小屏幕手机视图 */
 @media (max-width: 480px) {
   .content-wrapper {
-    padding: 0 8px; /* 减小内容包装器的内边距 */
+    padding: 0;
   }
 
   .container {
     margin: 8px 0;
-    padding: 0 12px; /* 小屏幕手机进一步减小内部留白，但仍保持可读性 */
   }
 }
 </style>

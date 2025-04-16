@@ -46,11 +46,12 @@ const handleQuestionClick = (questionId: number) => {
 
 <style scoped>
 .sidebar {
-  width: 100%;
+  width: 280px;
   display: flex;
   flex-direction: column;
   background: white;
   border-radius: 8px;
+  margin: 0 auto;
 }
 
 .head {

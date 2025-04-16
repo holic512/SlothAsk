@@ -14,8 +14,8 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.example.servicequestion.entity.Question;
-import org.springframework.stereotype.Repository;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
@@ -57,4 +57,14 @@ public interface UserQuestionQuestionMapper extends BaseMapper<Question> {
             @Param("categoryId") Long categoryId, 
             @Param("offset") int offset, 
             @Param("limit") int limit);
+            
+    /**
+     * 增加题目访问量
+     * 
+     * @param questionId 题目ID
+     * @param increment 增加的访问量
+     * @return 影响的行数
+     */
+    @Update("UPDATE question SET view_count = view_count + #{increment} WHERE id = #{questionId}")
+    int incrementViewCount(@Param("questionId") Long questionId, @Param("increment") Long increment);
 }

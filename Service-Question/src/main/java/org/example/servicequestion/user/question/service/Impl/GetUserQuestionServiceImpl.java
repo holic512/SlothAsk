@@ -10,6 +10,7 @@ package org.example.servicequestion.user.question.service.Impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.servicequestion.config.Redis.RedisConfig;
+import org.example.servicequestion.config.view.ViewCountConfig;
 import org.example.servicequestion.entity.Question;
 import org.example.servicequestion.entity.QuestionComment;
 import org.example.servicequestion.user.question.dto.*;
@@ -21,6 +22,8 @@ import org.example.servicequestion.user.question.service.GetUserQuestionService;
 import org.example.servicequestion.util.IdEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -491,5 +494,98 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
         userQuestionCommentMapper.updateLikeCount(commentId);
     }
 
+    @Override
+    @Async
+    public void recordQuestionView(String virtualId, String userId) {
+        try {
+            // 1. 解析虚拟ID
+            Long originalId = getOriginalIdFromVirtualId(virtualId);
+            if (originalId == null) {
+                return;
+            }
+            
+            // 2. 检查用户是否在防抖时间内访问过该题目
+            String userViewKey = ViewCountConfig.USER_VIEW_RECORD_KEY + userId + ":" + originalId;
+            Boolean hasViewedRecently = redisTemplate.hasKey(userViewKey);
+            
+            // 如果用户最近没有访问过这个题目，记录访问并设置过期时间
+            if (Boolean.FALSE.equals(hasViewedRecently)) {
+                // 记录用户访问，并设置过期时间
+                redisTemplate.opsForValue().set(userViewKey, "1", ViewCountConfig.DEBOUNCE_INTERVAL, TimeUnit.SECONDS);
+                
+                // 增加题目访问计数
+                String viewCountKey = ViewCountConfig.VIEW_COUNT_INCR_KEY + originalId;
+                redisTemplate.opsForValue().increment(viewCountKey, 1L);
+            }
+        } catch (Exception e) {
+            // 记录日志但不影响主流程
+            System.err.println("记录题目访问量失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 定时任务：每5分钟将Redis中的访问量数据同步到数据库
+     */
+    @Scheduled(fixedDelay = ViewCountConfig.SYNC_INTERVAL)
+    public void syncViewCountToDatabase() {
+        try {
+            // 1. 获取所有需要更新的题目ID
+            Set<String> keys = redisTemplate.keys(ViewCountConfig.VIEW_COUNT_INCR_KEY + "*");
+            if (keys == null || keys.isEmpty()) {
+                return;
+            }
+            
+            // 2. 批量获取每个题目的增量访问量
+            for (String key : keys) {
+                Object value = redisTemplate.opsForValue().get(key);
+                if (value == null) {
+                    continue;
+                }
+                
+                // 提取题目ID
+                String idStr = key.substring(ViewCountConfig.VIEW_COUNT_INCR_KEY.length());
+                Long questionId = Long.parseLong(idStr);
+                
+                // 获取增量值
+                Long increment = 0L;
+                if (value instanceof Integer) {
+                    increment = ((Integer) value).longValue();
+                } else if (value instanceof Long) {
+                    increment = (Long) value;
+                } else if (value instanceof String) {
+                    increment = Long.parseLong((String) value);
+                }
+                
+                if (increment > 0) {
+                    // 3. 更新数据库中的访问量
+                    userQuestionQuestionMapper.incrementViewCount(questionId, increment);
+                    
+                    // 4. 删除Redis中的增量记录
+                    redisTemplate.delete(key);
+                }
+            }
+        } catch (Exception e) {
+            // 记录日志但不中断程序
+            System.err.println("同步题目访问量到数据库失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public QuestionResponseDTO getQuestionWithRealId(String virtualId) {
+        // 解析虚拟ID获取原始ID
+        Long originalId = getOriginalIdFromVirtualId(virtualId);
+        if (originalId == null) {
+            return null;
+        }
+        
+        // 获取问题信息
+        QuestionDTO questionDTO = getQuestionByVirtualId(virtualId);
+        if (questionDTO == null) {
+            return null;
+        }
+        
+        // 封装问题信息和真实ID
+        return new QuestionResponseDTO(questionDTO, originalId);
+    }
 
 }
