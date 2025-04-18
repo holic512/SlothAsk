@@ -5,7 +5,6 @@ import {useRouter, useRoute} from 'vue-router';
 import {ElMessage} from 'element-plus';
 import {
   User,
-  List,
   Star,
   Warning,
   DataLine,
@@ -29,7 +28,6 @@ const userInfo = ref({
 
 // 学习相关
 const studyMenuItems = [
-  {path: '/account/problem-list', name: '题单', icon: List},
   {path: '/account/favorites', name: '收藏夹', icon: Star},
   {path: '/account/wrong-questions', name: '错题本', icon: Warning},
   {path: '/account/history', name: '历史浏览', icon: Timer},

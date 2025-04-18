@@ -7,7 +7,6 @@
  */
 package org.example.servicequestion.user.history.service.Impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -24,14 +23,12 @@ import org.example.servicequestion.user.history.service.GetUserHistoryService;
 import org.example.servicequestion.util.IdEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GetUserHistoryServiceImpl implements GetUserHistoryService {
 
     private final static String VidKey = RedisConfig.getKey() + "Question:VId:";
-    private final static String HISTORY_CACHE_KEY = RedisConfig.getKey() + "User:History:";
 
     private final UserHistoryUserQuestionHistoryMapper userHistoryMapper;
     private final RedisTemplate<String, Object> redisTemplate;
@@ -89,6 +86,7 @@ public class GetUserHistoryServiceImpl implements GetUserHistoryService {
         return new HistoryQuestionDTO(historyList, tags);
     }
 
+    // 获取当前列表的 tags 集合
     public Set<Integer> extractTagIds(List<UserHistoryDTO> userHistoryList) {
         return userHistoryList.stream() // 遍历每个 UserHistoryDTO 对象
                 .map(UserHistoryDTO::getTagCategoryIds) // 获取每个 UserHistoryDTO 的 tagCategoryIds 字符串

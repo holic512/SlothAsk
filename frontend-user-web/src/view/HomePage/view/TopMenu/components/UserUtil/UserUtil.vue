@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineProps, computed } from 'vue';
+import { defineProps, computed } from 'vue';
 import { useRouter } from 'vue-router';
 // 引入Element Plus图标组件
 import {
@@ -37,7 +37,7 @@ const getAvatarText = computed(() => {
 
 // 工具栏项目 - 使用导入的Element Plus图标组件
 const toolItems = [
-  { name: '题单', icon: Document, color: '#67C23A', path: '/account/problem-list' },  // 绿色
+  { name: '历史记录', icon: Document, color: '#67C23A', path: '/account/history' },  // 绿色
   { name: '收藏夹', icon: Star, color: '#E6A23C', path: '/account/favorites' },    // 黄色
   { name: '错题本', icon: Warning, color: '#F56C6C', path: '/account/wrong-questions' }, // 红色
   { name: '进展分析', icon: DataAnalysis, color: '#409EFF', path: '/account/progress' }, // 蓝色
@@ -171,13 +171,6 @@ const handleSettingClick = (path: string) => {
 .user-details {
   display: flex;
   flex-direction: column;
-}
-
-.username {
-  font-size: 16px;
-  font-weight: 600;
-  color: #303133;
-  margin-bottom: 4px;
 }
 
 .vip-level {

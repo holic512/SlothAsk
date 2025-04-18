@@ -9,6 +9,7 @@ package org.example.servicequestion.user.history.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -39,5 +40,26 @@ public interface UserHistoryUserQuestionHistoryMapper extends BaseMapper<UserQue
                                             @Param("offset") int offset,
                                             @Param("limit") int limit);
 
+    /**
+     * 删除单条历史记录
+     *
+     * @param userId   用户ID
+     * @param questionId 问题ID
+     * @return 影响的行数
+     */
+    @Delete("DELETE FROM user_question_history WHERE question_id = #{questionId} and user_id = #{userId}")
+    int deleteHistoryRecord(@Param("userId") Long userId, @Param("questionId") String questionId);
+
+    /**
+     * 清空指定日期的历史记录
+     *
+     * @param userId 用户ID
+     * @param date 日期 (格式应为"yyyy-MM-dd")
+     * @return 影响的行数
+     */
+    @Delete("DELETE FROM user_question_history " +
+            "WHERE user_id = #{userId} " +
+            "AND DATE(visit_time) = #{date}")
+    int clearDayHistoryRecords(@Param("userId") Long userId, @Param("date") String date);
 
 }

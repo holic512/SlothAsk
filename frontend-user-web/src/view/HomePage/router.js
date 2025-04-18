@@ -53,11 +53,6 @@ export default [
                         component: () => import('@/view/HomePage/view/AccountPage/components/Profile/Profile.vue')
                     },
                     {
-                        path: 'problem-list',
-                        name: 'AccountProblemList',
-                        component: () => import(/* webpackChunkName: "account-problem-list" */ '@/view/HomePage/view/AccountPage/components/ProblemList.vue')
-                    },
-                    {
                         path: 'favorites',
                         name: 'AccountFavorites',
                         component: () => import(/* webpackChunkName: "account-favorites" */ '@/view/HomePage/view/AccountPage/components/Favorites.vue')
