@@ -51,7 +51,7 @@ const SingleChoice = defineAsyncComponent(() =>
     import('./components/SingleChoice.vue')
 );
 const MultipleChoice = defineAsyncComponent(() =>
-    import("@/view/HomePage/view/QuestionPage/components/container/components/MultipleChoice.vue")
+    import("@/view/HomePage/view/QuestionPage/components/container/QuestionDetail/components/MultipleChoice.vue")
 );
 const TrueFalse = defineAsyncComponent(() =>
     import('./components/TrueFalse.vue')
@@ -196,7 +196,7 @@ const hasMoreTags = computed(() => {
 .question-content,
 .question-detail {
   background: white;
-  border-radius: 16px;
+  border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
   padding: 32px;
 }

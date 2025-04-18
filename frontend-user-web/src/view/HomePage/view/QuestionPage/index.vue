@@ -17,7 +17,7 @@
       <div class="content-wrapper" :class="{ 'content-full': isMobileView }">
         <div class="container">
           <QuestionDetail/>
-          <CommentSection/>
+          <AnswerDiscussion />
         </div>
       </div>
 
@@ -32,8 +32,8 @@
 <script setup>
 import {onMounted, ref, onBeforeUnmount, computed} from 'vue';
 import {setTitle} from '@/utils/title';
-import QuestionDetail from './components/container/QuestionDetail.vue'
-import CommentSection from './components/container/CommentSection.vue'
+import QuestionDetail from './components/container/QuestionDetail/QuestionDetail.vue'
+import AnswerDiscussion from './components/container/AnswerDiscussion/AnswerDiscussion.vue'
 import SidebarLeft from './components/sidebar-left/SidebarLeft.vue'
 import SidebarRight from './components/sidebar-right/SidebarRight.vue'
 
