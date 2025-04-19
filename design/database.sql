@@ -545,3 +545,35 @@ CREATE TABLE `user_question_history` (
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户访问问题历史记录表' ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- ----------------------------
+-- 用户请求表
+-- ----------------------------
+DROP TABLE IF EXISTS `user_request_log`;
+CREATE TABLE `user_request_log` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '日志ID',
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `request_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '请求时间',
+  `request_path` varchar(255) NOT NULL COMMENT '请求路径',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_user_id` (`user_id` ASC) USING BTREE COMMENT '用户ID索引',
+  INDEX `idx_user_time` (`user_id` ASC, `request_time` DESC) USING BTREE COMMENT '用户请求时间索引',
+  CONSTRAINT `fk_user_log_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户请求日志表' ROW_FORMAT = DYNAMIC;
+
+
+-- ----------------------------
+-- 管理员请求表
+-- ----------------------------
+DROP TABLE IF EXISTS `admin_request_log`;
+CREATE TABLE `admin_request_log` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '日志ID',
+  `admin_id` bigint NOT NULL COMMENT '管理员ID',
+  `request_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '请求时间',
+  `request_path` varchar(255) NOT NULL COMMENT '请求路径',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_admin_id` (`admin_id` ASC) USING BTREE COMMENT '管理员ID索引',
+  INDEX `idx_admin_time` (`admin_id` ASC, `request_time` DESC) USING BTREE COMMENT '管理员请求时间索引',
+  CONSTRAINT `fk_admin_log_admin` FOREIGN KEY (`admin_id`) REFERENCES `admin_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '管理员请求日志表' ROW_FORMAT = DYNAMIC;
+

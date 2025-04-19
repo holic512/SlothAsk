@@ -12,6 +12,11 @@ spring:
         locator:
           enabled: true  # 自动映射 Eureka 下的服务路由
           lower-case-service-id: true  # 服务名称小写处理
+  datasource:
+    url: jdbc:mysql://localhost:3306/slothAsk?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   data:
     # redis配置

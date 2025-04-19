@@ -4,5 +4,6 @@ export const ApiGetQuestionByVirtualId = async (virtualId: string) => {
     const response = await axios.get(
         `service-question/user/question/question/${virtualId}`
     )
+    console.log(response.data);
     return response.data;
 }
