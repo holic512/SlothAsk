@@ -29,14 +29,28 @@ public class RequestLogServiceImpl implements RequestLogService {
     @Override
     @Async
     public void saveAdminRequestLogs(List<AdminRequestLog> adminRequestLogs) {
-        adminRequestLogMapper.insertAdminRequestLogs(adminRequestLogs);
+        try {
+            System.out.println("Start saving admin request logs...");
+            adminRequestLogMapper.insertAdminRequestLogs(adminRequestLogs);
+            System.out.println("Finished saving admin request logs...");
+        } catch (Exception e) {
+            System.err.println("Error during saving admin request logs: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     // 异步保存用户请求日志
     @Override
     @Async
     public void saveUserRequestLogs(List<UserRequestLog> userRequestLogs) {
-        userRequestLogMapper.insertUserRequestLogs(userRequestLogs);
+        try {
+            System.out.println("Start saving admin request logs...");
+            userRequestLogMapper.insertUserRequestLogs(userRequestLogs);
+            System.out.println("Finished saving admin request logs...");
+        } catch (Exception e) {
+            System.err.println("Error during saving admin request logs: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 
