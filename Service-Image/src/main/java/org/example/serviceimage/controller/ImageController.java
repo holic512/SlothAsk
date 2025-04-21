@@ -1,23 +1,16 @@
 package org.example.serviceimage.controller;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import lombok.RequiredArgsConstructor;
 import org.example.serviceimage.service.MinioService;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import lombok.RequiredArgsConstructor;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/images")
@@ -27,6 +20,7 @@ public class ImageController {
 
     /**
      * 上传图片接口
+     *
      * @param file 要上传的图片文件
      * @return 返回包含文件名和预览URL的Map
      */
@@ -41,6 +35,7 @@ public class ImageController {
 
     /**
      * 下载指定图片
+     *
      * @param fileName 图片文件名
      * @return 返回图片文件流
      */
@@ -53,6 +48,7 @@ public class ImageController {
 
     /**
      * 删除指定图片
+     *
      * @param fileName 要删除的图片文件名
      * @return 返回空响应
      */
@@ -73,10 +69,23 @@ public class ImageController {
 
     /**
      * 获取所有图片列表
+     *
      * @return 返回所有图片文件名列表
      */
     @GetMapping("/list")
     public ResponseEntity<List<String>> listImages() {
         return ResponseEntity.ok(minioService.listImages());
     }
+
+    /**
+     * 批量获取图片预览 URL
+     *
+     * @param fileNames 图片文件名列表
+     * @return 文件名 -> 预览URL 的映射
+     */
+    @PostMapping("/preview/batch")
+    public Map<String, String> getPreviewUrls(@RequestBody List<String> fileNames) {
+        return minioService.getPreviewUrls(fileNames);
+    }
+
 } 

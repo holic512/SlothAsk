@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, ref, watch, defineAsyncComponent} from 'vue';
+import {computed, defineAsyncComponent, onMounted, ref, watch} from 'vue';
 import {useRoute} from 'vue-router';
 import {useQuestionBankStore} from '@/view/HomePage/view/StudyPage/store/QuestionBank';
 
@@ -198,7 +198,7 @@ const hasMoreTags = computed(() => {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-  padding: 32px;
+  padding: 24px;
 }
 
 .title-section {

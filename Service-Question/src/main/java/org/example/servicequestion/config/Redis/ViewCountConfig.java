@@ -1,6 +1,5 @@
-package org.example.servicequestion.config.view;
+package org.example.servicequestion.config.Redis;
 
-import org.example.servicequestion.config.Redis.RedisConfig;
 import org.springframework.context.annotation.Configuration;
 
 /**

@@ -10,12 +10,10 @@ package org.example.servicequestion.user.question.service.Impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.servicequestion.config.Redis.RedisConfig;
-import org.example.servicequestion.config.view.ViewCountConfig;
+import org.example.servicequestion.config.Redis.ViewCountConfig;
 import org.example.servicequestion.entity.Question;
-import org.example.servicequestion.entity.QuestionComment;
 import org.example.servicequestion.user.question.dto.*;
 import org.example.servicequestion.user.question.mapper.UserQuestionCategoryMapper;
-import org.example.servicequestion.user.question.mapper.UserQuestionCommentMapper;
 import org.example.servicequestion.user.question.mapper.UserQuestionQuestionMapper;
 import org.example.servicequestion.user.question.mapper.UserQuestionTagMapper;
 import org.example.servicequestion.user.question.service.GetUserQuestionService;
@@ -44,37 +42,37 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
     private final UserQuestionQuestionMapper userQuestionQuestionMapper;
     private final UserQuestionCategoryMapper userQuestionCategoryMapper;
     private final UserQuestionTagMapper userQuestionTagMapper;
-    private final UserQuestionCommentMapper userQuestionCommentMapper;
+
 
     @Autowired
     public GetUserQuestionServiceImpl(
             RedisTemplate<String, Object> redisTemplate,
             UserQuestionQuestionMapper userQuestionQuestionMapper,
             UserQuestionCategoryMapper userQuestionCategoryMapper,
-            UserQuestionTagMapper userQuestionTagMapper,
-            UserQuestionCommentMapper userQuestionCommentMapper) {
+            UserQuestionTagMapper userQuestionTagMapper
+    ) {
         this.redisTemplate = redisTemplate;
         this.userQuestionQuestionMapper = userQuestionQuestionMapper;
         this.userQuestionCategoryMapper = userQuestionCategoryMapper;
         this.userQuestionTagMapper = userQuestionTagMapper;
-        this.userQuestionCommentMapper = userQuestionCommentMapper;
     }
 
     // 根据VirtualId获取原始ID
     public Long getOriginalIdFromVirtualId(String virtualId) {
-        // 1.  先从 Redis 获取原始 ID，如果 Redis 里有，尝试解析
         String originalIdStr = (String) redisTemplate.opsForValue().get(VidKey + virtualId);
         Long originalId = null;
 
-        // 如果 Redis 没有，则解析 virtualId
-        if (originalIdStr != null && originalIdStr.matches("\\d+")) {
-            originalId = Long.parseLong(originalIdStr);
+        if (originalIdStr != null) {
+            // 清理潜在的双引号（如 Redis 中存的是 "\"1\""）
+            String cleaned = originalIdStr.replaceAll("^\"|\"$", "");
+            if (cleaned.matches("\\d+")) {
+                originalId = Long.parseLong(cleaned);
+            }
         }
 
         if (originalId == null) {
             originalId = IdEncryptor.decryptId(virtualId);
             if (originalId != null) {
-                // 解析成功才存入 Redis
                 redisTemplate.opsForValue().set(VidKey + virtualId, String.valueOf(originalId), 1, TimeUnit.DAYS);
                 redisTemplate.opsForValue().set(VidKey + originalId, virtualId, 1, TimeUnit.DAYS);
             }
@@ -85,11 +83,9 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
 
 
     @Override
-    public QuestionDTO getQuestionByVirtualId(String virtualId) {
-        // 1.  解析虚拟ID
-        Long originalId = getOriginalIdFromVirtualId(virtualId);
+    public QuestionDTO getQuestionByVirtualId(String virtualId, Long originalId) {
 
-        // 2.  尝试从缓存获取题目信息
+        // 1.  尝试从缓存获取题目信息
         String questionCacheKey = QUESTION_CACHE_KEY + originalId;
         Object cachedValue = redisTemplate.opsForValue().get(questionCacheKey);
         QuestionDTO questionDTO = null;
@@ -462,57 +458,20 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
         return result;
     }
 
-
-    @Override
-    public List<CommentGetDTO> getCommentsByVirtualId(String virtualId) {
-        // 1.解析虚拟ID
-        long originalId = getOriginalIdFromVirtualId(virtualId);
-
-        List<CommentGetDTO> topLevel = userQuestionCommentMapper.getTopLevelComments(originalId);
-        for (CommentGetDTO comment : topLevel) {
-            List<CommentGetDTO> replies = userQuestionCommentMapper.getReplies(comment.getId());
-            comment.setReplies(replies);
-        }
-        return topLevel;
-    }
-
-    @Override
-    public void addComment(String questionId,Long userId,String content,Long parentId) {
-        long originalId = getOriginalIdFromVirtualId(questionId);
-        QuestionComment comment = new QuestionComment();
-        comment.setQuestionId(originalId);
-        comment.setUserId(userId);
-        comment.setContent(content);
-        comment.setParentId(parentId);
-        comment.setStatus(1);
-        comment.setLikeCount(0);
-        userQuestionCommentMapper.insertComment(comment);
-    }
-
-    @Override
-    public void updateLikeCount(Long commentId) {
-        userQuestionCommentMapper.updateLikeCount(commentId);
-    }
-
     @Override
     @Async
-    public void recordQuestionView(String virtualId, String userId) {
+    public void recordQuestionView(Long originalId, String userId) {
         try {
-            // 1. 解析虚拟ID
-            Long originalId = getOriginalIdFromVirtualId(virtualId);
-            if (originalId == null) {
-                return;
-            }
-            
+
             // 2. 检查用户是否在防抖时间内访问过该题目
             String userViewKey = ViewCountConfig.USER_VIEW_RECORD_KEY + userId + ":" + originalId;
             Boolean hasViewedRecently = redisTemplate.hasKey(userViewKey);
-            
+
             // 如果用户最近没有访问过这个题目，记录访问并设置过期时间
             if (Boolean.FALSE.equals(hasViewedRecently)) {
                 // 记录用户访问，并设置过期时间
                 redisTemplate.opsForValue().set(userViewKey, "1", ViewCountConfig.DEBOUNCE_INTERVAL, TimeUnit.SECONDS);
-                
+
                 // 增加题目访问计数
                 String viewCountKey = ViewCountConfig.VIEW_COUNT_INCR_KEY + originalId;
                 redisTemplate.opsForValue().increment(viewCountKey, 1L);
@@ -522,7 +481,7 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
             System.err.println("记录题目访问量失败: " + e.getMessage());
         }
     }
-    
+
     /**
      * 定时任务：每5分钟将Redis中的访问量数据同步到数据库
      */
@@ -534,20 +493,20 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
             if (keys == null || keys.isEmpty()) {
                 return;
             }
-            
+
             // 2. 批量获取每个题目的增量访问量
             for (String key : keys) {
                 Object value = redisTemplate.opsForValue().get(key);
                 if (value == null) {
                     continue;
                 }
-                
+
                 // 提取题目ID
                 String idStr = key.substring(ViewCountConfig.VIEW_COUNT_INCR_KEY.length());
                 Long questionId = Long.parseLong(idStr);
-                
+
                 // 获取增量值
-                Long increment = 0L;
+                long increment = 0L;
                 if (value instanceof Integer) {
                     increment = ((Integer) value).longValue();
                 } else if (value instanceof Long) {
@@ -555,11 +514,11 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
                 } else if (value instanceof String) {
                     increment = Long.parseLong((String) value);
                 }
-                
+
                 if (increment > 0) {
                     // 3. 更新数据库中的访问量
                     userQuestionQuestionMapper.incrementViewCount(questionId, increment);
-                    
+
                     // 4. 删除Redis中的增量记录
                     redisTemplate.delete(key);
                 }
@@ -577,13 +536,13 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
         if (originalId == null) {
             return null;
         }
-        
+
         // 获取问题信息
-        QuestionDTO questionDTO = getQuestionByVirtualId(virtualId);
+        QuestionDTO questionDTO = getQuestionByVirtualId(virtualId, originalId);
         if (questionDTO == null) {
             return null;
         }
-        
+
         // 封装问题信息和真实ID
         return new QuestionResponseDTO(questionDTO, originalId);
     }

@@ -11,6 +11,7 @@ package org.example.servicequestion.admin.question.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -68,7 +69,7 @@ public class GetQuestionAdminServiceImpl implements GetQuestionAdminService {
         TableInfo tableInfo = TableInfoHelper.getTableInfo(Question.class);
         if (tableInfo != null) {
             List<String> allFields = tableInfo.getFieldList().stream()
-                    .map(f -> f.getColumn())  // 获取数据库字段名
+                    .map(TableFieldInfo::getColumn)  // 获取数据库字段名
                     .collect(Collectors.toList());
 
             // 添加主键字段

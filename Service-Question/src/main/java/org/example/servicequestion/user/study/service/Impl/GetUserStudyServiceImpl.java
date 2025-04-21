@@ -9,20 +9,13 @@
  */
 package org.example.servicequestion.user.study.service.Impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.servicequestion.config.Redis.RedisConfig;
 import org.example.servicequestion.entity.Question;
 import org.example.servicequestion.entity.QuestionCategory;
@@ -40,8 +33,12 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.type.TypeReference;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class GetUserStudyServiceImpl implements GetUserStudyService {
@@ -138,7 +135,7 @@ public class GetUserStudyServiceImpl implements GetUserStudyService {
                                 // 获取失败时保持原有 URL 不变，可记录日志便于调试
                             }
                         }))
-                        .collect(Collectors.toList());
+                        .toList();
                 // 等待所有异步任务完成
                 CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
             }
