@@ -75,7 +75,6 @@ public class RequestLogBuffer {
 
                 // 如果有日志则批量写入数据库
                 if (!batch.isEmpty()) {
-                    System.out.println("Processing batch of user logs...");
                     requestLogService.saveUserRequestLogs(new ArrayList<>(batch));
                     batch.clear();
                 }
