@@ -1,13 +1,5 @@
 package org.example.servicequestion.user.question.service.Impl;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.example.servicequestion.config.HistoryQueueConfig.HistoryRecord;
 import org.example.servicequestion.user.question.mapper.UserQuestionHistoryMapper;
 import org.example.servicequestion.user.question.service.QuestionHistoryService;
@@ -16,6 +8,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 问题历史记录服务实现类(优化版)
@@ -111,7 +111,7 @@ public class QuestionHistoryServiceImpl implements QuestionHistoryService {
             
             // 构建唯一记录集合
             for (HistoryRecord record : recordBatch) {
-                String key = generateKey(record.getUserId(), record.getQuestionId());
+                String key = generateKey(record.userId(), record.questionId());
                 // 从historyMap获取最新访问时间
                 LocalDateTime visitTime = historyMap.get(key);
                 // 如果不存在访问时间(罕见情况)，则使用当前时间
@@ -135,7 +135,7 @@ public class QuestionHistoryServiceImpl implements QuestionHistoryService {
                     
                     // 使用INSERT ON DUPLICATE KEY UPDATE高效插入或更新记录
                     userQuestionHistoryMapper.insertOrUpdateVisitRecord(
-                        record.getUserId(), record.getQuestionId(), visitTime);
+                        record.userId(), record.questionId(), visitTime);
                 }
             } catch (Exception e) {
                 logger.error("保存历史记录失败", e);

@@ -13,13 +13,13 @@ import org.example.servicequestion.user.question.dto.QuestionResponseDTO;
 
 public interface GetUserQuestionService {
 
-    /**
-     * 根据虚拟ID获取原始ID
-     *
-     * @param virtualId 虚拟ID
-     * @return 原始ID
-     */
-    Long getOriginalIdFromVirtualId(String virtualId);
+    // /**
+    //  * 根据虚拟ID获取原始ID
+    //  *
+    //  * @param virtualId 虚拟ID
+    //  * @return 原始ID
+    //  */
+    // Long getOriginalIdFromVirtualId(String virtualId);
 
     /**
      * 根据虚拟ID获取题目信息(不包含答案) - 被代理

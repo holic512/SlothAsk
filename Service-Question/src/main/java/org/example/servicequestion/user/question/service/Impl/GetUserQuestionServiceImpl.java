@@ -10,8 +10,10 @@ package org.example.servicequestion.user.question.service.Impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.servicequestion.config.Redis.RedisConfig;
-import org.example.servicequestion.config.Redis.ViewCountConfig;
+import org.example.servicequestion.config.Redis.RedisKey;
+import org.example.servicequestion.config.ViewCountConfig.ViewCountConfig;
 import org.example.servicequestion.entity.Question;
+import org.example.servicequestion.user.commonService.IdConversionService;
 import org.example.servicequestion.user.question.dto.*;
 import org.example.servicequestion.user.question.mapper.UserQuestionCategoryMapper;
 import org.example.servicequestion.user.question.mapper.UserQuestionQuestionMapper;
@@ -30,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class GetUserQuestionServiceImpl implements GetUserQuestionService {
 
-    private final static String VidKey = RedisConfig.getKey() + "Question:VId:";
     private final static String QUESTION_CACHE_KEY = RedisConfig.getKey() + "Question:Detail:";
     private final static String ANSWER_CACHE_KEY = RedisConfig.getKey() + "Question:Answer:";
     private final static String CATEGORY_CACHE_KEY = RedisConfig.getKey() + "Category:Name:";
@@ -43,43 +44,46 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
     private final UserQuestionCategoryMapper userQuestionCategoryMapper;
     private final UserQuestionTagMapper userQuestionTagMapper;
 
+    private final IdConversionService idConversionService;
 
     @Autowired
     public GetUserQuestionServiceImpl(
             RedisTemplate<String, Object> redisTemplate,
             UserQuestionQuestionMapper userQuestionQuestionMapper,
             UserQuestionCategoryMapper userQuestionCategoryMapper,
-            UserQuestionTagMapper userQuestionTagMapper
+            UserQuestionTagMapper userQuestionTagMapper,
+            IdConversionService idConversionService
     ) {
         this.redisTemplate = redisTemplate;
         this.userQuestionQuestionMapper = userQuestionQuestionMapper;
         this.userQuestionCategoryMapper = userQuestionCategoryMapper;
         this.userQuestionTagMapper = userQuestionTagMapper;
+        this.idConversionService = idConversionService;
     }
 
-    // 根据VirtualId获取原始ID
-    public Long getOriginalIdFromVirtualId(String virtualId) {
-        String originalIdStr = (String) redisTemplate.opsForValue().get(VidKey + virtualId);
-        Long originalId = null;
-
-        if (originalIdStr != null) {
-            // 清理潜在的双引号（如 Redis 中存的是 "\"1\""）
-            String cleaned = originalIdStr.replaceAll("^\"|\"$", "");
-            if (cleaned.matches("\\d+")) {
-                originalId = Long.parseLong(cleaned);
-            }
-        }
-
-        if (originalId == null) {
-            originalId = IdEncryptor.decryptId(virtualId);
-            if (originalId != null) {
-                redisTemplate.opsForValue().set(VidKey + virtualId, String.valueOf(originalId), 1, TimeUnit.DAYS);
-                redisTemplate.opsForValue().set(VidKey + originalId, virtualId, 1, TimeUnit.DAYS);
-            }
-        }
-
-        return originalId;
-    }
+    // // 根据VirtualId获取原始ID
+    // public Long getOriginalIdFromVirtualId(String virtualId) {
+    //     String originalIdStr = (String) redisTemplate.opsForValue().get(RedisKey.QUESTION_VID_KEY + virtualId);
+    //     Long originalId = null;
+    //
+    //     if (originalIdStr != null) {
+    //         // 清理潜在的双引号（如 Redis 中存的是 "\"1\""）
+    //         String cleaned = originalIdStr.replaceAll("^\"|\"$", "");
+    //         if (cleaned.matches("\\d+")) {
+    //             originalId = Long.parseLong(cleaned);
+    //         }
+    //     }
+    //
+    //     if (originalId == null) {
+    //         originalId = IdEncryptor.decryptId(virtualId);
+    //         if (originalId != null) {
+    //             redisTemplate.opsForValue().set(RedisKey.QUESTION_VID_KEY + virtualId, String.valueOf(originalId), 1, TimeUnit.DAYS);
+    //             redisTemplate.opsForValue().set(RedisKey.QUESTION_VID_KEY + originalId, virtualId, 1, TimeUnit.DAYS);
+    //         }
+    //     }
+    //
+    //     return originalId;
+    // }
 
 
     @Override
@@ -141,7 +145,7 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
     @Override
     public String getQuestionAnswerByVirtualId(String virtualId) {
         // 解析虚拟ID
-        long originalId = getOriginalIdFromVirtualId(virtualId);
+        long originalId = idConversionService.getOriginalIdFromVirtualId(virtualId);
 
         // 尝试从缓存获取答案
         String answerCacheKey = ANSWER_CACHE_KEY + originalId;
@@ -249,7 +253,7 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
         final String QUESTION_INDEX_CACHE_KEY = RedisConfig.getKey() + "Question:CategoryIndex:";
 
         // 1.解析虚拟ID
-        long originalId = getOriginalIdFromVirtualId(virtualId);
+        long originalId = idConversionService.getOriginalIdFromVirtualId(virtualId);
 
         // 2. 尝试从缓存获取完整的结果
         String resultCacheKey = CATEGORY_QUESTIONS_CACHE_KEY + originalId + ":" + page + ":" + pageSize;
@@ -417,12 +421,12 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
                 dto.setId((long) sequentialIndex++);
 
                 // 获取虚拟ID (使用缓存)
-                String qVirtualId = (String) redisTemplate.opsForValue().get(VidKey + q.getId());
+                String qVirtualId = (String) redisTemplate.opsForValue().get(RedisKey.QUESTION_VID_KEY + q.getId());
                 if (qVirtualId == null) {
                     qVirtualId = IdEncryptor.encryptId(q.getId());
                     // 缓存虚拟ID
-                    redisTemplate.opsForValue().set(VidKey + q.getId(), qVirtualId, 1, TimeUnit.DAYS);
-                    redisTemplate.opsForValue().set(VidKey + qVirtualId, String.valueOf(q.getId()), 1, TimeUnit.DAYS);
+                    redisTemplate.opsForValue().set(RedisKey.QUESTION_VID_KEY + q.getId(), qVirtualId, 1, TimeUnit.DAYS);
+                    redisTemplate.opsForValue().set(RedisKey.QUESTION_VID_KEY + qVirtualId, String.valueOf(q.getId()), 1, TimeUnit.DAYS);
                 }
 
                 dto.setVirtualId(qVirtualId);
@@ -532,7 +536,7 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
     @Override
     public QuestionResponseDTO getQuestionWithRealId(String virtualId) {
         // 解析虚拟ID获取原始ID
-        Long originalId = getOriginalIdFromVirtualId(virtualId);
+        Long originalId = idConversionService.getOriginalIdFromVirtualId(virtualId);
         if (originalId == null) {
             return null;
         }

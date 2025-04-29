@@ -29,6 +29,13 @@ spring:
           max-idle: 10     # 最大空闲连接数
           min-idle: 5      # 最小空闲连接数
 
+  # rabbit 配置
+  rabbitmq:
+    port: 5672
+    host: localhost
+    username: admin
+    password: admin
+
 eureka:
   client:
     service-url:

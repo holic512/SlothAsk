@@ -7,7 +7,7 @@
  */
 package org.example.servicequestion.user.history.service.Impl;
 
-import org.example.servicequestion.config.Redis.RedisConfig;
+import org.example.servicequestion.config.Redis.RedisKey;
 import org.example.servicequestion.user.history.mapper.UserHistoryUserQuestionHistoryMapper;
 import org.example.servicequestion.user.history.service.DeleteUserHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +19,6 @@ public class DeleteUserHistoryServiceImpl implements DeleteUserHistoryService {
 
     private final UserHistoryUserQuestionHistoryMapper userHistoryMapper;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final static String VidKey = RedisConfig.getKey() + "Question:VId:";
-
 
     @Autowired
     public DeleteUserHistoryServiceImpl(UserHistoryUserQuestionHistoryMapper userHistoryMapper, RedisTemplate<String, Object> redisTemplate) {
@@ -35,7 +33,7 @@ public class DeleteUserHistoryServiceImpl implements DeleteUserHistoryService {
         }
 
         // 获取真实题目id
-        String questionId = (String) redisTemplate.opsForValue().get(VidKey + questionVId);
+        String questionId = (String) redisTemplate.opsForValue().get(RedisKey.QUESTION_VID_KEY + questionVId);
 
         try {
             // 这里需要根据实际数据库表结构实现删除逻辑

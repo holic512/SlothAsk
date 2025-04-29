@@ -1,24 +1,33 @@
 <script setup>
-import {useRouter, useRoute} from 'vue-router'
-import SearchBox from './components/SearchBox/SearchBox.vue'
-import {useSessionStore} from "@/pinia/Session";
-import {watch, ref, computed, onMounted, onUnmounted} from "vue";
+import {useRoute, useRouter} from 'vue-router';
+import {computed, onMounted, onUnmounted, ref, watch} from 'vue';
 import {useTopMenuStore} from "@/view/HomePage/view/TopMenu/pinia/topMenuStore";
+import {getUserNameAndAvatar} from "@/view/HomePage/view/TopMenu/Api/ApiUserInfo";
+import {useSessionStore} from "@/pinia/Session";
 import UserUtil from "@/view/HomePage/view/TopMenu/components/UserUtil/UserUtil.vue";
-import {getUserNameAndAvatar} from '@/view/HomePage/view/TopMenu/Api/ApiUserInfo';
-import {Bell, Menu} from "@element-plus/icons-vue";
+import SearchBox from "@/view/HomePage/view/TopMenu/components/SearchBox/SearchBox.vue";
+import {ArrowRight, Bell, Menu, QuestionFilled, Reading, User} from '@element-plus/icons-vue';
 
-const router = useRouter()
-const route = useRoute()
+const router = useRouter();
+const route = useRoute();
+
+// 菜单配置项
+const menuItems = ref([
+  {path: '/study', name: '学习', icon: Reading},
+  {path: '/questionbank', name: '题库', icon: QuestionFilled},
+  // { path: '/contest', name: '竞赛' },
+  // { path: '/discussion', name: '讨论' },
+  // { path: '/interview', name: '面试分享' }
+]);
 
 // 响应式屏幕宽度检测
 const windowWidth = ref(window.innerWidth);
-const isMobile = computed(() => windowWidth.value < 768);
+const isMobile = computed(() => windowWidth.value < 800);
 const showMobileMenu = ref(false);
 
 const updateWindowWidth = () => {
   windowWidth.value = window.innerWidth;
-  if (windowWidth.value >= 768) {
+  if (windowWidth.value >= 800) {
     showMobileMenu.value = false;
   }
 };
@@ -51,7 +60,7 @@ const fetchUserInfo = async () => {
 };
 
 const handleSelect = (key) => {
-  router.push(key)
+  router.push(key);
   showMobileMenu.value = false;
 }
 
@@ -109,7 +118,7 @@ const toggleMobileMenu = () => {
       <!-- 移动端菜单按钮 -->
       <button v-if="isMobile" class="mobile-menu-button" @click="toggleMobileMenu">
         <el-icon :size="20">
-          <Menu/>
+          <Menu />
         </el-icon>
       </button>
 
@@ -122,15 +131,9 @@ const toggleMobileMenu = () => {
       <nav v-if="!isMobile" class="desktop-nav">
         <ul class="nav-list">
           <li
-              v-for="item in [
-              { path: '/study', name: '学习' },
-              { path: '/questionbank', name: '题库' },
-              { path: '/contest', name: '竞赛' },
-              { path: '/discussion', name: '讨论' },
-              { path: '/interview', name: '面试分享' }
-            ]"
+              v-for="item in menuItems"
               :key="item.path"
-              :class="['nav-item', { 'active': route.path === item.path }]"
+              :class="{ 'nav-item': true, 'active': route.path === item.path }"
               @click="handleSelect(item.path)"
           >
             {{ item.name }}
@@ -148,7 +151,7 @@ const toggleMobileMenu = () => {
           <!-- 消息通知 -->
           <button class="icon-button">
             <el-icon :size="isMobile ? 20 : 18">
-              <Bell/>
+              <Bell />
             </el-icon>
           </button>
 
@@ -165,11 +168,13 @@ const toggleMobileMenu = () => {
               <div class="avatar-container">
                 <el-avatar
                     size="small"
+                    style="display: flex; align-items: center; justify-content: center;margin-right: 12px"
                     :src="userInfo.avatar"
                     v-if="userInfo.avatar"
                 />
                 <el-avatar
                     size="small"
+                    style="display: flex; align-items: center; justify-content: center;margin-right: 12px"
                     v-else
                 >{{ getAvatarText(userInfo.nickname) }}
                 </el-avatar>
@@ -197,26 +202,51 @@ const toggleMobileMenu = () => {
     <transition name="slide-down">
       <div v-if="isMobile && showMobileMenu" class="mobile-menu">
         <div class="mobile-menu-content">
+          <!-- 菜单导航项 -->
           <ul class="mobile-nav-list">
             <li
-                v-for="item in [
-                { path: '/', name: '学习' },
-                { path: '/questionbank', name: '题库' },
-                { path: '/contest', name: '竞赛' },
-                { path: '/discussion', name: '讨论' },
-                { path: '/interview', name: '面试分享' }
-              ]"
+                v-for="item in menuItems"
                 :key="item.path"
-                :class="['mobile-nav-item', { 'active': route.path === item.path }]"
+                :class="{ 'mobile-nav-item': true, 'active': route.path === item.path }"
                 @click="handleSelect(item.path)"
             >
-              {{ item.name }}
+              <div class="mobile-nav-item-content">
+                <div class="mobile-nav-item-icon">
+                  <el-icon :size="18">
+                    <component :is="item.icon" />
+                  </el-icon>
+                </div>
+                <span class="mobile-nav-item-text">{{ item.name }}</span>
+                <el-icon class="mobile-nav-item-arrow">
+                  <ArrowRight />
+                </el-icon>
+              </div>
             </li>
           </ul>
+
+          <!-- 搜索框 -->
           <div class="mobile-search-container">
             <SearchBox @search="handleSearch"/>
           </div>
-          <button v-if="!topMenuStore.isLogin" class="mobile-login-button" @click="handleLogin">登录</button>
+
+          <!-- 登录按钮 -->
+          <div v-if="!topMenuStore.isLogin" class="mobile-login-section">
+            <button class="mobile-login-button" @click="handleLogin">
+              <div class="mobile-login-content">
+                <el-icon :size="18">
+                  <User />
+                </el-icon>
+                <span>登录 / 注册账号</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- 会员按钮 -->
+          <div class="mobile-vip-section">
+            <button class="mobile-vip-button">
+              <span>开通Sloth会员，解锁全部功能</span>
+            </button>
+          </div>
         </div>
       </div>
     </transition>
@@ -227,15 +257,16 @@ const toggleMobileMenu = () => {
 /* 基础样式 */
 .navbar {
   width: 100%;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #e0e0e0;
+  position: relative;
 }
 
 .navbar-container {
   display: flex;
   align-items: center;
   height: 52px;
-  max-width: 1380px;
-  margin: 0 auto;
+  padding: 0 36px; /* 添加左右内边距保持间距 */
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -243,21 +274,13 @@ const toggleMobileMenu = () => {
 .logo-container {
   display: flex;
   align-items: center;
-
   cursor: pointer;
-  margin-right: 32px;
+  margin-right: 48px;
 }
 
 .logo-img {
   height: 24px;
   object-fit: contain;
-}
-
-.logo-text {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a1a;
-  letter-spacing: -0.5px;
 }
 
 /* 桌面导航菜单 */
@@ -381,110 +404,172 @@ const toggleMobileMenu = () => {
   align-items: center;
   justify-content: center;
   color: #333;
+  transition: transform 0.2s ease;
+}
+
+.mobile-menu-button:active {
+  transform: scale(0.92);
 }
 
 /* 移动端菜单 */
 .mobile-menu {
   position: absolute;
-  top: 100%;
+  top: 52px;
   left: 0;
   right: 0;
   background: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
   z-index: 999;
+  width: 100%;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  overflow: hidden;
 }
 
 .mobile-menu-content {
-  padding: 16px 0;
+  padding: 8px 0 16px;
 }
 
 .mobile-nav-list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 8px 0;
 }
 
 .mobile-nav-item {
-  padding: 14px 24px;
+  padding: 0;
   font-size: 15px;
-  color: #333;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
   font-weight: 500;
+  position: relative;
 }
 
-.mobile-nav-item:hover {
-  background-color: #f5f5f5;
+.mobile-nav-item-content {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  transition: background-color 0.15s;
 }
 
-.mobile-nav-item.active {
-  color: #000;
-  font-weight: 600;
+.mobile-nav-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  color: #555;
+}
+
+.mobile-nav-item-text {
+  flex: 1;
+  color: #333;
+}
+
+.mobile-nav-item-arrow {
+  font-size: 14px;
+  color: #999;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-item:hover .mobile-nav-item-content {
+  background-color: #f8f8f8;
+}
+
+.mobile-nav-item:hover .mobile-nav-item-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.mobile-nav-item.active .mobile-nav-item-content {
   background-color: #f0f0f0;
 }
 
+.mobile-nav-item.active .mobile-nav-item-text {
+  color: #000;
+  font-weight: 600;
+}
+
+.mobile-nav-item.active .mobile-nav-item-icon {
+  color: #333;
+}
+
 .mobile-search-container {
-  padding: 16px 24px;
+  padding: 16px 20px;
+  margin: 8px 0;
   border-top: 1px solid #f0f0f0;
   border-bottom: 1px solid #f0f0f0;
 }
 
+.mobile-login-section {
+  padding: 8px 16px;
+}
+
 .mobile-login-button {
   width: 100%;
-  padding: 14px 24px;
-  text-align: left;
   background: none;
   border: none;
   cursor: pointer;
+  padding: 0;
+  transition: all 0.15s;
+}
+
+.mobile-login-content {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  transition: background-color 0.15s;
+}
+
+.mobile-login-content span {
+  margin-left: 10px;
   font-size: 15px;
-  color: #333;
   font-weight: 500;
+  color: #333;
+}
+
+.mobile-login-button:hover .mobile-login-content {
+  background-color: #eee;
+}
+
+.mobile-vip-section {
+  padding: 8px 16px;
+  margin-top: 8px;
+}
+
+.mobile-vip-button {
+  width: 100%;
+  background-color: #1a1a1a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
   transition: all 0.2s;
 }
 
-.mobile-login-button:hover {
-  background-color: #f5f5f5;
+.mobile-vip-button:hover {
+  background-color: #333;
 }
 
 /* 动画效果 */
 .slide-down-enter-active,
 .slide-down-leave-active {
-  transition: all 0.3s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 800px;
 }
 
 .slide-down-enter-from,
 .slide-down-leave-to {
-  transform: translateY(-20px);
+  max-height: 0;
   opacity: 0;
-}
-
-/* 响应式调整 */
-/* 调整移动端样式 */
-@media (max-width: 768px) {
-  .navbar-container {
-    height: 48px; /* 从56px缩小到48px */
-    padding: 0 12px; /* 从16px缩小到12px */
-  }
-
-  .logo-text {
-    font-size: 15px; /* 从16px缩小到15px */
-  }
-
-  .vip-button {
-    padding: 5px 10px; /* 从8px 12px缩小 */
-    font-size: 12px; /* 从13px缩小 */
-  }
-}
-
-
-@media (max-width: 480px) {
-  .logo-text {
-    display: none;
-  }
-
-  .mobile-menu-button {
-    margin-right: 8px;
-  }
+  transform: translateY(-8px);
 }
 </style>
 

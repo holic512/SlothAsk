@@ -24,7 +24,14 @@
         <div class="actions">
           <el-button text icon="view" @click="handleShareClick">{{ question.viewCount }}</el-button>
           <el-button text icon="share" @click="handleShareClick">分享</el-button>
-          <el-button text icon="star" @click="handleStarClick">收藏</el-button>
+          <el-button 
+            :icon="isFavorited ? 'Star' : 'star'"
+            :text="!isFavorited"
+            :type="isFavorited ? 'warning' : 'default'"
+            @click="handleStarClick"
+          >
+            {{ isFavorited ? '已收藏' : '收藏' }}
+          </el-button>
         </div>
       </div>
     </div>
@@ -41,6 +48,8 @@
 import {computed, defineAsyncComponent, onMounted, ref, watch} from 'vue';
 import {useRoute} from 'vue-router';
 import {useQuestionBankStore} from '@/view/HomePage/view/StudyPage/store/QuestionBank';
+import axios from '@/axios/axios';
+import {ElMessage} from 'element-plus';
 
 import {setTitle} from '@/utils/title';
 import {QuestionInterface} from "@/view/HomePage/view/QuestionPage/interface/QuestionInterface";
@@ -65,12 +74,37 @@ const questionBank = useQuestionBankStore();
 
 // 根据路由获取 题目信息
 const question = ref<QuestionInterface>();
+// 收藏状态
+const isFavorited = ref(false);
+
+// 检查题目是否已收藏
+const checkFavoriteStatus = async (virtualId: string) => {
+  try {
+    // 这里需要调用检查收藏状态的API
+    const response = await axios.get('service-question/user/favQuestion/checkFav', {
+      params: {
+        virtualId
+      },
+      headers: {
+        'X-User-Id': localStorage.getItem('userId') || '0'
+      }
+    });
+    
+    if (response.data.status === 200) {
+      isFavorited.value = response.data.data;
+    }
+  } catch (error) {
+    console.error('检查收藏状态出错：', error);
+  }
+};
 
 watch(() => route.params.questionId as string, async (newValue) => {
   if (newValue) {  // 确保newValue存在
     const result = await ApiGetQuestionByVirtualId(newValue);  // 使用newValue而不是questionId.value
     if (result.status === 200) {
       question.value = result.data;
+      // 获取题目信息后检查收藏状态
+      checkFavoriteStatus(newValue);
     }
   }
 }, {immediate: true});
@@ -128,9 +162,54 @@ const questionComponent = computed(() => {
 const handleShareClick = () => {
   console.log('分享点击');
 };
-const handleStarClick = () => {
-  console.log('收藏点击');
+
+// 收藏/取消收藏
+const handleStarClick = async () => {
+  if (!question.value) return;
+  const virtualId = route.params.questionId as string;
+  
+  try {
+    if (isFavorited.value) {
+      // 取消收藏
+      const response = await axios.post('service-question/user/favQuestion/removeFav', null, {
+        params: {
+          virtualId
+        },
+        headers: {
+          'X-User-Id': localStorage.getItem('userId') || '0'
+        }
+      });
+      
+      if (response.data.status === 200) {
+        isFavorited.value = false;
+        ElMessage.success('已取消收藏');
+      } else {
+        ElMessage.error('取消收藏失败');
+      }
+    } else {
+      // 添加收藏
+      const response = await axios.post('service-question/user/favQuestion/addFav', null, {
+        params: {
+          virtualId
+        },
+        headers: {
+          'X-User-Id': localStorage.getItem('userId') || '0'
+        }
+      });
+      
+      if (response.data.status === 200) {
+        isFavorited.value = true;
+        ElMessage.success('已添加收藏');
+      } else {
+        ElMessage.error('收藏失败');
+      }
+    }
+  } catch (error) {
+    console.error('收藏操作出错：', error);
+    ElMessage.error('操作失败，请稍后重试');
+  }
 };
+
 const handlePassClick = () => {
   console.log('查看点击');
 };
@@ -226,6 +305,12 @@ const hasMoreTags = computed(() => {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .stat-item {

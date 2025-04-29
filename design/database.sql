@@ -686,4 +686,25 @@ CREATE TABLE `user_question_history`
   COLLATE = utf8mb4_general_ci COMMENT = '用户访问问题历史记录表'
   ROW_FORMAT = Dynamic;
 
+-- ----------------------------
+-- Table structure for user_favorite_question
+-- ----------------------------
+DROP TABLE IF EXISTS `user_favorite_question`;
+CREATE TABLE `user_favorite_question`
+(
+    `id`          bigint   NOT NULL AUTO_INCREMENT COMMENT '收藏记录ID',
+    `user_id`     bigint   NOT NULL COMMENT '用户ID',
+    `question_id` bigint   NOT NULL COMMENT '题目ID',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '收藏时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE INDEX `uniq_user_question` (`user_id`, `question_id`) COMMENT '防止重复收藏',
+    INDEX `idx_user` (`user_id`) USING BTREE COMMENT '用户维度查询',
+    INDEX `idx_question` (`question_id`) USING BTREE COMMENT '题目维度查询',
+    CONSTRAINT `fk_favorite_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+    CONSTRAINT `fk_favorite_question` FOREIGN KEY (`question_id`) REFERENCES `question` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci COMMENT = '用户题目收藏表'
+  ROW_FORMAT = Dynamic;
+
 SET FOREIGN_KEY_CHECKS = 1;
