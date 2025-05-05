@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class GetUserQuestionServiceImpl implements GetUserQuestionService {
@@ -549,6 +550,67 @@ public class GetUserQuestionServiceImpl implements GetUserQuestionService {
 
         // 封装问题信息和真实ID
         return new QuestionResponseDTO(questionDTO, originalId);
+    }
+
+    @Override
+    public List<HotQuestionDTO> getHotQuestionList() {
+        // 定义Redis缓存键和过期时间
+        final String HOT_QUESTIONS_CACHE_KEY = RedisConfig.getKey() + "Question:HotList";
+        final long CACHE_EXPIRE_TIME = 12; // 12小时
+        
+        // 首先尝试从缓存获取
+        Object cachedValue = redisTemplate.opsForValue().get(HOT_QUESTIONS_CACHE_KEY);
+        if (cachedValue != null) {
+            try {
+                if (cachedValue instanceof List) {
+                    // 直接返回缓存的列表
+                    return (List<HotQuestionDTO>) cachedValue;
+                } else if (cachedValue instanceof Collection) {
+                    // 尝试转换集合
+                    ObjectMapper mapper = new ObjectMapper();
+                    return mapper.convertValue(cachedValue,
+                            mapper.getTypeFactory().constructCollectionType(List.class, HotQuestionDTO.class));
+                }
+            } catch (Exception e) {
+                // 转换失败，将从数据库重新查询
+                System.err.println("缓存转换失败: " + e.getMessage());
+            }
+        }
+        
+        // 缓存未命中，从数据库查询
+        // 只查询需要的字段：id, title, view_count
+        QueryWrapper<Question> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("id", "title", "view_count")
+                .orderByDesc("view_count")
+                .last("LIMIT 10"); // 只取前10条
+        
+        List<Question> hotQuestions = userQuestionQuestionMapper.selectList(queryWrapper);
+        
+        // 转换为DTO
+        List<HotQuestionDTO> hotQuestionDTOs = hotQuestions.stream()
+                .map(q -> {
+                    // 获取虚拟ID (使用缓存)
+                    String qVirtualId = (String) redisTemplate.opsForValue().get(RedisKey.QUESTION_VID_KEY + q.getId());
+                    if (qVirtualId == null) {
+                        qVirtualId = IdEncryptor.encryptId(q.getId());
+                        // 缓存虚拟ID
+                        redisTemplate.opsForValue().set(RedisKey.QUESTION_VID_KEY + q.getId(), qVirtualId, 1, TimeUnit.DAYS);
+                        redisTemplate.opsForValue().set(RedisKey.QUESTION_VID_KEY + qVirtualId, String.valueOf(q.getId()), 1, TimeUnit.DAYS);
+                    }
+                    
+                    // 创建热门题目DTO
+                    return new HotQuestionDTO(
+                            qVirtualId,
+                            q.getTitle(),
+                            q.getViewCount()
+                    );
+                })
+                .collect(Collectors.toList());
+        
+        // 缓存结果，设置较长的过期时间
+        redisTemplate.opsForValue().set(HOT_QUESTIONS_CACHE_KEY, hotQuestionDTOs, CACHE_EXPIRE_TIME, TimeUnit.HOURS);
+        
+        return hotQuestionDTOs;
     }
 
 }

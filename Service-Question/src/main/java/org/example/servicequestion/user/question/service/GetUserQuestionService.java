@@ -7,9 +7,12 @@
  */
 package org.example.servicequestion.user.question.service;
 
+import org.example.servicequestion.user.question.dto.HotQuestionDTO;
 import org.example.servicequestion.user.question.dto.QuestionDTO;
 import org.example.servicequestion.user.question.dto.QuestionListDTO;
 import org.example.servicequestion.user.question.dto.QuestionResponseDTO;
+
+import java.util.List;
 
 public interface GetUserQuestionService {
 
@@ -64,4 +67,10 @@ public interface GetUserQuestionService {
      */
     void recordQuestionView(Long questionId, String userId);
 
+    /**
+     * 获取热门题目列表
+     * 
+     * @return 热门题目列表，按访问量排序，返回前10条
+     */
+    List<HotQuestionDTO> getHotQuestionList();
 }

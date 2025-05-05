@@ -11,6 +11,7 @@ package org.example.servicequestion.user.question.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.example.servicequestion.config.ApiResponse.ApiResponse;
+import org.example.servicequestion.user.question.dto.HotQuestionDTO;
 import org.example.servicequestion.user.question.dto.QuestionDTO;
 import org.example.servicequestion.user.question.dto.QuestionListDTO;
 import org.example.servicequestion.user.question.dto.QuestionResponseDTO;
@@ -18,6 +19,8 @@ import org.example.servicequestion.user.question.service.GetUserQuestionService;
 import org.example.servicequestion.user.question.service.QuestionHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/user/question")
@@ -108,6 +111,17 @@ public class GetUserQuestionController {
         }
 
         return new ApiResponse(200, "获取分类题目列表成功", result);
+    }
+
+    /**
+     * 获取热门题目列表
+     *
+     * @return 包含热门题目列表的API响应
+     */
+    @GetMapping("/hot-questions")
+    public ApiResponse getHotQuestions() {
+        List<HotQuestionDTO> hotQuestions = getUserQuestionService.getHotQuestionList();
+        return new ApiResponse(200, "获取热门题目列表成功", hotQuestions);
     }
 
 }

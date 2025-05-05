@@ -3,45 +3,101 @@
     <div class="head">
       <h2 class="title">热门题目</h2>
     </div>
-    <div class="hot-questions-container">
-      <ul class="hot-questions-list">
-        <li v-for="question in hotQuestions" :key="question.id" @click="handleQuestionClick(question.id)"
+    <div v-loading="loading" class="hot-questions-container">
+      <ul v-if="hotQuestions.length > 0" class="hot-questions-list">
+        <li v-for="question in hotQuestions" :key="question.virtualId" @click="handleQuestionClick(question.virtualId)"
             class="question-item">
           <div class="question-title">{{ question.title }}</div>
-          <div class="view-count">
-            <img src="../../image/hot.png" alt="View" class="el-icon" />
-            {{ question.view_count }}
+          <div :class="getViewCountClass(question.viewCount)" class="view-count">
+            <el-icon v-if="isHot(question.viewCount)"><DataLine /></el-icon>
+            <el-icon><View /></el-icon>
+            {{ formatViewCount(question.viewCount) }}
           </div>
         </li>
       </ul>
+      <div v-else class="empty-state">
+        <el-empty description="暂无热门题目" />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useRouter } from 'vue-router';
-import { useQuestionBankStore } from '@/view/HomePage/view/StudyPage/store/QuestionBank';
+import {onMounted, ref} from 'vue';
+import {useRouter} from 'vue-router';
+import {ElMessage} from 'element-plus';
+import {DataLine, View} from '@element-plus/icons-vue';
+import {ApiGetHotQuestions} from '../../service/ApiGetHotQuestions';
+
+// 定义热门题目的接口
+interface HotQuestion {
+  virtualId: string;
+  title: string;
+  viewCount: number;
+}
 
 const router = useRouter();
-const questionBank = useQuestionBankStore();
+const loading = ref(false);
+const hotQuestions = ref<HotQuestion[]>([]);
 
-// 获取所有题目并按照浏览次数降序排序，取前10个
-const hotQuestions = computed(() => {
-  return [...questionBank.questions]
-      .sort((a, b) => b.view_count - a.view_count)
-      .slice(0, 10);
-});
+// 获取热门题目列表
+const fetchHotQuestions = async () => {
+  loading.value = true;
+  try {
+    const response = await ApiGetHotQuestions();
+    if (response.status === 200) {
+      hotQuestions.value = response.data;
+    } else {
+      ElMessage.error(response.message || '获取热门题目失败');
+    }
+  } catch (error) {
+    console.error('获取热门题目失败:', error);
+    ElMessage.error('获取热门题目失败，请稍后重试');
+  } finally {
+    loading.value = false;
+  }
+};
 
 // 处理点击题目事件，跳转到对应的题目详情页
-const handleQuestionClick = (questionId: number) => {
+const handleQuestionClick = (virtualId: string) => {
   router.push({
     name: 'QuestionPage',
     params: {
-      questionId: questionId.toString()
+      questionId: virtualId
     }
   });
 };
+
+// 根据浏览量获取对应的样式类
+const getViewCountClass = (viewCount: number): string => {
+  if (viewCount >= 1000) {
+    return 'view-count-hot';
+  } else if (viewCount >= 500) {
+    return 'view-count-medium';
+  } else {
+    return 'view-count-normal';
+  }
+};
+
+// 判断是否为热门内容
+const isHot = (viewCount: number): boolean => {
+  return viewCount >= 500;
+};
+
+// 格式化浏览量数字
+const formatViewCount = (viewCount: number): string => {
+  if (viewCount >= 10000) {
+    return (viewCount / 10000).toFixed(1) + '万';
+  } else if (viewCount >= 1000) {
+    return (viewCount / 1000).toFixed(1) + 'k';
+  }
+  return viewCount.toString();
+};
+
+// 组件挂载时获取热门题目
+onMounted(() => {
+  fetchHotQuestions();
+});
 </script>
 
 <style scoped>
@@ -72,6 +128,7 @@ const handleQuestionClick = (questionId: number) => {
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #e0e0e0 transparent;
+  min-height: 300px;
 }
 
 .hot-questions-container::-webkit-scrollbar {
@@ -126,7 +183,25 @@ const handleQuestionClick = (questionId: number) => {
   gap: 4px;
 }
 
-.view-count .el-icon {
-  font-size: 14px;
+.view-count-normal {
+  color: #909399;
+}
+
+.view-count-medium {
+  color: #e6a23c;
+  font-weight: 500;
+}
+
+.view-count-hot {
+  color: #f56c6c;
+  font-weight: bold;
+}
+
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  min-height: 200px;
 }
 </style>
