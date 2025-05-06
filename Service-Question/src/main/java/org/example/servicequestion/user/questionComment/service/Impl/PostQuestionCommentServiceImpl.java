@@ -54,7 +54,7 @@ public class PostQuestionCommentServiceImpl implements PostQuestionCommentServic
     @Override
     public PostCommentStatusEnum addComment(Long userId, CommentRequestDTO requestDTO) {
         // 检查用户是否登录
-        if (userId == null) {
+        if (userId == null || userId <= 0) {
             return PostCommentStatusEnum.USER_NOT_LOGGED_IN;
         }
 
@@ -92,7 +92,7 @@ public class PostQuestionCommentServiceImpl implements PostQuestionCommentServic
     @Override
     public PostCommentStatusEnum likeComment(Long userId, Long commentId) {
         // 检查用户是否登录
-        if (userId == null) {
+        if (userId == null || userId <= 0) {
             return PostCommentStatusEnum.USER_NOT_LOGGED_IN;
         }
 
@@ -132,7 +132,7 @@ public class PostQuestionCommentServiceImpl implements PostQuestionCommentServic
     @Override
     public PostCommentStatusEnum unlikeComment(Long userId, Long commentId) {
         // 检查用户是否登录
-        if (userId == null) {
+        if (userId == null || userId <= 0) {
             return PostCommentStatusEnum.USER_NOT_LOGGED_IN;
         }
 
@@ -154,7 +154,7 @@ public class PostQuestionCommentServiceImpl implements PostQuestionCommentServic
     @Override
     public PostCommentStatusEnum deleteComment(Long userId, Long commentId) {
         // 检查用户是否登录
-        if (userId == null) {
+        if (userId == null || userId <= 0) {
             return PostCommentStatusEnum.USER_NOT_LOGGED_IN;
         }
 

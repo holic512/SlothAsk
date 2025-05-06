@@ -9,7 +9,9 @@
  */
 package org.example.servicegateway.config.satoken;
 
+import cn.dev33.satoken.context.SaHolder;
 import cn.dev33.satoken.reactor.filter.SaReactorFilter;
+import cn.dev33.satoken.router.SaHttpMethod;
 import cn.dev33.satoken.router.SaRouter;
 import org.example.servicegateway.util.StpKit;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +30,19 @@ public class SaTokenConfigure {
                 // 指定拦截路由与放行路由
                 .addInclude("/**")
                 .addExclude("/favicon.ico")
+
+                // 前置函数：在每次认证函数之前执行
+                .setBeforeAuth(obj -> {
+                    SaHolder.getResponse()
+                            // ---------- 设置跨域响应头 ----------
+                            .setHeader("Access-Control-Allow-Origin", "*")
+                            .setHeader("Access-Control-Allow-Methods", "*")
+                            .setHeader("Access-Control-Allow-Headers", "*")
+                            .setHeader("Access-Control-Max-Age", "3600");
+
+                    // 如果是预检请求，直接放行
+                    SaRouter.match(SaHttpMethod.OPTIONS).back();
+                })
 
                 // 认证函数：每次请求执行
                 .setAuth(obj -> {

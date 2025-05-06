@@ -33,12 +33,13 @@ public class UserHeaderGlobalFilter implements GlobalFilter, Ordered {
 
                 System.out.println("用户ID:" + userId + "发起请求");
 
-
+                String upcId = (String) StpKit.USER.getTokenSession().get("userUpcId");
+                
                 // 插入用户的 id 和 UpcId
                 ServerHttpRequest modifiedRequest = exchange.getRequest()
                         .mutate()
                         .header("X-User-Id", userId)
-                        .header("X-Upc-Id", StpKit.USER.getSession().getString("userUpcId"))
+                        .header("X-Upc-Id", upcId)
                         .build();
                 exchange = exchange.mutate().request(modifiedRequest).build();
             } else if (StpKit.ADMIN.isLogin()) {
@@ -53,6 +54,8 @@ public class UserHeaderGlobalFilter implements GlobalFilter, Ordered {
                         .build();
                 exchange = exchange.mutate().request(modifiedRequest).build();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             SaReactorSyncHolder.clearContext();
         }

@@ -59,7 +59,7 @@ public class PostFavQuestionServiceImpl implements PostFavQuestionService {
     public PostFavQuestionEnum addFavQuestion(String virtualId, Long userId) {
         try {
             // 参数校验
-            if (virtualId == null || userId == null || virtualId.isEmpty())
+            if (virtualId == null || userId == null || userId <= 0 || virtualId.isEmpty())
                 return PostFavQuestionEnum.FAIL;
 
             // 1.解析问题id

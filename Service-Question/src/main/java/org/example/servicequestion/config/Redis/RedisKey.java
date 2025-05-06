@@ -29,6 +29,6 @@ public class RedisKey {
      * 格式为：{前缀}fav:question:user:{用户ID} -> ZSet<题目ID><时间戳>
      * 用于快速判断用户是否收藏某道题，以及获取用户的所有收藏题目
      */
-    public static final String FAV_QUESTION_USER_KEY = RedisConfig.getKey() + "fav:question:user";
+    public static final String FAV_QUESTION_USER_KEY = RedisConfig.getKey() + "fav:question:user:";
 
 }

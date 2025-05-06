@@ -1,8 +1,9 @@
 package org.example.serviceuser.util.SliderCaptchaGenerator;
 
 import org.springframework.core.io.ClassPathResource;
-import java.io.File;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Random;
 
 /**
@@ -14,7 +15,7 @@ import java.util.Random;
  * @since 2025-01-14
  */
 public class RandomImageLoader {
-    
+
     /**
      * 获取随机验证码背景图片
      * 从public/captchaImage/目录下随机选择一张图片（1-15.jpg）
@@ -22,7 +23,7 @@ public class RandomImageLoader {
      * @return 随机选择的图片文件
      * @throws IOException 当图片文件不存在或无法访问时抛出异常
      */
-    public static File GetRandomImageLoader() throws IOException {
+    public static InputStream GetRandomImageLoader() throws IOException {
         // 1. 生成 1-15 之间的随机数
         Random random = new Random();
         int imageNumber = random.nextInt(15) + 1;  // 生成 1 到 15 之间的数字
@@ -33,12 +34,7 @@ public class RandomImageLoader {
         // 3. 获取文件路径
         ClassPathResource resource = new ClassPathResource(fileName);
 
-        // 4. 确保文件存在
-        File file = resource.getFile();
-        if (!file.exists()) {
-            throw new IOException("Captcha image not found: " + file.getAbsolutePath());
-        }
-
-        return file;
+        // 4. 返回输入流
+        return resource.getInputStream();
     }
 }
