@@ -60,7 +60,7 @@ public class GetUserQuestionController {
         Long questionId = response.getRealId();
 
         // 1. 异步记录访问历史（独立服务）
-        if (userId > 0 && questionId != null) { // 只记录已登录用户的历史
+        if (userId != null && questionId != null) { // 只记录已登录用户的历史
             questionHistoryService.addHistoryRecord(userId, questionId);
         }
 
