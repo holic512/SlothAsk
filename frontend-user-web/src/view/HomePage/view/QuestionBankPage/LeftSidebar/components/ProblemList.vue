@@ -95,7 +95,7 @@ const items = ref<QuestionItem[]>([
   {
     id: 1,
     label: '我的收藏',
-    path: 'myFavoritesQuestion',
+    path: '/questionbank/myFavoritesQuestion',
     icon: StarFilled,
     locked: true,
     enabled: true,

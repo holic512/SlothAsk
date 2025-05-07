@@ -11,7 +11,6 @@ onMounted(async () => {
   setTitle('题库');
   try {
     await projectStore.fetchProjects();
-    console.log('加载的项目:', projectStore.projects); // 调试日志
   } catch (error) {
     console.error('获取项目时出错:', error);
   } finally {
@@ -21,42 +20,60 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="container">
-    <div class="page-content">
-        <div v-for="project in projectStore.projects" :key="project.id" class="project-section">
-          <h2 class="project-title">{{ project.name }}</h2>
-          <CategoryClass :projectId="project.id" />
+  <div class="bank-container">
+    <el-scrollbar height="100%">
+      <div class="page-content">
+        <div v-if="isLoading" class="loading-container">
+          <el-skeleton :rows="3" animated />
         </div>
-    </div>
+        <div v-else>
+          <div v-for="project in projectStore.projects" :key="project.id" class="project-section">
+            <h2 class="project-title">{{ project.name }}</h2>
+            <CategoryClass :projectId="project.id" />
+          </div>
+        </div>
+      </div>
+    </el-scrollbar>
   </div>
 </template>
 
 
 <style scoped>
-.container {
-  flex: 1;
-  display: flex;
-  justify-content: center;
+.bank-container {
+  width: 100%;
   height: 100%;
-
+  overflow: hidden;
+  padding: 0 36px;
 }
 
-
 .page-content {
-  width: 1380px;
-  margin-top: 50px;
-  padding: 12px;
-  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 1380px;
+  margin: 2rem auto 0;
+  box-sizing: border-box;
 }
 
 .project-title {
   margin: 0;
-  font-size: 22px;
+  font-size: 1.5rem;
   font-weight: 600;
   color: #1a1a1a;
   position: relative;
-  padding-left: 60px;
+  padding-left: 1rem;
+  border-left: 4px solid #409eff;
 }
 
+.loading-container {
+  padding: 2rem;
+}
 
+@media (max-width: 768px) {
+  .page-content {
+    margin-top: 1rem;
+  }
+  
+  .project-title {
+    font-size: 1.25rem;
+  }
+}
 </style>

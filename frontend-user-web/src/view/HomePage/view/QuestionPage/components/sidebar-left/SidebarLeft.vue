@@ -25,7 +25,7 @@
     </div>
 
     <!-- 题目列表 -->
-    <div class="question-list-container" v-loading="loading">
+    <el-scrollbar v-loading="loading" class="question-list-container">
       <ul class="question-list" v-if="filteredQuestions.length">
         <li
             v-for="question in filteredQuestions"
@@ -53,12 +53,12 @@
         </li>
       </ul>
       <el-empty v-else description="暂无题目"/>
-    </div>
+    </el-scrollbar>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref, computed, onMounted, watch} from 'vue';
+import {computed, inject, onMounted, ref, watch} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
 import {ElMessage} from 'element-plus';
 import {QuestionListInterface} from '../../interface/QuestionListInterface';
@@ -67,6 +67,9 @@ import {ApiGetCategoryQuestions} from '../../service/ApiGetCategoryQuestions';
 // 路由相关
 const route = useRoute();
 const router = useRouter();
+
+// 提供一个可选的关闭函数，从父组件获取
+const parentCloseSidebar = inject('closeSidebar', null);
 
 // 状态管理
 const loading = ref(false);
@@ -84,21 +87,6 @@ const filteredQuestions = computed(() => {
   );
 });
 
-// 获取题目列表数据
-const fetchQuestionList = async (virtualId: string) => {
-  try {
-    loading.value = true;
-    const response = await ApiGetCategoryQuestions(virtualId);
-    questionList.value = response.data;
-    currentPage.value = questionList.value?.currentPage || 1;
-  } catch (error) {
-    ElMessage.error('获取题目列表失败');
-    console.error('获取题目列表失败:', error);
-  } finally {
-    loading.value = false;
-  }
-};
-
 // 处理题目点击
 const handleQuestionClick = (virtualId: string) => {
   router.push({
@@ -107,11 +95,11 @@ const handleQuestionClick = (virtualId: string) => {
       questionId: virtualId
     }
   });
-};
-
-// 处理搜索清除
-const handleSearchClear = () => {
-  searchQuery.value = '';
+  
+  // 如果在移动视图下且有提供关闭函数，则关闭侧边栏
+  if (window.innerWidth < 1350 && parentCloseSidebar) {
+    parentCloseSidebar();
+  }
 };
 
 // 处理分页变化
@@ -244,6 +232,8 @@ onMounted(async () => {
   background: white;
   border-radius: 8px;
   overflow: hidden; /* 防止内容溢出 */
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .sidebar-header {
@@ -273,6 +263,7 @@ onMounted(async () => {
   overflow: hidden;
   margin: 0 -16px;
   padding: 0 16px;
+  height: calc(100% - 140px); /* 减去头部和分页的高度 */
 }
 
 .question-list {
@@ -337,26 +328,39 @@ onMounted(async () => {
   justify-content: center;
 }
 
+/* 移动视图下的样式调整 */
+@media (max-width: 1350px) {
+  .sidebar {
+    height: 100vh; /* 在移动视图中占满高度 */
+    border-radius: 0; /* 移除圆角 */
+    overflow-y: auto; /* 添加垂直滚动条 */
+    display: flex;
+    flex-direction: column;
+  }
+
+  .question-list-container {
+    margin: 0;
+    padding: 0 8px;
+    flex: 1;
+    height: auto !important; /* 覆盖之前设置的固定高度 */
+  }
+}
+
 /* 滚动条样式优化 */
 :deep(.el-scrollbar__bar) {
   opacity: 0.3;
+  transition: opacity 0.15s ease;
 }
 
 :deep(.el-scrollbar__bar):hover {
   opacity: 0.8;
 }
 
-/* 移动视图下的样式调整 */
-@media (max-width: 1350px) {
-  .sidebar {
-    height: 100vh; /* 在移动视图中占满高度 */
-    border-radius: 0; /* 移除圆角 */
-  }
+:deep(.el-scrollbar__wrap) {
+  overflow-x: hidden;
+}
 
-
-  .question-list-container {
-    margin: 0;
-    padding: 0 8px;
-  }
+:deep(.el-scrollbar__view) {
+  height: 100%;
 }
 </style>

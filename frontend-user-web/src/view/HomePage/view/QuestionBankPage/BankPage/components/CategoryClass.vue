@@ -6,7 +6,9 @@
           @click="prevSlide"
           :disabled="currentSlide === 0"
       >
-        <el-icon><ArrowLeft /></el-icon>
+        <el-icon>
+          <ArrowLeft/>
+        </el-icon>
       </el-button>
 
       <div class="carousel">
@@ -27,15 +29,18 @@
                   :sm="12"
                   :md="8"
                   :lg="8"
+                  :xl="6"
               >
                 <el-card shadow="hover" class="category-card" @click="goToDetail(category.id)">
                   <div class="card-content">
                     <div class="image-text">
                       <div class="image-container">
-                        <el-image :src="category.avatarUrl" class="category-image" />
+                        <el-image :src="category.avatarUrl" class="category-image"/>
                         <div class="view-count">
-                          <el-icon><View /></el-icon>
-                          <span>{{category.viewCount}}</span>
+                          <el-icon>
+                            <View/>
+                          </el-icon>
+                          <span>{{ category.viewCount }}</span>
                         </div>
                       </div>
                       <div class="text-content">
@@ -56,7 +61,9 @@
           @click="nextSlide"
           :disabled="currentSlide === slides.length - 1"
       >
-        <el-icon><ArrowRight /></el-icon>
+        <el-icon>
+          <ArrowRight/>
+        </el-icon>
       </el-button>
     </div>
 
@@ -72,11 +79,11 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import {computed, ref, watch} from 'vue';
 import {useRouter} from 'vue-router';
 import {ArrowLeft, ArrowRight, View} from '@element-plus/icons-vue';
-import {useCategoryStore} from "../store/CategoryStore.ts"
+import {useCategoryStore} from "../store/CategoryStore"
 
 const router = useRouter();
 const props = defineProps({
@@ -85,25 +92,63 @@ const props = defineProps({
 const categoryStore = useCategoryStore();
 const currentSlide = ref(0);
 
-// 将分类数据分成每9个一组的幻灯片
+// 将分类数据分成每组的幻灯片，根据屏幕大小动态调整
+const itemsPerSlide = computed(() => {
+  // 根据窗口宽度决定每页显示的项目数
+  const width = window.innerWidth;
+  if (width < 576) return 3; // 手机
+  if (width < 992) return 6; // 平板
+  return 9; // 桌面
+});
+
+// 监听窗口大小变化
+window.addEventListener('resize', () => {
+  if (categoryStore.categories.length > 0) {
+    // 重新计算幻灯片，保持当前比例
+    const currentIndex = currentSlide.value * (slides.value[0]?.length || 0);
+    const newItemsPerSlide = itemsPerSlide.value;
+    if (newItemsPerSlide > 0) {
+      currentSlide.value = Math.floor(currentIndex / newItemsPerSlide);
+    }
+  }
+});
+
 const slides = computed(() => {
   const result = [];
   const categories = [...categoryStore.categories];
+  const perSlide = itemsPerSlide.value;
   while (categories.length) {
-    result.push(categories.splice(0, 9));
+    result.push(categories.splice(0, perSlide));
   }
   return result;
 });
 
 watch(() => props.projectId, (newProjectId) => {
   if (newProjectId) {
-    categoryStore.fetchCategoriesByProjectId(newProjectId);
+    // 改用分页方法获取分类
+    categoryStore.fetchCategoriesByProjectIdPaged(newProjectId, 1, itemsPerSlide.value * 2);
     currentSlide.value = 0;
   }
-}, { immediate: true });
+}, {immediate: true});
 
-const goToDetail = (id) => {
-  router.push({ name: 'CategoryDetail', params: { id } });
+// 加载更多分类的方法
+const loadMoreCategories = () => {
+  if (props.projectId && slides.value.length > 0 && 
+      currentSlide.value === slides.value.length - 1 && 
+      categoryStore.categories.length < categoryStore.totalCategories) {
+    categoryStore.loadMoreCategories(props.projectId);
+  }
+};
+
+// 监听幻灯片变化，当到达最后一页时自动加载更多
+watch(currentSlide, (newValue) => {
+  if (newValue === slides.value.length - 1) {
+    loadMoreCategories();
+  }
+});
+
+const goToDetail = (id: number) => {
+  router.push({name: 'CategoryDetail', params: {id: id.toString()}});
 };
 
 const prevSlide = () => {
@@ -118,7 +163,7 @@ const nextSlide = () => {
   }
 };
 
-const goToSlide = (index) => {
+const goToSlide = (index: number) => {
   currentSlide.value = index;
 };
 </script>
@@ -126,19 +171,22 @@ const goToSlide = (index) => {
 <style scoped>
 .category-page {
   width: 100%;
-  padding: 20px 0;
+  padding: 1rem 0;
   position: relative;
+  overflow: hidden;
 }
 
 .carousel-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .carousel {
-  width: calc(100% - 80px);
+  width: calc(100% - 5rem);
   overflow: hidden;
 }
 
@@ -150,13 +198,13 @@ const goToSlide = (index) => {
 
 .carousel-slide {
   flex: 0 0 100%;
-  padding: 0 10px;
   box-sizing: border-box;
+  width: 100%;
 }
 
 .carousel-button {
-  width: 40px;
-  height: 40px;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -166,6 +214,7 @@ const goToSlide = (index) => {
   border: none;
   cursor: pointer;
   z-index: 1;
+  flex-shrink: 0;
 }
 
 .carousel-button:disabled {
@@ -176,22 +225,26 @@ const goToSlide = (index) => {
 .category-row {
   display: flex;
   flex-wrap: wrap;
-  margin: 0 -10px;
+  margin: 0 -0.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .category-card {
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border-radius: 8px;
-  height: 150px;
-  margin: 10px;
+  height: auto;
+  min-height: 6rem;
+  margin: 0.5rem;
   display: flex;
   align-items: center;
-  padding: 12px;
+  padding: 0.5rem;
   background: white;
   border: 1px solid #eee;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06),
-  0 2px 4px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  width: calc(100% - 1rem);
+  box-sizing: border-box;
 }
 
 .category-card:hover {
@@ -203,6 +256,7 @@ const goToSlide = (index) => {
   display: flex;
   justify-content: flex-start;
   height: 100%;
+  width: 100%;
 }
 
 .image-text {
@@ -211,12 +265,13 @@ const goToSlide = (index) => {
 }
 
 .image-container {
-  width: 120px;
-  height: 120px;
+  width: 5.5rem;
+  height: 5.5rem;
   overflow: hidden;
   border-radius: 8px;
   position: relative;
-  margin-right: 15px;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
 }
 
 .view-count {
@@ -252,38 +307,43 @@ const goToSlide = (index) => {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-width: 0; /* 防止文本溢出 */
 }
 
 .category-name {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: bold;
-  margin: 0 0 8px 0;
+  margin: 0 0 0.5rem 0;
   color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .category-desc {
-  font-size: 12px;
+  font-size: 0.75rem;
   color: #666;
   margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-height: 1.4;
+  height: 2.1rem; /* 2行文字的高度 */
 }
 
 .pagination {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 1.25rem;
 }
 
 .pagination-dot {
-  width: 10px;
-  height: 10px;
+  width: 0.625rem;
+  height: 0.625rem;
   border-radius: 50%;
   background-color: #dcdfe6;
-  margin: 0 5px;
+  margin: 0 0.25rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
@@ -294,5 +354,68 @@ const goToSlide = (index) => {
 
 .pagination-dot:hover {
   background-color: #c0c4cc;
+}
+
+@media (max-width: 992px) {
+  .image-container {
+    width: 4rem;
+    height: 4rem;
+  }
+
+  .category-name {
+    font-size: 0.875rem;
+  }
+
+  .category-desc {
+    -webkit-line-clamp: 2;
+    font-size: 0.7rem;
+    height: 1.96rem; /* 2行文字的高度适配较小的字体 */
+  }
+
+}
+
+@media (max-width: 768px) {
+  .carousel {
+    width: calc(100% - 4.5rem);
+  }
+
+  .carousel-button {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .category-card{
+    padding: 4px;
+  }
+}
+
+@media (max-width: 576px) {
+
+  .image-text {
+    flex-direction: column;
+  }
+
+  .image-container {
+    width: 100%;
+    height: 7rem;
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .category-card {
+    padding: 0.5rem;
+
+  }
+
+  .pagination-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+  }
+
+  .category-desc {
+    -webkit-line-clamp: 2;
+    height: auto; /* 在小屏幕上自适应高度 */
+    max-height: 2.1rem; /* 限制最大高度 */
+  }
 }
 </style>

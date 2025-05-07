@@ -1,111 +1,87 @@
 <template>
   <div class="short-answer-container">
-    <!-- 安全渲染HTML内容 -->
+    <!-- 问题内容 -->
     <div class="question-content" v-html="sanitizedContent"></div>
-
-    <!--    &lt;!&ndash; 答题区域 &ndash;&gt;-->
-    <!--    <div class="answer-area">-->
-    <!--      <el-input-->
-    <!--        v-model="answer"-->
-    <!--        type="textarea"-->
-    <!--        :rows="8"-->
-    <!--        placeholder="请输入你的答案..."-->
-    <!--        resize="vertical"-->
-    <!--        class="answer-input"-->
-    <!--      />-->
-    <!--      <div class="submit-actions">-->
-    <!--        <el-button type="primary" @click="submitAnswer">提交答案</el-button>-->
-    <!--      </div>-->
-    <!--    </div>-->
+    <!-- 分割线 -->
+    <el-divider />
 
     <!-- 答案区域 -->
-    <div class="question-answer" v-if="showAnswer">
-      <div class="section-header">
-        <h2 class="section-title">答案解析</h2>
-        <el-button type="primary" plain @click="toggleAnswer">隐藏答案</el-button>
-      </div>
-      <div class="answer-content">
+    <div class="question-answer">
+      <!-- 展示答案 -->
+      <div v-if="showAnswer" class="answer-content">
+        <div class="answer-actions-top">
+          <h2 class="section-title">答案解析</h2>
+          <a class="toggle-link" @click.prevent="toggleAnswer">
+            <i class="el-icon-close" /> 隐藏答案
+          </a>
+        </div>
         <div class="answer-text" v-html="sanitizedAnswer"></div>
       </div>
-    </div>
-    <div v-else class="section-header">
-      <el-button type="primary" plain @click="toggleAnswer">查看答案</el-button>
+
+      <!-- 毛玻璃占位 -->
+      <div v-else class="answer-placeholder">
+        <div class="placeholder-content">
+          <div v-for="n in 5" :key="n" class="line"></div>
+        </div>
+        <a class="view-link" @click.prevent="toggleAnswer">
+          <i v-if="isLoading" class="el-icon-loading spinning" />
+          <span v-if="!isLoading">查看答案</span>
+        </a>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref, computed, watch} from 'vue';
+import {computed, ref, watch} from 'vue';
 import DOMPurify from 'dompurify';
 import {
   ApiGetQuestionAnswerByVirtualId
-} from "@/view/HomePage/view/QuestionPage/service/ApiGetQuestionAnswerByVirtualId";
+} from '@/view/HomePage/view/QuestionPage/service/ApiGetQuestionAnswerByVirtualId';
 
 const props = defineProps({
   question: {
-    type: Object,
+    type: Object as () => { content: string; answer: string | null; virtualId: string },
     required: true
   }
 });
 
-
-const answer = ref('');
 const showAnswer = ref(false);
+const isLoading = ref(false);
 
-// 监控页面 当页面问题发生改变的时候 清空回答 和 关闭答案展示
-watch(() => props.question, (value) => {
-  if (value) {
-    answer.value = '';
-    showAnswer.value = false;
-  }
-})
+watch(
+    () => props.question,
+    () => { showAnswer.value = false; isLoading.value = false; }
+);
 
-// 使用DOMPurify净化HTML内容，防止XSS攻击
-const sanitizedContent = computed(() => {
-  if (!props.question?.content) return '';
-  return DOMPurify.sanitize(props.question.content);
-});
-
-// 使用DOMPurify净化答案HTML内容
-const sanitizedAnswer = computed(() => {
-  if (!props.question?.answer) return '';
-  return DOMPurify.sanitize(props.question.answer);
-});
-
-// 提交答案方法
-const submitAnswer = () => {
-  console.log('提交答案:', answer.value);
-  // TODO: 实现提交逻辑
-};
+const sanitizedContent = computed(() => DOMPurify.sanitize(props.question.content || ''));
+const sanitizedAnswer = computed(() => DOMPurify.sanitize(props.question.answer || ''));
 
 const toggleAnswer = async () => {
-  showAnswer.value = !showAnswer.value;
-
-  if (props.question.answer == null) {
-    const response = await ApiGetQuestionAnswerByVirtualId(props.question.virtualId);
-    if (response.status === 200) {
-      props.question.answer = response.data;
+  if (!showAnswer.value) {
+    isLoading.value = true;
+    if (!props.question.answer) {
+      const res = await ApiGetQuestionAnswerByVirtualId(props.question.virtualId);
+      if (res.status === 200) props.question.answer = res.data;
     }
+    isLoading.value = false;
+    showAnswer.value = true;
+  } else {
+    showAnswer.value = false;
   }
 };
-
-// 暴露获取答案的方法供父组件调用
-defineExpose({
-  getAnswer: () => answer.value
-});
-
-
 </script>
 
 <style scoped>
 .short-answer-container {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  font-family: 'Inter', sans-serif;
+  color: #2c3e50;
 }
 
-/* 使v-html渲染的内容也能应用样式 */
+
 :deep(.question-content) {
   color: #333;
   line-height: 1.7;
@@ -180,75 +156,74 @@ defineExpose({
   }
 }
 
-.answer-area {
+/* 答案区域 */
+.question-answer {
+  position: relative;
+}
+
+.answer-actions-top {
+  display: flex;
+  justify-content: space-between; /* 左右对齐 */
+  align-items: center;            /* 垂直居中 */
+}
+
+.toggle-link {
+  color: #e74c3c;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+}
+.toggle-link:hover {
+  text-decoration: underline;
+}
+.answer-text {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #2c3e50;
+}
+
+/* 占位毛玻璃效果 */
+.answer-placeholder {
+  position: relative;
+  padding: 1rem 0;
+}
+.placeholder-content {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.6rem;
+  filter: blur(6px);
 }
-
-.answer-input {
-  border-radius: 8px;
+.placeholder-content .line {
+  height: 1em;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
 }
-
-:deep(.el-textarea__inner) {
-  padding: 16px;
-  font-size: 1rem;
-  line-height: 1.6;
-  border-color: #e5e7eb;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-:deep(.el-textarea__inner:focus) {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.submit-actions {
+.view-link {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
-  justify-content: flex-end;
-  margin-top: 0.5rem;
-}
-
-/* 响应式调整 */
-@media (max-width: 768px) {
-  .short-answer-container {
-    gap: 1.5rem;
-  }
-
-  :deep(.question-content) {
-    font-size: 1rem;
-  }
-}
-
-.question-answer {
-  margin-top: 2rem;
-  border-top: 1px solid #e5e7eb;
-  padding-top: 2rem;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.section-title {
-  font-size: 1.25rem;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 4px;
+  color: #3498db;
   font-weight: 600;
-  color: #1f2937;
-  margin: 0;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
 }
-
-.answer-content {
-  background-color: #f9fafb;
-  border-radius: 8px;
-  padding: 1.5rem;
+.view-link:hover {
+  background: rgba(255, 255, 255, 1);
 }
-
-.answer-text {
-  color: #374151;
-  line-height: 1.6;
+.spinning {
+  font-size: 1.2em;
+  animation: spin 1s linear infinite;
 }
-
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 </style>

@@ -1,24 +1,28 @@
 <template>
-  <div class="category-detail">
-    <div class="category-header">
-      <div class="category-info">
-        <el-image class="category-icon" :src="category?.avatarUrl"/>
-        <div class="title-section">
-          <h2 class="category-name">{{ category?.name }}</h2>
-          <p class="category-description">{{ category?.description }}</p>
+  <div class="category-detail-container">
+    <el-scrollbar height="100%">
+      <div class="category-detail">
+        <div class="category-header">
+          <div class="category-info">
+            <el-image :src="category?.avatarUrl" class="category-icon"/>
+            <div class="title-section">
+              <h2 class="category-name">{{ category?.name }}</h2>
+              <p class="category-description">{{ category?.description }}</p>
+            </div>
+          </div>
+          <div class="category-stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ questionCount }}</span>
+              <span class="stat-label">题目数量</span>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="category-stats">
-        <div class="stat-item">
-          <span class="stat-value">{{ questionCount }}</span>
-          <span class="stat-label">题目数量</span>
-        </div>
-      </div>
-    </div>
 
-    <div class="question-list">
-      <QuestionList :selected-category="categoryId" />
-    </div>
+        <div class="question-list">
+          <QuestionList :selected-category="categoryId" />
+        </div>
+      </div>
+    </el-scrollbar>
   </div>
 </template>
 
@@ -66,23 +70,33 @@ watch(() => category.value?.name, (newTitle) => {
 </script>
 
 <style scoped>
+.category-detail-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
 .category-detail {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px 16px;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
 .category-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 28px 32px;
+  padding: 1.5rem;
   background: white;
-  border-radius: 16px;
+  border-radius: 1rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  margin-bottom: 28px;
+  margin-bottom: 1.5rem;
   transition: all 0.3s ease;
   border: 1px solid #eaeef5;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .category-header:hover {
@@ -93,18 +107,21 @@ watch(() => category.value?.name, (newTitle) => {
 .category-info {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 1.5rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .category-icon {
-  width: 100px;
-  height: 100px;
+  width: 5rem;
+  height: 5rem;
   background: linear-gradient(135deg, #f6f8fc, #eef2f7);
-  border-radius: 20px;
+  border-radius: 1rem;
   object-fit: contain;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
   border: 1px solid #eaeef5;
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 .category-icon:hover {
@@ -113,51 +130,60 @@ watch(() => category.value?.name, (newTitle) => {
 
 .title-section {
   flex: 1;
+  min-width: 0;
 }
 
 .category-name {
-  font-size: 30px;
+  font-size: 1.75rem;
   font-weight: 700;
-  margin: 0 0 12px 0;
+  margin: 0 0 0.75rem 0;
   color: #1a1a1a;
   letter-spacing: -0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .category-description {
   color: #5a6a85;
   margin: 0;
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.6;
-  max-width: 80%;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .category-stats {
   display: flex;
-  gap: 32px;
+  gap: 1.5rem;
   background: rgba(255, 255, 255, 0.8);
-  padding: 16px 24px;
-  border-radius: 12px;
+  padding: 1rem;
+  border-radius: 0.75rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   border: 1px solid #eaeef5;
+  flex-shrink: 0;
 }
 
 .stat-item {
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .stat-value {
   display: block;
-  font-size: 34px;
+  font-size: 2rem;
   font-weight: 700;
   color: black;
-  margin-bottom: 4px;
+  margin-bottom: 0.25rem;
 }
 
 .stat-label {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #5a6a85;
   font-weight: 500;
   text-transform: uppercase;
@@ -166,24 +192,35 @@ watch(() => category.value?.name, (newTitle) => {
 
 .question-list {
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 1rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  padding: 28px;
+  padding: 1.5rem;
   border: 1px solid #eaeef5;
   transition: all 0.3s ease;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .question-list:hover {
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
 }
 
+@media (max-width: 992px) {
+  .category-name {
+    font-size: 1.5rem;
+  }
+  
+  .stat-value {
+    font-size: 1.75rem;
+  }
+}
 
 @media (max-width: 768px) {
   .category-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 20px;
-    padding: 24px;
+    gap: 1.25rem;
+    padding: 1.25rem;
   }
 
   .category-stats {
@@ -192,25 +229,46 @@ watch(() => category.value?.name, (newTitle) => {
   }
 
   .category-name {
-    font-size: 26px;
+    font-size: 1.25rem;
   }
-
-  .category-description {
-    max-width: 100%;
+  
+  .category-icon {
+    width: 4rem;
+    height: 4rem;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+  }
+  
+  .question-list {
+    padding: 1rem;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 576px) {
+  .category-detail {
+    padding: 0.75rem;
+  }
+
   .category-info {
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
+    gap: 1rem;
   }
 
   .category-icon {
-    width: 64px;
-    height: 64px;
-    padding: 12px;
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+  
+  .category-description {
+    font-size: 0.875rem;
+    -webkit-line-clamp: 3;
+  }
+  
+  .stat-label {
+    font-size: 0.75rem;
   }
 }
 </style>

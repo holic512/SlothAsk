@@ -20,19 +20,13 @@
               {{ showAllTags ? '收起' : `+${question?.tags.length - maxVisibleTags}` }}
             </span>
           </div>
+          <span class="tag" style="display: flex; align-items: center;gap: 8px">
+            <el-icon><View/></el-icon>
+            {{ question.viewCount }}
+          </span>
         </div>
-        <div class="actions">
-          <el-button text icon="view" @click="handleShareClick">{{ question.viewCount }}</el-button>
-          <el-button text icon="share" @click="handleShareClick">分享</el-button>
-          <el-button 
-            :icon="isFavorited ? 'Star' : 'star'"
-            :text="!isFavorited"
-            :type="isFavorited ? 'warning' : 'default'"
-            @click="handleStarClick"
-          >
-            {{ isFavorited ? '已收藏' : '收藏' }}
-          </el-button>
-        </div>
+
+        <ActionButtons v-model="isFavorited"/>
       </div>
     </div>
 
@@ -49,11 +43,13 @@ import {computed, defineAsyncComponent, onMounted, ref, watch} from 'vue';
 import {useRoute} from 'vue-router';
 import {useQuestionBankStore} from '@/view/HomePage/view/StudyPage/store/QuestionBank';
 import axios from '@/axios/axios';
-import {ElMessage} from 'element-plus';
 
 import {setTitle} from '@/utils/title';
 import {QuestionInterface} from "@/view/HomePage/view/QuestionPage/interface/QuestionInterface";
 import {ApiGetQuestionByVirtualId} from "@/view/HomePage/view/QuestionPage/service/ApiGetQuestionByVirtualId";
+import ActionButtons
+  from "@/view/HomePage/view/QuestionPage/components/container/QuestionDetail/components/ActionButtons.vue";
+import {View} from "@element-plus/icons-vue";
 
 // 使用异步组件动态导入，只在需要时加载
 const SingleChoice = defineAsyncComponent(() =>
@@ -89,7 +85,7 @@ const checkFavoriteStatus = async (virtualId: string) => {
         'X-User-Id': localStorage.getItem('userId') || '0'
       }
     });
-    
+
     if (response.data.status === 200) {
       isFavorited.value = response.data.data;
     }
@@ -159,60 +155,6 @@ const questionComponent = computed(() => {
   }
 });
 
-const handleShareClick = () => {
-  console.log('分享点击');
-};
-
-// 收藏/取消收藏
-const handleStarClick = async () => {
-  if (!question.value) return;
-  const virtualId = route.params.questionId as string;
-  
-  try {
-    if (isFavorited.value) {
-      // 取消收藏
-      const response = await axios.post('service-question/user/favQuestion/removeFav', null, {
-        params: {
-          virtualId
-        },
-        headers: {
-          'X-User-Id': localStorage.getItem('userId') || '0'
-        }
-      });
-      
-      if (response.data.status === 200) {
-        isFavorited.value = false;
-        ElMessage.success('已取消收藏');
-      } else {
-        ElMessage.error('取消收藏失败');
-      }
-    } else {
-      // 添加收藏
-      const response = await axios.post('service-question/user/favQuestion/addFav', null, {
-        params: {
-          virtualId
-        },
-        headers: {
-          'X-User-Id': localStorage.getItem('userId') || '0'
-        }
-      });
-      
-      if (response.data.status === 200) {
-        isFavorited.value = true;
-        ElMessage.success('已添加收藏');
-      } else {
-        ElMessage.error('收藏失败');
-      }
-    }
-  } catch (error) {
-    console.error('收藏操作出错：', error);
-    ElMessage.error('操作失败，请稍后重试');
-  }
-};
-
-const handlePassClick = () => {
-  console.log('查看点击');
-};
 
 onMounted(() => {
   setTitle(`${question.value?.title || '题目详情'}`);
@@ -265,7 +207,7 @@ const hasMoreTags = computed(() => {
 .question-container {
   width: 100%;
   margin: 0 auto;
-  padding: 6px 18px;
+
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -281,7 +223,7 @@ const hasMoreTags = computed(() => {
 }
 
 .title-section {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 
@@ -289,7 +231,7 @@ const hasMoreTags = computed(() => {
   font-size: 24px;
   font-weight: 600;
   margin: 8px 0;
-  line-height: 1.4;
+  line-height: 1;
   color: #1a1a1a;
 }
 
@@ -339,8 +281,8 @@ const hasMoreTags = computed(() => {
 .difficulty,
 .type-tag {
   padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 14px;
+  border-radius: 12px;
+  font-size: 12px;
 }
 
 .difficulty-1 {
@@ -389,7 +331,7 @@ const hasMoreTags = computed(() => {
 
   background-color: #f0f0f0;
   color: #666;
-  padding: 2px 8px;
+  padding: 4px 12px;
   border-radius: 12px;
   font-size: 12px;
 }

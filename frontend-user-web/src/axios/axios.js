@@ -4,7 +4,7 @@ import {useSessionStore} from "@/pinia/Session";
 const instance = axios.create({
     // baseURL: `${window.location.origin}/api/`,  // 根据当前域名动态设置 baseURL
     baseURL: 'http://localhost:8081/', // 这里是你的基础 URL
-    // baseURL: 'http://49.232.155.38:4481/', // 这里是你的基础 URL
+    // baseURL: 'http://slothask.online/api/',
 
     timeout: 10000, // 可选的超时时间
     headers: {"Content-Type": "application/json"}

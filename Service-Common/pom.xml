@@ -11,8 +11,8 @@
     <groupId>org.example</groupId>
     <artifactId>Service-Common</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Service-registry</name>
-    <description>Service-registry</description>
+    <name>Service-Common</name>
+    <description>Service-Common</description>
     <url/>
     <licenses>
         <license/>

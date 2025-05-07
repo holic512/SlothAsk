@@ -265,7 +265,7 @@ const toggleMobileMenu = () => {
   display: flex;
   align-items: center;
   height: 52px;
-  padding: 0 36px; /* 添加左右内边距保持间距 */
+  padding: 0 48px; /* 添加左右内边距保持间距 */
   width: 100%;
   box-sizing: border-box;
 }

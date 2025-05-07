@@ -9,15 +9,26 @@
           circle
           @click="toggleLeftSidebar"
       />
-      <SidebarLeft :class="{ 'sidebar-mobile': isMobileView && showLeftSidebar }"/>
+      <transition name="slide-fade">
+        <SidebarLeft v-if="!isMobileView || showLeftSidebar" :class="{ 'sidebar-mobile': isMobileView && showLeftSidebar }"/>
+      </transition>
     </div>
+
+    <!-- 遮罩层 - 点击关闭侧边栏 -->
+    <transition name="fade">
+      <div 
+        v-if="isMobileView && showLeftSidebar" 
+        class="sidebar-overlay" 
+        @click="closeSidebar"
+      ></div>
+    </transition>
 
     <!-- 中间内容区 -->
     <div class="main-content">
       <div class="content-wrapper" :class="{ 'content-full': isMobileView }">
         <div class="container">
           <QuestionDetail/>
-          <AnswerDiscussion />
+          <AnswerDiscussion/>
         </div>
       </div>
 
@@ -30,7 +41,7 @@
 </template>
 
 <script setup>
-import {onMounted, ref, onBeforeUnmount, computed} from 'vue';
+import {computed, onBeforeUnmount, onMounted, provide, ref} from 'vue';
 import {setTitle} from '@/utils/title';
 import QuestionDetail from './components/container/QuestionDetail/QuestionDetail.vue'
 import AnswerDiscussion from './components/container/AnswerDiscussion/AnswerDiscussion.vue'
@@ -54,18 +65,35 @@ const handleResize = () => {
   }
 };
 
+// 监听ESC键关闭侧边栏
+const handleKeyDown = (e) => {
+  if (e.key === 'Escape' && showLeftSidebar.value) {
+    closeSidebar();
+  }
+};
+
 // 切换左侧边栏显示状态
 const toggleLeftSidebar = () => {
   showLeftSidebar.value = !showLeftSidebar.value;
 };
 
+// 关闭侧边栏
+const closeSidebar = () => {
+  showLeftSidebar.value = false;
+};
+
+// 提供closeSidebar函数给子组件
+provide('closeSidebar', closeSidebar);
+
 onMounted(() => {
   setTitle('题库');
   window.addEventListener('resize', handleResize);
+  window.addEventListener('keydown', handleKeyDown);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize);
+  window.removeEventListener('keydown', handleKeyDown);
 });
 </script>
 
@@ -116,10 +144,12 @@ onBeforeUnmount(() => {
 
 /* 右侧边栏容器 */
 .sidebar-right-container {
-  width: 240px;
+  width: 280px;
   flex-shrink: 0;
-  margin: 24px 16px 0 24px;
-  transition: width 0.2s ease, margin 0.2s ease;
+  margin: 16px 16px 0 24px;
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1), margin 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  position: relative;
 }
 
 
@@ -127,7 +157,7 @@ onBeforeUnmount(() => {
 @media (max-width: 1600px) {
   .sidebar-hidden {
     width: 0;
-    margin: 0;
+    margin: 16px 16px 0 0; /* 保持右侧、顶部和底部的margin，只将左侧margin设为0 */
     padding: 0;
     overflow: hidden;
   }
@@ -180,9 +210,14 @@ onBeforeUnmount(() => {
     z-index: 999;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
-    padding: 16px;
-    border-radius: 0;
-    transition: all 0.2s ease;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
   }
 }
 
@@ -219,5 +254,44 @@ onBeforeUnmount(() => {
   .container {
     margin: 8px 0;
   }
+}
+
+/* 遮罩层样式 */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.25);
+  z-index: 998; /* 确保在侧边栏下方，但在其他内容上方 */
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  will-change: opacity;
+}
+
+/* 遮罩层动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* 侧边栏动画 */
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(-100%);
+  opacity: 0;
 }
 </style>
