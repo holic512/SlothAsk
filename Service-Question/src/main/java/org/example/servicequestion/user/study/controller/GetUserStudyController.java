@@ -13,22 +13,16 @@
  */
 package org.example.servicequestion.user.study.controller;
 
-import java.util.List;
-
+import jakarta.validation.Valid;
 import org.example.servicequestion.config.ApiResponse.ApiResponse;
-import org.example.servicequestion.entity.Question;
 import org.example.servicequestion.entity.QuestionCategory;
 import org.example.servicequestion.user.study.dto.CategoryIdAndNameDto;
 import org.example.servicequestion.user.study.request.GetQuestionListRequest;
 import org.example.servicequestion.user.study.service.GetUserStudyService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
+import java.util.List;
 
 /**
  * 用户题库分类控制器
@@ -61,7 +55,7 @@ public class GetUserStudyController {
 
     /**
      * 获取项目下所有分类的ID和名称
-     * 
+     *
      * @param userId 用户ID,从请求头X-User-Id获取,可选
      * @param upcId  项目ID,从请求头X-Upc-Id获取,可选
      * @return 包含分类ID和名称列表的API响应
@@ -112,5 +106,18 @@ public class GetUserStudyController {
                 getUserStudyService.getQuestionList(upcId, request));
     }
 
-
+    /**
+     * 获取下一题的虚拟ID
+     * 根据当前题目的虚拟ID，获取同一分类下的下一题虚拟ID
+     *
+     * @param currentVid 当前题目的虚拟ID
+     * @return 包含下一题虚拟ID的API响应
+     */
+    @GetMapping("/nextQuestion/{currentVid}")
+    public ApiResponse getNextQuestionVid(
+            @PathVariable String currentVid
+    ) {
+        String nextVid = getUserStudyService.getNextQuestionVid(currentVid);
+        return new ApiResponse(200, "获取下一题虚拟ID成功", nextVid);
+    }
 }

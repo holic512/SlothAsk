@@ -9,9 +9,8 @@
  */
 package org.example.serviceuser.user.sign.service.Impl;
 
-import java.util.concurrent.TimeUnit;
-
 import cn.dev33.satoken.session.SaSession;
+import cn.dev33.satoken.stp.SaTokenInfo;
 import org.example.serviceuser.config.Redis.RedisConfig;
 import org.example.serviceuser.entity.User;
 import org.example.serviceuser.entity.UserProfile;
@@ -35,7 +34,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import cn.dev33.satoken.stp.SaTokenInfo;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 用户登录注册服务实现类
@@ -108,15 +107,15 @@ public class PostUserSignServiceImpl implements PostUserSignService {
 
     /**
      * 验证登录/注册验证码
-     * 验证用户提交的邮箱验证码，根据验证结果和用户注册状态返回不同的处理结果
+     * 验证用户提交的邮箱验证码，如果用户不存在则自动注册
      *
      * @param request 包含邮箱和验证码的请求对象
      * @return Pair<PostUserSignEnum, String> 返回验证结果和附加信息
-     * - SUCCESS_LOGIN: 验证成功且用户已注册，返回token
-     * - SUCCESS_BUT_NOT_REGISTERED: 验证成功但用户未注册，返回临时UUID用于后续注册
+     * - SUCCESS_LOGIN: 验证成功，返回token
      * - INVALID_VERIFICATION_CODE: 验证失败，验证码错误或已过期
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Pair<PostUserSignEnum, Object> verifySignVerificationCode(VerifySignVerificationCodeRequest request) {
         // 读取数据
         String email = request.getEmail();
@@ -139,28 +138,62 @@ public class PostUserSignServiceImpl implements PostUserSignService {
         // 查询 该邮箱是否注册
         User user = userSignUserMapper.getUserByEmail(email);
 
-        // 当user为空 则证明没有注册 插入临时注册数据并且保存
+        // 当user为空 则证明没有注册，自动创建账户（无感注册）
         if (user == null) {
-            // 创建拟注册 uid 并插入redis
-            String uid = UuidUtil.generateUuid();
-
-            // 将此 mail作为key 插入 redis 五分钟过期时间
-            redisTemplate.opsForValue().set(
-                    PENDING_REGISTRATION + email,
-                    uid, // 获取运算结果
-                    5,
-                    TimeUnit.MINUTES
-            );
-
-            return Pair.of(PostUserSignEnum.SUCCESS_BUT_NOT_REGISTERED, uid);
+            // 创建新用户
+            user = new User();
+            user.setEmail(email);
+            
+            // 生成随机用户名
+            String randomUsername = NicknameGenerator.generateNickname();
+            user.setUsername(randomUsername);
+            
+            // 设置空密码或默认密码（根据需求可修改）
+            user.setPassword(""); // 或者设置默认密码：SCryptUtil.hashPassword("defaultPassword")
+            
+            // 保存用户信息
+            int result = userSignUserMapper.insert(user);
+            
+            if (result <= 0) {
+                return Pair.of(PostUserSignEnum.REGISTER_FAILED, "null");
+            }
+            
+            // 插入用户的个人资料
+            Long userId = user.getId();
+            // 生成用户随机详细信息
+            String nickName = NicknameGenerator.generateNickname();
+            UserProfile userProfile = new UserProfile(userId, nickName);
+            // 保存用户详情信息
+            userSignProfileMapper.insert(userProfile);
+            
+            // 设置默认项目类别
+            UserProjectCategory userPc = new UserProjectCategory();
+            userPc.setUserId(user.getId());
+            userPc.setProjectId(1L);
+            userSignUpcMapper.insert(userPc);
         }
 
-        // 返回token
+        // 登录并获取token
         StpKit.USER.login(user.getId());
         SaTokenInfo saTokenInfo = StpKit.USER.getTokenInfo();
+        
+        // 获取或设置用户项目类别ID
+        Long userUpcId = userSignUpcMapper.selectPidByUid(user.getId());
+        
+        // 如果用户项目id为空 则设置为 默认 1
+        if (userUpcId == null) {
+            UserProjectCategory userPc = new UserProjectCategory();
+            userPc.setUserId(user.getId());
+            userPc.setProjectId(1L);
+            userSignUpcMapper.insert(userPc);
 
+            userUpcId = 1L;
+        }
 
-        // 反之登录成功-执行登录并且返回token
+        SaSession session = StpKit.USER.getSession();
+        session.set("userUpcId", userUpcId);
+
+        // 返回token
         return Pair.of(PostUserSignEnum.SUCCESS_LOGIN, saTokenInfo);
     }
 
@@ -202,9 +235,25 @@ public class PostUserSignServiceImpl implements PostUserSignService {
             userSignProfileMapper.insert(userProfile);
 
 
-            // 返回token
-            StpKit.USER.login(userIdid);
+            // 验证成功,进行登录
+            StpKit.USER.login(user.getId());
             SaTokenInfo saTokenInfo = StpKit.USER.getTokenInfo();
+
+            // 插入用户选择的项目id
+            Long userUpcId = userSignUpcMapper.selectPidByUid(user.getId());
+
+            // 如果用户项目id为空 则设置为 默认 1
+            if (userUpcId == null) {
+                UserProjectCategory userPc = new UserProjectCategory();
+                userPc.setUserId(user.getId());
+                userPc.setProjectId(1L);
+                userSignUpcMapper.insert(userPc);
+
+                userUpcId = 1L;
+            }
+
+            SaSession session = StpKit.USER.getSession();
+            session.set("userUpcId", userUpcId);
 
             return Pair.of(PostUserSignEnum.SUCCESS_REGISTER, saTokenInfo);
         }

@@ -1,22 +1,24 @@
 <script setup lang="ts">
-import { defineProps, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import {computed, defineProps} from 'vue';
+import {useRouter} from 'vue-router';
 // 引入Element Plus图标组件
 import {
-  Document,
-  Star,
-  Warning,
-  DataAnalysis,
-  Timer,
-  Collection,
-  Setting,
   Brush,
-  SwitchButton,
+  Collection,
+  DataAnalysis,
+  Document,
   Link,
-  User
+  Setting,
+  Star,
+  SwitchButton,
+  Timer,
+  User,
+  Warning
 } from '@element-plus/icons-vue';
+import {useSessionStore} from "@/pinia/Session";
 
 const router = useRouter();
+const userSession = useSessionStore();
 
 // 接收父组件传递的用户信息
 const props = defineProps({
@@ -38,10 +40,10 @@ const getAvatarText = computed(() => {
 // 工具栏项目 - 使用导入的Element Plus图标组件
 const toolItems = [
   { name: '历史记录', icon: Document, color: '#67C23A', path: '/account/history' },  // 绿色
-  { name: '收藏夹', icon: Star, color: '#E6A23C', path: '/account/favorites' },    // 黄色
+  { name: '收藏夹', icon: Star, color: '#E6A23C', path: '/questionbank/myFavoritesQuestion' },    // 黄色
   { name: '错题本', icon: Warning, color: '#F56C6C', path: '/account/wrong-questions' }, // 红色
   { name: '进展分析', icon: DataAnalysis, color: '#409EFF', path: '/account/progress' }, // 蓝色
-  { name: '答题记录', icon: Timer, color: '#9370DB', path: '/account/history' },  // 紫色
+  { name: '答题记录', icon: Timer, color: '#9370DB', path: '/account/record' },  // 紫色
   { name: '我的题库', icon: Collection, color: '#20B2AA', path: '/account/my-bank' } // 青绿色
 ];
 
@@ -63,8 +65,10 @@ const handleToolClick = (path: string) => {
 const handleSettingClick = (path: string) => {
   if (path === 'logout') {
     // 处理退出登录逻辑
+    userSession.clearSession();
     console.log('退出登录');
-    // TODO: 添加退出登录的具体逻辑
+    // 刷新页面
+    window.location.reload();
   } else {
     router.push(path);
   }

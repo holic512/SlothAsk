@@ -1,6 +1,18 @@
 server:
   port: 8082 # 用户服务的端口号
 
+
+#github:
+#  client-id: your_github_client_id
+#  client-secret: your_github_client_secret
+#  redirect-uri: https://yourdomain.com/oauth/github/callback
+# GitHub OAuth 配置
+github:
+  client-id: Ov23lil78EF0dPW8gXPU
+  client-secret: 5d3adfc7f1411cf3a510bb93b31790ffb3dbe88a
+  redirect-uri: http://localhost:3000/sign/GitHubCallback
+
+
 spring:
   application:
     name: service-user # 服务名

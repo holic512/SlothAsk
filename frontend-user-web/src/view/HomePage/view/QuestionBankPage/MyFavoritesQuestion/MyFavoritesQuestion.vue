@@ -1,7 +1,8 @@
 <!-- pages/FavoritePage.vue -->
 <template>
   <div style="background-color:white;margin: 0;width:100%;height:100%">
-    <div class="favorite-page">
+    <!-- 只有登录状态才渲染内容 -->
+    <div v-if="isLoggedIn" class="favorite-page">
       <!-- 左侧卡片 -->
       <el-card class="fav-card" shadow="never">
         <div class="card-header">
@@ -90,17 +91,30 @@
         </div>
       </div>
     </div>
+    
+    <!-- 用户未登录遮罩 -->
+    <div v-if="!isLoggedIn" class="login-overlay">
+      <div class="login-card">
+        <el-icon class="login-icon"><User /></el-icon>
+        <h2>您还未登录</h2>
+        <p>登录后才能查看收藏的题目</p>
+        <el-button type="primary" @click="handleLogin">登录 / 注册</el-button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref} from 'vue'
-import {useRouter} from 'vue-router'
-import {CaretRight, StarFilled} from '@element-plus/icons-vue'
+import {computed, onMounted, ref, watch} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
+import {CaretRight, StarFilled, User} from '@element-plus/icons-vue'
 import {ElMessage} from 'element-plus'
 import axios from '@/axios/axios.js'
+import {useSessionStore} from "@/pinia/Session";
 
 const router = useRouter()
+const route = useRoute()
+const userSession = useSessionStore()
 const totalCount = ref(0)
 const answeredCount = ref(0)
 const search = ref('')
@@ -109,8 +123,49 @@ const loading = ref(false)
 const currentPage = ref(1)
 const pageSize = ref(10)
 
+// 侧边栏状态 - 获取父组件的状态
+// 通过父级查找QuestionBankPage组件中的isDrawerMode和collapsed状态
+const parentSidebarCollapsed = ref(false);
+const parentIsDrawerMode = ref(false);
+
+// 尝试获取父组件状态
+const updateParentSidebarState = () => {
+  // 在这里可以添加获取父组件状态的逻辑
+  // 由于Vue组件之间的隔离性，这里我们使用一种简化的方法：观察DOM状态
+  const sidebarEl = document.querySelector('.sidebar');
+  if (sidebarEl) {
+    parentSidebarCollapsed.value = !sidebarEl.classList.contains('drawer-mode') || 
+                                  window.getComputedStyle(sidebarEl).display === 'none';
+    parentIsDrawerMode.value = sidebarEl.classList.contains('drawer-mode');
+  }
+};
+
+// 监听路由变化时更新侧边栏状态
+watch(() => route.path, () => {
+  setTimeout(updateParentSidebarState, 100);
+});
+
+// 判断用户是否登录
+const isLoggedIn = computed(() => {
+  return userSession.userSession && userSession.userSession.tokenValue;
+});
+
+// 处理登录跳转
+const handleLogin = () => {
+  router.push({
+    path: '/sign/email',
+    query: {
+      redirect: route.fullPath
+    }
+  });
+};
+
 // 获取收藏列表
 const fetchFavorites = async (page = 1) => {
+  if (!isLoggedIn.value) {
+    return;
+  }
+  
   loading.value = true
   try {
     const response = await axios.get('service-question/user/favQuestion/list', {
@@ -141,6 +196,9 @@ const fetchFavorites = async (page = 1) => {
 
 // 搜索题目
 const searchQuestions = () => {
+  if (!isLoggedIn.value) {
+    return;
+  }
   currentPage.value = 1
   fetchFavorites(1)
 }
@@ -186,9 +244,26 @@ const formatDate = (dateStr: string) => {
   return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
 }
 
-// 页面加载时获取收藏列表
+// 页面加载时获取收藏列表并更新侧边栏状态
 onMounted(() => {
-  fetchFavorites()
+  if (isLoggedIn.value) {
+    fetchFavorites();
+  }
+  updateParentSidebarState();
+  
+  // 添加窗口大小变化监听，更新侧边栏状态
+  window.addEventListener('resize', updateParentSidebarState);
+  // 添加一个MutationObserver来监听DOM变化
+  const observer = new MutationObserver(updateParentSidebarState);
+  const targetNode = document.querySelector('.question-bank-container');
+  if (targetNode) {
+    observer.observe(targetNode, { childList: true, subtree: true, attributes: true });
+  }
+  
+  return () => {
+    window.removeEventListener('resize', updateParentSidebarState);
+    observer.disconnect();
+  };
 })
 </script>
 
@@ -197,6 +272,7 @@ onMounted(() => {
   display: flex;
   gap: 24px;
   padding: 36px;
+  position: relative;
 
   .fav-card {
     width: 360px;
@@ -333,6 +409,54 @@ onMounted(() => {
         }
       }
     }
+  }
+}
+
+/* 登录遮罩样式 */
+.login-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  height: 100%;
+  width: 100%;
+}
+
+.login-card {
+  background: white;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 320px;
+  animation: fadeIn 0.3s ease-out;
+  margin-bottom: 60px; /* 稍微向上偏移，视觉上更居中 */
+}
+
+.login-icon {
+  font-size: 48px;
+  color: var(--el-color-primary);
+  background-color: var(--el-color-primary-light-9);
+  padding: 16px;
+  border-radius: 50%;
+  margin-bottom: 16px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>

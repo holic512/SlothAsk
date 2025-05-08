@@ -55,7 +55,15 @@ public class GetUserStudyServiceImpl implements GetUserStudyService {
     private final static String QUESTION_LIST_CACHE_KEY = RedisConfig.getKey() + "Question:List:";
     // 设置问题列表缓存过期时间（分钟）
     private final static int QUESTION_LIST_CACHE_EXPIRY = 5;
+    // 下一题ID缓存键前缀
+    private final static String NEXT_QUESTION_CACHE_KEY = RedisConfig.getKey() + "Question:Next:";
+    // 下一题缓存过期时间（分钟）
+    private final static int NEXT_QUESTION_CACHE_EXPIRY = 30;
 
+    // 添加分类ID缓存键前缀
+    private final static String QUESTION_CATEGORY_CACHE_KEY = RedisConfig.getKey() + "Question:Category:";
+    // 分类缓存过期时间（小时）
+    private final static int QUESTION_CATEGORY_CACHE_EXPIRY = 24;
 
     @Autowired
     GetUserStudyServiceImpl(QuestionCategoryMapper questionCategoryMapper, ServiceImageFeign serviceImageFeign,
@@ -322,7 +330,117 @@ public class GetUserStudyServiceImpl implements GetUserStudyService {
         return page;
     }
 
-
+    @Override
+    public String getNextQuestionVid(String currentVid) {
+        if (currentVid == null || currentVid.isEmpty()) {
+            return null;
+        }
+        
+        // 构建缓存键
+        String cacheKey = NEXT_QUESTION_CACHE_KEY + currentVid;
+        
+        // 尝试从缓存获取
+        String nextVid = (String) redisTemplate.opsForValue().get(cacheKey);
+        if (nextVid != null) {
+            return nextVid;
+        }
+        
+        try {
+            // 1. 从虚拟ID获取真实ID
+            String realIdKey = VidKey + currentVid;
+            String realIdStr = (String) redisTemplate.opsForValue().get(realIdKey);
+            
+            // 如果缓存中没有映射关系，尝试解密虚拟ID
+            Long realId;
+            if (realIdStr == null) {
+                try {
+                    realId = IdEncryptor.decryptId(currentVid);
+                } catch (Exception e) {
+                    // 无效的虚拟ID
+                    return null;
+                }
+            } else {
+                realId = Long.valueOf(realIdStr);
+            }
+            
+            // 2. 查询当前题目分类ID（先尝试从缓存获取）
+            Long queryCategoryId = null;
+            String categoryIdKey = QUESTION_CATEGORY_CACHE_KEY + realId;
+            String cachedCategoryId = (String) redisTemplate.opsForValue().get(categoryIdKey);
+            
+            if (cachedCategoryId != null) {
+                queryCategoryId = Long.valueOf(cachedCategoryId);
+            } else {
+                // 缓存未命中，查询数据库
+                Question currentQuestion = userQuestionMapper.selectById(realId);
+                if (currentQuestion == null) {
+                    return null; // 当前题目不存在
+                }
+                
+                queryCategoryId = currentQuestion.getCategoryId();
+                
+                // 异步缓存分类ID
+                final Long categoryId = queryCategoryId;
+                CompletableFuture.runAsync(() -> {
+                    redisTemplate.opsForValue().set(categoryIdKey, String.valueOf(categoryId), 
+                        QUESTION_CATEGORY_CACHE_EXPIRY, TimeUnit.HOURS);
+                });
+            }
+            
+            // 3. 查询下一题
+            QueryWrapper<Question> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("category_id", queryCategoryId);
+            queryWrapper.eq("status", 1); // 确保状态为启用
+            queryWrapper.gt("id", realId); // ID大于当前题目ID
+            queryWrapper.orderByAsc("id"); // 按ID升序
+            queryWrapper.last("LIMIT 1"); // 只获取一条记录
+            
+            Question nextQuestion = userQuestionMapper.selectOne(queryWrapper);
+            
+            // 如果没有找到下一题，可能是当前题目是该分类中的最后一题
+            // 尝试查找该分类的第一题（循环回到开头）
+            if (nextQuestion == null) {
+                queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("category_id", queryCategoryId);
+                queryWrapper.eq("status", 1);
+                queryWrapper.orderByAsc("id");
+                queryWrapper.last("LIMIT 1");
+                
+                nextQuestion = userQuestionMapper.selectOne(queryWrapper);
+                
+                // 如果仍然没有找到，说明该分类下没有题目
+                if (nextQuestion == null) {
+                    return null;
+                }
+            }
+            
+            // 4. 获取下一题的虚拟ID
+            String nextVirtualId;
+            String nextVirtualIdKey = VidKey + nextQuestion.getId();
+            nextVirtualId = (String) redisTemplate.opsForValue().get(nextVirtualIdKey);
+            
+            // 如果缓存中没有，生成新的虚拟ID
+            if (nextVirtualId == null) {
+                nextVirtualId = IdEncryptor.encryptId(nextQuestion.getId());
+                // 建立双向映射并异步存储到Redis
+                final String finalNextVirtualId = nextVirtualId;
+                Question finalNextQuestion = nextQuestion;
+                CompletableFuture.runAsync(() -> {
+                    redisTemplate.opsForValue().set(nextVirtualIdKey, finalNextVirtualId);
+                    redisTemplate.opsForValue().set(VidKey + finalNextVirtualId, String.valueOf(finalNextQuestion.getId()));
+                });
+            }
+            
+            // 5. 缓存结果
+            redisTemplate.opsForValue().set(cacheKey, nextVirtualId, NEXT_QUESTION_CACHE_EXPIRY, TimeUnit.MINUTES);
+            
+            return nextVirtualId;
+            
+        } catch (Exception e) {
+            // 发生异常，记录日志但不影响主流程
+            return null;
+        }
+    }
 
     /**
      * 异步增加分类的访问量

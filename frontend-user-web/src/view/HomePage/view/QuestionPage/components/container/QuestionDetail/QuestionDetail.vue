@@ -35,21 +35,36 @@
       <!--  答题页面  -->
       <component :is="questionComponent" :question="question"/>
     </div>
+    
+    <!-- 导航区域 -->
+    <div class="question-navigation">
+      <el-button 
+        :loading="loadingNext"
+        class="next-question-btn" 
+        type="primary"
+        @click="goToNextQuestion"
+      >
+        <el-icon class="next-icon"><ArrowRight /></el-icon>
+        下一题
+      </el-button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import {computed, defineAsyncComponent, onMounted, ref, watch} from 'vue';
-import {useRoute} from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
 import {useQuestionBankStore} from '@/view/HomePage/view/StudyPage/store/QuestionBank';
 import axios from '@/axios/axios';
+import {ElMessage} from 'element-plus';
+import {useScrollbarStore} from '@/pinia/ScrollbarStore';
 
 import {setTitle} from '@/utils/title';
 import {QuestionInterface} from "@/view/HomePage/view/QuestionPage/interface/QuestionInterface";
 import {ApiGetQuestionByVirtualId} from "@/view/HomePage/view/QuestionPage/service/ApiGetQuestionByVirtualId";
 import ActionButtons
   from "@/view/HomePage/view/QuestionPage/components/container/QuestionDetail/components/ActionButtons.vue";
-import {View} from "@element-plus/icons-vue";
+import {ArrowRight, View} from "@element-plus/icons-vue";
 
 // 使用异步组件动态导入，只在需要时加载
 const SingleChoice = defineAsyncComponent(() =>
@@ -66,12 +81,15 @@ const ShortAnswer = defineAsyncComponent(() =>
 );
 
 const route = useRoute();
+const router = useRouter();
 const questionBank = useQuestionBankStore();
 
 // 根据路由获取 题目信息
 const question = ref<QuestionInterface>();
 // 收藏状态
 const isFavorited = ref(false);
+// 加载下一题状态
+const loadingNext = ref(false);
 
 // 检查题目是否已收藏
 const checkFavoriteStatus = async (virtualId: string) => {
@@ -200,6 +218,53 @@ const displayedTags = computed(() => {
 const hasMoreTags = computed(() => {
   return question.value?.tags && question.value.tags.length > maxVisibleTags;
 });
+
+// 获取下一题并跳转
+const goToNextQuestion = async () => {
+  if (!question.value) return;
+  
+  const currentVid = route.params.questionId as string;
+  if (!currentVid) return;
+  
+  try {
+    loadingNext.value = true;
+    // 调用获取下一题API
+    const response = await axios.get(`service-question/user/study/nextQuestion/${currentVid}`);
+    
+    if (response.data.status === 200 && response.data.data) {
+      const nextQuestionVid = response.data.data;
+      // 先获取scrollbarStore
+      const scrollbarStore = useScrollbarStore();
+      
+      // 使用路径导航
+      router.push(`/question/${nextQuestionVid}`).then(() => {
+        // 导航成功后等待DOM更新完成再滚动
+        setTimeout(() => {
+          console.log('Attempting to scroll to top, scrollbar instance:', scrollbarStore.scrollbarRef);
+          scrollbarStore.scrollToTop();
+          
+          // 备用方案：如果store中的scrollbar引用失效，尝试直接使用DOM API
+          if (!scrollbarStore.scrollbarRef) {
+            const scrollWrap = document.querySelector('.el-scrollbar__wrap');
+            if (scrollWrap) {
+              scrollWrap.scrollTop = 0;
+              console.log('Used DOM API to scroll to top');
+            }
+          }
+        }, 100);
+      });
+    } else {
+      // 处理没有下一题的情况
+      console.warn('没有更多题目了');
+      ElMessage.warning('已经是最后一题了');
+    }
+  } catch (error) {
+    console.error('获取下一题失败:', error);
+    ElMessage.error('获取下一题失败，请稍后重试');
+  } finally {
+    loadingNext.value = false;
+  }
+};
 </script>
 
 
@@ -347,6 +412,27 @@ const hasMoreTags = computed(() => {
   margin-top: 24px;
   display: flex;
   justify-content: center;
+}
+
+/* 导航区域样式 */
+.question-navigation {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  padding: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.next-question-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+}
+
+.next-icon {
+  font-size: 14px;
 }
 </style>
 

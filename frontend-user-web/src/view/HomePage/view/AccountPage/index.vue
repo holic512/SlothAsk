@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import {onMounted, ref, watch} from 'vue';
 import {setTitle} from '@/utils/title';
-import {useRouter, useRoute} from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
 import {ElMessage} from 'element-plus';
 import {
-  User,
-  Star,
-  Warning,
-  DataLine,
-  Timer,
+  Brush,
   Collection,
+  DataLine,
   Folder,
   Setting,
-  Brush,
-  SwitchButton
+  Star,
+  SwitchButton,
+  Timer,
+  User,
+  Warning
 } from '@element-plus/icons-vue';
 import {getUserNameAndAvatar} from "@/view/HomePage/view/TopMenu/Api/ApiUserInfo";
 import {useSessionStore} from "@/pinia/Session";
@@ -28,7 +28,7 @@ const userInfo = ref({
 
 // 学习相关
 const studyMenuItems = [
-  {path: '/account/favorites', name: '收藏夹', icon: Star},
+  {path: '/questionbank/myFavoritesQuestion', name: '收藏夹', icon: Star},
   {path: '/account/wrong-questions', name: '错题本', icon: Warning},
   {path: '/account/history', name: '历史浏览', icon: Timer},
   {path: '/account/progress', name: '进展分析', icon: DataLine},
@@ -78,8 +78,11 @@ watch(() => userSession.userSession, async (newValue) => {
 
 
 const handleLogout = () => {
+  // 清空token
+  userSession.clearSession();
   ElMessage.success('退出登录成功');
-  // 这里添加退出登录的逻辑
+  // 刷新页面
+  window.location.reload();
 };
 
 onMounted(() => {
@@ -205,8 +208,6 @@ onMounted(() => {
   gap: 14px;
   padding: 12px 0;
 }
-
-
 
 .nickname {
   font-size: 18px;

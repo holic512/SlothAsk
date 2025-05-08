@@ -6,6 +6,8 @@ interface Session {
     userId?: string;
     token?: string;
     email?: string;
+    nickname?: string;
+    avatar?: string;
 
     [key: string]: any; // 允许额外的字段
 }
@@ -24,6 +26,12 @@ export const useSessionStore = defineStore('Session', () => {
         userSession.value = newSession;
     };
 
+    // 更新用户信息
+    const updateUserInfo = (nickname: string, avatar: string) => {
+        userSession.value.nickname = nickname;
+        userSession.value.avatar = avatar;
+    };
+
     // 清除 session
     const clearSession = () => {
         userSession.value = {};
@@ -33,6 +41,7 @@ export const useSessionStore = defineStore('Session', () => {
         userSession,
         getSession,
         setSession,
+        updateUserInfo,
         clearSession
     };
 },{

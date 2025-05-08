@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import {ref, onMounted} from 'vue';
-import {useRouter, useRoute} from 'vue-router';
-import {Message, Key, Lock} from '@element-plus/icons-vue';
+import {ref} from 'vue';
+import {useRoute, useRouter} from 'vue-router';
+import {Key, Lock, Message} from '@element-plus/icons-vue';
 import {ElMessage} from 'element-plus';
 import SliderCaptcha from '../../../components/SliderCaptcha.vue';
-import axios from 'axios';
 import {apiSendSignVerificationCode} from "@/view/Sign/service/ApiSendSignVerificationCode";
 import {ApiVerifySignVerificationCode} from "@/view/Sign/service/ApiVerifySignVerificationCode";
+import {useSessionStore} from "@/pinia/Session";
 
 const router = useRouter();
 const route = useRoute();
@@ -14,6 +14,7 @@ const email = ref('');
 const verificationCode = ref('');
 const countdown = ref(0);
 const loading = ref(false);
+const sendingEmail = ref(false);
 
 // 滑块验证码相关
 const showCaptchaDialog = ref(false);
@@ -55,10 +56,11 @@ const closeCaptcha = () => {
 // 实际发送邮箱验证码的函数
 const sendEmailCode = async () => {
   loading.value = true;
+  sendingEmail.value = true;
+  
   try {
     // 调用发送验证码API
     const response = await apiSendSignVerificationCode(email.value)
-
 
     if (response.status === 200) {
       ElMessage.success('验证码已发送，请查收邮箱');
@@ -81,6 +83,7 @@ const sendEmailCode = async () => {
     captchaVerified.value = false;
   } finally {
     loading.value = false;
+    sendingEmail.value = false;
   }
 };
 
@@ -97,6 +100,11 @@ const handleLogin = async () => {
     const response = await ApiVerifySignVerificationCode(email.value, verificationCode.value);
 
     if (response.status === 200) {
+
+      // 保存token
+      const store = useSessionStore();
+      store.setSession(response.data);
+
       ElMessage.success('登录成功');
 
       // 获取重定向地址，如果没有则跳转到首页
@@ -106,24 +114,28 @@ const handleLogin = async () => {
 
       // 确保redirectPath不为null
       await router.push(redirectPath ? redirectPath : '/');
-    } else if (response.status === 201) {
-      // 验证成功但用户未注册，跳转到注册页面
-      ElMessage.info('请完成注册');
-      
-      // 获取重定向地址
-      const redirectPath = Array.isArray(route.query.redirect)
-          ? route.query.redirect[0]
-          : (route.query.redirect || '/');
-      
-      router.push({
-        path: '/sign/register',
-        query: {
-          email: email.value,           // 传递邮箱
-          uid: response.data,           // 传递拟注册的uid
-          redirect: redirectPath        // 传递重定向地址
-        }
-      });
-    } else {
+    }
+    //以升级成无感注入
+
+    // else if (response.status === 201) {
+    //   // 验证成功但用户未注册，跳转到注册页面
+    //   ElMessage.info('请完成注册');
+    //
+    //   // 获取重定向地址
+    //   const redirectPath = Array.isArray(route.query.redirect)
+    //       ? route.query.redirect[0]
+    //       : (route.query.redirect || '/');
+    //
+    //   router.push({
+    //     path: '/sign/register',
+    //     query: {
+    //       email: email.value,           // 传递邮箱
+    //       uid: response.data,           // 传递拟注册的uid
+    //       redirect: redirectPath        // 传递重定向地址
+    //     }
+    //   });
+    // }
+    else {
       ElMessage.error(response.message || '登录失败');
     }
   } catch (error) {
@@ -186,12 +198,15 @@ const captchaSuccessOn = (uid: string) => {
           </el-input>
           <el-button
               type="primary"
+              :loading="countdown > 0 || sendingEmail"
               :disabled="countdown > 0"
               @click="sendVerificationCode"
               size="large"
               class="send-code-btn"
           >
-            {{ countdown > 0 ? `${countdown}s后重新发送` : '发送验证码' }}
+            <span v-if="sendingEmail">发送中...</span>
+            <span v-else-if="countdown > 0">{{ countdown }}s后重新发送</span>
+            <span v-else>发送验证码</span>
           </el-button>
         </div>
       </el-form-item>

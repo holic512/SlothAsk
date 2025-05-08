@@ -24,7 +24,6 @@
 
     <!-- 评论发布表单 -->
     <div class="comment-form">
-
       <div class="form-content">
         <el-input
           v-model="commentContent"
@@ -36,12 +35,22 @@
           type="textarea"
         />
         <div class="form-footer">
+          <!-- 已登录时显示的按钮 -->
           <el-button
+            v-if="isLoggedIn"
             :disabled="!commentContent.trim()"
             type="primary"
             @click="submitComment"
           >
             发布
+          </el-button>
+          <!-- 未登录时显示的按钮 -->
+          <el-button
+            v-else
+            type="primary"
+            @click="showLoginTip"
+          >
+            登录后发布
           </el-button>
         </div>
       </div>
@@ -80,7 +89,7 @@
                   <span>{{ comment.likeCount > 0 ? comment.likeCount : '' }}</span>
                 </div>
 
-                <div class="action-btn" @click="toggleReplyForm(comment.id)">
+                <div class="action-btn" @click="handleReply(comment.id)">
                   <el-icon><chat-line-round /></el-icon>
                   <span>回复</span>
                 </div>
@@ -164,7 +173,7 @@
                   <span>{{ reply.likeCount > 0 ? reply.likeCount : '' }}</span>
                 </div>
 
-                <div class="action-btn" @click="toggleReplyForm(comment.id, reply.id, reply.userInfo.id)">
+                <div class="action-btn" @click="handleReply(comment.id, reply.id, reply.userInfo.id)">
                   <el-icon><chat-line-round /></el-icon>
                   <span>回复</span>
                 </div>
@@ -229,12 +238,13 @@
 </template>
 
 <script setup lang="ts">
-import {defineComponent, h, onMounted, ref, watch} from 'vue';
+import {computed, defineComponent, h, onMounted, ref, watch} from 'vue';
 import {ArrowDown, ChatLineRound, MoreFilled} from '@element-plus/icons-vue';
 import type {CommentType, ReplyType, SortType} from './types';
 import {commentService} from './commentService';
-import {useRoute} from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
 import {ElMessage, ElMessageBox} from 'element-plus';
+import {useSessionStore} from "@/pinia/Session";
 
 // 自定义点赞图标组件
 const ThumbUpIcon = defineComponent({
@@ -264,6 +274,38 @@ const ThumbUpIcon = defineComponent({
 
 // 路由
 const route = useRoute();
+const router = useRouter();
+
+// 用户登录状态
+const userSession = useSessionStore();
+
+// 判断用户是否登录
+const isLoggedIn = computed(() => {
+  return userSession.userSession && userSession.userSession.tokenValue;
+});
+
+// 显示登录提示
+const showLoginTip = () => {
+  ElMessageBox.confirm('登录后才能发表评论，是否前往登录？', '提示', {
+    confirmButtonText: '去登录',
+    cancelButtonText: '取消',
+    type: 'info'
+  }).then(() => {
+    handleLogin();
+  }).catch(() => {
+    // 用户取消登录
+  });
+};
+
+// 处理登录跳转
+const handleLogin = () => {
+  router.push({
+    path: '/sign/email',
+    query: {
+      redirect: route.fullPath
+    }
+  });
+};
 
 // 状态管理
 const comments = ref<CommentType[]>([]);
@@ -327,6 +369,17 @@ const getQuestionId = (): string => {
   return route.params.questionId as string;
 };
 
+// 处理回复操作
+const handleReply = (commentId: number, replyId?: number, userId?: number): void => {
+  // 检查用户是否登录
+  if (!isLoggedIn.value) {
+    ElMessage.warning('登录后才能回复评论');
+    return;
+  }
+  
+  toggleReplyForm(commentId, replyId, userId);
+};
+
 // 切换回复表单显示状态
 const toggleReplyForm = (commentId: number, replyId?: number, userId?: number): void => {
   if (replyToId.value === commentId && replyToSubId.value === replyId) {
@@ -352,6 +405,12 @@ const cancelReply = (): void => {
 // 提交评论
 const submitComment = async (): Promise<void> => {
   if (!commentContent.value.trim()) return;
+  
+  // 检查用户是否登录
+  if (!isLoggedIn.value) {
+    ElMessage.warning('登录后才能发表评论');
+    return;
+  }
 
   const questionId = getQuestionId();
   loading.value = true;
@@ -380,6 +439,12 @@ const submitComment = async (): Promise<void> => {
 // 提交回复
 const submitReply = async (commentId: number, userId: number): Promise<void> => {
   if (!replyContent.value.trim()) return;
+  
+  // 检查用户是否登录
+  if (!isLoggedIn.value) {
+    ElMessage.warning('登录后才能回复评论');
+    return;
+  }
 
   const questionId = getQuestionId();
   loading.value = true;
@@ -516,6 +581,12 @@ const handleSortChange = (sortType: SortType): void => {
 
 // 处理点赞
 const handleLike = async (id: number): Promise<void> => {
+  // 检查用户是否登录
+  if (!isLoggedIn.value) {
+    ElMessage.warning('登录后才能点赞');
+    return;
+  }
+  
   // 查找对应的评论或回复
   let target: any = null;
   let isReply = false;

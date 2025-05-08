@@ -13,15 +13,14 @@
  */
 package org.example.servicequestion.user.study.service;
 
-import java.util.List;
-
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.example.servicequestion.entity.Question;
 import org.example.servicequestion.entity.QuestionCategory;
 import org.example.servicequestion.user.study.dto.CategoryIdAndNameDto;
 import org.example.servicequestion.user.study.dto.TagIdAndNameDto;
 import org.example.servicequestion.user.study.request.GetQuestionListRequest;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import java.util.List;
 
 /**
  * 用户题库分类服务接口
@@ -70,5 +69,13 @@ public interface GetUserStudyService {
      */
     Page<Question> getQuestionList(Long projectId, GetQuestionListRequest request);
 
+    /**
+     * 获取下一题的虚拟ID
+     * 根据当前题目的虚拟ID,查找同一分类下的下一题,并返回其虚拟ID
+     * 
+     * @param currentVid 当前题目的虚拟ID
+     * @return 下一题的虚拟ID,如果没有下一题则返回null
+     */
+    String getNextQuestionVid(String currentVid);
 
 }

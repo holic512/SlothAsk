@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {ref, computed, onMounted} from 'vue';
+import {computed, onMounted, ref} from 'vue';
 import {useQuestionBankStore} from '@/view/HomePage/view/StudyPage/store/QuestionBank';
-import {Close, Search, Delete} from "@element-plus/icons-vue";
+import {Close, Delete, Search} from "@element-plus/icons-vue";
 import {
   apiGetCategoryIdAndNameByProjectId
 } from "@/view/HomePage/view/StudyPage/service/ApiGetCategoryIdAndNameByProjectId";
@@ -31,7 +31,17 @@ onMounted(() => {
   filterDifficulty.value = questionBank.pagination.filterDifficulty ?? 0;
 });
 
-
+// 防抖函数
+const debounce = (fn: Function, delay: number = 300) => {
+  let timer: number | null = null;
+  return (...args: any[]) => {
+    if (timer) clearTimeout(timer);
+    timer = window.setTimeout(() => {
+      fn(...args);
+      timer = null;
+    }, delay);
+  };
+};
 
 // 过滤搜索的变量 - 直接从 store 获取
 const searchText = ref('');
@@ -72,6 +82,14 @@ const updateSearchText = (text: string) => {
   questionBank.pagination.searchText = text || null;
 };
 
+// 防抖处理搜索输入
+const debouncedUpdateSearchText = debounce(updateSearchText, 500);
+
+const handleSearchInput = (text: string) => {
+  searchText.value = text; // 立即更新UI显示
+  debouncedUpdateSearchText(text); // 延迟更新store和搜索
+};
+
 const updateFilterCategory = (category: number) => {
   filterCategory.value = category;
   questionBank.pagination.filterCategory = category === 0 ? null : category;
@@ -90,6 +108,18 @@ const updateFilterType = (type: number) => {
 const updateFilterDifficulty = (difficulty: number) => {
   filterDifficulty.value = difficulty;
   questionBank.pagination.filterDifficulty = difficulty === 0 ? null : difficulty;
+};
+
+// 防抖处理标签搜索
+const debouncedTagSearch = debounce((value: string) => {
+  tagSearchText.value = value;
+}, 300);
+
+const handleTagSearchInput = (value: string) => {
+  // 立即更新UI显示
+  tagSearchText.value = value;
+  // 延迟过滤标签列表
+  debouncedTagSearch(value);
 };
 
 // 过滤标签列表
@@ -133,7 +163,7 @@ const filteredTags = computed(() => {
     </div>
 
     <div class="search-box">
-      <el-input prefix-icon="search" v-model="searchText" @input="updateSearchText(searchText)"
+      <el-input v-model="searchText" prefix-icon="search" @input="handleSearchInput"
                 placeholder="搜索题目ID或标题..." class="search-input"/>
     </div>
   </div>
@@ -147,7 +177,11 @@ const filteredTags = computed(() => {
         <el-icon class="search-icon">
           <Search/>
         </el-icon>
-        <input type="text" v-model="tagSearchText" placeholder="搜索标签..." class="tag-search-input">
+        <input v-model="tagSearchText"
+               class="tag-search-input"
+               placeholder="搜索标签..."
+               type="text"
+               @input="handleTagSearchInput($event.target.value)">
         <el-icon v-if="tagSearchText" class="clear-icon" @click="tagSearchText = ''">
           <Close/>
         </el-icon>

@@ -93,7 +93,7 @@ const toggleSection = (index) => {
 .footer {
   background-color: #1a1a1a;
   color: #ffffff;
-  padding: 40px 0 20px;
+  padding: 25px 0 10px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -104,14 +104,14 @@ const toggleSection = (index) => {
   display: flex;
   justify-content: space-around;
   flex-wrap: wrap;
-  padding: 0 20px;
+  padding: 0 15px;
 }
 
 .footer-section {
-  margin-bottom: 30px;
-  min-width: 200px;
+  margin-bottom: 20px;
+  min-width: 180px;
   flex: 1 1 auto;
-  padding: 0 15px;
+  padding: 0 10px;
 }
 
 .section-title {
@@ -126,8 +126,8 @@ const toggleSection = (index) => {
 }
 
 .footer-section h3 {
-  font-size: 16px;
-  margin-bottom: 20px;
+  font-size: 15px;
+  margin-bottom: 15px;
   color: #ffffff;
 }
 
@@ -141,7 +141,7 @@ const toggleSection = (index) => {
 }
 
 .footer-section ul li {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .footer-section ul li a {
@@ -149,7 +149,8 @@ const toggleSection = (index) => {
   text-decoration: none;
   transition: color 0.3s ease;
   display: inline-block;
-  padding: 3px 0;
+  padding: 2px 0;
+  font-size: 14px;
 }
 
 .footer-section ul li a:hover {
@@ -158,56 +159,56 @@ const toggleSection = (index) => {
 
 .footer-bottom {
   text-align: center;
-  margin-top: 40px;
-  padding-top: 20px;
+  margin-top: 25px;
+  padding-top: 15px;
   border-top: 1px solid #333333;
 }
 
 .footer-bottom a {
   color: #666666;
   text-decoration: none;
-  margin: 5px 0;
-  font-size: 14px;
+  margin: 3px 0;
+  font-size: 13px;
   display: inline-block;
-  padding: 5px;
+  padding: 3px;
 }
 
 @media (max-width: 992px) {
   .footer-section {
-    min-width: 150px;
+    min-width: 140px;
     flex: 1 1 30%;
   }
 }
 
 @media (max-width: 768px) {
   .footer {
-    padding: 20px 0 10px;
+    padding: 15px 0 8px;
   }
   
   .footer-content {
     flex-direction: column;
     align-items: stretch;
     text-align: left;
-    padding: 0 10px;
+    padding: 0 8px;
   }
 
   .footer-section {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     width: 100%;
     flex: none;
-    padding: 0 5px;
+    padding: 0 3px;
     border-bottom: 1px solid #333333;
   }
   
   .section-title {
     cursor: pointer;
-    padding: 10px 0;
+    padding: 8px 0;
     margin-bottom: 0;
   }
   
   .toggle-icon {
     display: inline-block;
-    font-size: 18px;
+    font-size: 16px;
     transition: transform 0.3s ease;
   }
   
@@ -217,7 +218,7 @@ const toggleSection = (index) => {
   
   .footer-section h3 {
     margin-bottom: 0;
-    font-size: 15px;
+    font-size: 14px;
   }
   
   .footer-section ul {
@@ -228,55 +229,55 @@ const toggleSection = (index) => {
   .footer-section ul.active {
     max-height: 500px;
     opacity: 1;
-    padding: 5px 0 10px;
+    padding: 3px 0 8px;
   }
   
   .footer-section ul li {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
   
   .footer-section ul li a {
-    padding: 5px 0;
-    font-size: 14px;
+    padding: 3px 0;
+    font-size: 13px;
   }
   
   .footer-bottom {
-    margin-top: 15px;
-    padding-top: 10px;
+    margin-top: 12px;
+    padding-top: 8px;
   }
   
   .footer-bottom a {
     font-size: 12px;
-    padding: 3px;
+    padding: 2px;
   }
 }
 
 @media (max-width: 480px) {
   .footer {
-    padding: 10px 0 5px;
+    padding: 8px 0 3px;
   }
   
   .footer-section {
-    margin-bottom: 5px;
+    margin-bottom: 3px;
     padding: 0;
   }
   
   .footer-section h3 {
-    font-size: 14px;
+    font-size: 13px;
   }
   
   .footer-section ul li a {
-    font-size: 13px;
-    padding: 4px 0;
+    font-size: 12px;
+    padding: 3px 0;
   }
   
   .footer-content {
-    padding: 0 8px;
+    padding: 0 5px;
   }
   
   .footer-bottom {
-    margin-top: 10px;
-    padding-top: 8px;
+    margin-top: 8px;
+    padding-top: 5px;
   }
 }
 </style>

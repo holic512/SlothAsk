@@ -22,8 +22,14 @@
 
       <!-- 验证码图片区域 -->
       <div class="slider-captcha-body" ref="captchaContainer">
+        <!-- 加载中状态 -->
+        <div v-if="isLoading" class="loading-container">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">加载中...</div>
+        </div>
+        
         <!-- 背景图片 -->
-        <div class="background-container">
+        <div v-else class="background-container">
           <img :src="'data:image/' + backgroundImageType + ';base64,' + backgroundImage" alt="背景图片"
                class="background-image" draggable="false" @contextmenu.prevent/>
         </div>
@@ -32,7 +38,7 @@
         <div
             class="slider-block"
             :style="{ left: `${sliderPosition}px`, top: `${sliderYPosition}px` }"
-            v-show="backgroundImage && sliderImage"
+            v-show="backgroundImage && sliderImage && !isLoading"
         >
           <img :src="'data:image/' + sliderImageType + ';base64,' + sliderImage" alt="滑块" class="slider-image"
                draggable="false" @contextmenu.prevent/>
@@ -75,22 +81,22 @@
 <script setup lang="ts">
 /**
  * 滑块验证码组件
- * 
+ *
  * 功能：
  * 1. 显示背景图片和滑块，用户通过拖动滑块完成验证
  * 2. 支持鼠标和触摸屏操作
  * 3. 防止图片被拖拽保存或右键保存
  * 4. 支持点击遮罩层、关闭按钮或按ESC键关闭
  * 5. 验证成功后回调父组件
- * 
+ *
  * 使用方法：
- * <SliderCaptcha 
- *   :on-success="handleSuccess" 
+ * <SliderCaptcha
+ *   :on-success="handleSuccess"
  *   :on-close="handleClose"
  * />
  */
-import {ref, onMounted, computed, onBeforeUnmount} from 'vue';
-import {Check, Close, Right, Refresh} from '@element-plus/icons-vue';
+import {computed, onBeforeUnmount, onMounted, ref} from 'vue';
+import {Check, Close, Refresh, Right} from '@element-plus/icons-vue';
 import {ElMessage} from 'element-plus';
 import axios from '@/axios/axios';
 
@@ -105,6 +111,8 @@ const backgroundImage = ref('');
 const backgroundImageType = ref('jpeg');
 /** 滑块Y轴位置 */
 const targetYPosition = ref(0);
+/** 是否正在加载验证码 */
+const isLoading = ref(false);
 
 // ===== 滑块位置状态 =====
 /** 滑块在图片上的X轴位置 */
@@ -211,6 +219,7 @@ let captchaUid: string;
  * 从服务器获取验证码图片和相关数据
  */
 const loadCaptcha = async () => {
+  isLoading.value = true;
   try {
     const response = await axios.get("service-user/user/captcha/captcha");
 
@@ -245,6 +254,8 @@ const loadCaptcha = async () => {
   } catch (error) {
     console.error('获取验证码出错:', error);
     ElMessage.error('获取验证码出错');
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -517,6 +528,39 @@ const props = defineProps<{
   width: 100%;
   height: 160px;
   overflow: hidden;
+}
+
+/* 加载中容器样式 */
+.loading-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5;
+}
+
+/* 加载中动画 */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(64, 158, 255, 0.2);
+  border-radius: 50%;
+  border-top-color: #409EFF;
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 加载中文字 */
+.loading-text {
+  color: #909399;
+  font-size: 14px;
 }
 
 /* 背景图片容器 */

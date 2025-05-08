@@ -120,15 +120,6 @@ export default [
                                 '@/view/HomePage/view/AccountPage/components/Profile/Profile.vue'
                                 )
                     },
-                    // 我的收藏
-                    {
-                        path: 'favorites',
-                        name: 'AccountFavorites',
-                        component: () =>
-                            import(
-                                /* webpackChunkName: "account-favorites" */ '@/view/HomePage/view/AccountPage/components/Favorites.vue'
-                                )
-                    },
                     // 错题本
                     {
                         path: 'wrong-questions',
@@ -189,7 +180,7 @@ export default [
                         name: 'AccountSettings',
                         component: () =>
                             import(
-                                /* webpackChunkName: "account-settings" */ '@/view/HomePage/view/AccountPage/components/Settings.vue'
+                                /* webpackChunkName: "account-settings" */ '@/view/HomePage/view/AccountPage/components/AccountSetting/AccountSetting.vue'
                                 )
                     },
                     // 外观主题
@@ -202,6 +193,26 @@ export default [
                                 )
                     }
                 ]
+            },
+
+            // 用户协议
+            {
+                path: 'terms',
+                name: 'Terms',
+                component: () =>
+                    import(
+                        /* webpackChunkName: "terms" */ './view/Terms/Terms.vue'
+                        )
+            },
+
+            // 隐私政策
+            {
+                path: 'privacy',
+                name: 'Privacy',
+                component: () =>
+                    import(
+                        /* webpackChunkName: "privacy" */ './view/Terms/Privacy.vue'
+                        )
             }
         ]
     }

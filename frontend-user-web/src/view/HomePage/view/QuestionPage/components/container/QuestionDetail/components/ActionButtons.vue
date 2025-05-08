@@ -14,7 +14,7 @@
       <svg v-else class="icon loading-icon" viewBox="0 0 50 50">
         <circle cx="25" cy="25" fill="none" r="20" stroke-width="5"/>
       </svg>
-      <span>{{ loading ? '处理中' : '收藏' }}</span>
+      <span>{{ loading ? '处理中' : (isLoggedIn ? '收藏' : '登录后收藏') }}</span>
     </button>
 
     <!-- 分享按钮 -->
@@ -28,20 +28,58 @@
 </template>
 
 <script lang="ts" setup>
-import {ref} from 'vue'
-import {useRoute} from 'vue-router'
+import {computed, ref} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
 import axios from '@/axios/axios'
-import {ElMessage} from 'element-plus'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {useSessionStore} from "@/pinia/Session";
 
 const isFavorited = defineModel()
 
 const loading = ref(false)
 
 const route = useRoute()
+const router = useRouter()
+const userSession = useSessionStore()
+
+// 判断用户是否登录
+const isLoggedIn = computed(() => {
+  return userSession.userSession && userSession.userSession.tokenValue;
+});
+
+// 显示登录提示
+const showLoginTip = () => {
+  ElMessageBox.confirm('登录后才能收藏题目，是否前往登录？', '提示', {
+    confirmButtonText: '去登录',
+    cancelButtonText: '取消',
+    type: 'info'
+  }).then(() => {
+    handleLogin();
+  }).catch(() => {
+    // 用户取消登录
+  });
+};
+
+// 处理登录跳转
+const handleLogin = () => {
+  router.push({
+    path: '/sign/email',
+    query: {
+      redirect: route.fullPath
+    }
+  });
+};
 
 // 收藏/取消收藏
 const handleStarClick = async () => {
   if (loading.value) return
+  
+  // 检查用户是否登录
+  if (!isLoggedIn.value) {
+    showLoginTip();
+    return;
+  }
+  
   loading.value = true
 
   const virtualId = route.params.questionId as string

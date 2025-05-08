@@ -1,24 +1,48 @@
 <!--Home页面的主视图-->
-<script setup>
+<script lang="ts" setup>
 import TopMenu from "./view/TopMenu/TopMenu.vue";
 import FooterMenu from "./view/FootMenu/FootMenu.vue"
 import {useRoute} from 'vue-router';
-import {computed} from 'vue';
+import {computed, onMounted, ref, watch} from 'vue';
+import {useScrollbarStore} from "@/pinia/ScrollbarStore";
+import type {ScrollbarInstance} from 'element-plus';
 
 const route = useRoute();
 const showFooter = computed(() => !route.path.includes('questionbank'));
+
+// 使用store保存scrollbar引用
+const scrollbarStore = useScrollbarStore();
+const scrollbarRef = ref<ScrollbarInstance | null>(null); // 正确定义类型
+
+onMounted(() => {
+  // 确保组件已完全挂载后再保存引用
+  setTimeout(() => {
+    // 将组件中的scrollbar引用保存到store中
+    scrollbarStore.scrollbarRef = scrollbarRef.value;
+  }, 100);
+});
+
+// 确保在路由变化时scrollbar引用始终有效
+watch(() => route.path, () => {
+  // 当路由变化时，可能需要重新设置scrollbar引用
+  if (scrollbarRef.value && scrollbarStore.scrollbarRef !== scrollbarRef.value) {
+    scrollbarStore.scrollbarRef = scrollbarRef.value;
+    console.log('Scrollbar reference updated after route change');
+  }
+});
 </script>
 
 <template>
   <div class="index-page-container">
-    <el-scrollbar>
+    <el-scrollbar ref="scrollbarRef">
       <TopMenu/>
-
 
       <router-view></router-view>
 
-
       <FooterMenu v-if="showFooter"/>
+
+      <!-- 返回顶部按钮 -->
+      <el-backtop :bottom="40" :right="40" target=".el-scrollbar__wrap"/>
     </el-scrollbar>
   </div>
 </template>

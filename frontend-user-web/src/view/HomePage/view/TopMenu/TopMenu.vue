@@ -52,6 +52,8 @@ const fetchUserInfo = async () => {
     const response = await getUserNameAndAvatar();
     if (response.status === 200) {
       userInfo.value = response.data;
+      // 将用户信息保存到Session中
+      userSession.updateUserInfo(response.data.nickname, response.data.avatar);
       return 200;
     }
   } catch (error) {
