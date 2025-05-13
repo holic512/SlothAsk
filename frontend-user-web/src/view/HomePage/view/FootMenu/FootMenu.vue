@@ -1,283 +1,190 @@
 <template>
   <footer class="footer">
-    <div class="footer-content">
-      <div class="footer-section">
-        <h3 class="section-title" @click="toggleSection(0)">
-          SlothAsk
-          <span :class="{ 'active': activeSections[0] }" class="toggle-icon">+</span>
-        </h3>
-        <ul :class="{ 'active': activeSections[0] }">
-          <li><a href="#">面试</a></li>
-          <li><a href="#">考研</a></li>
-          <li><a href="#">考公</a></li>
-          <li><a href="#">考编</a></li>
-        </ul>
+    <div class="footer-container">
+      <div class="footer-left">
+        <div class="footer-logo">
+          <img alt="Intrepid Logo" class="logo-img" src="/HomePage/logo.ico" />
+          <div class="logo-text">
+            <p class="logo-text-small">Powered by</p>
+            <p class="logo-text-large">SlothAsk</p>
+          </div>
+        </div>
+        <a class="privacy-link" href="#">隐私政策</a>
+        <p class="copyright-text">
+          Copyright © 2025 Adventure.com | Copyright © 2025 Adventure.com, LLC
+        </p>
       </div>
-      <div class="footer-section">
-        <h3 class="section-title" @click="toggleSection(1)">
-          服务
-          <span :class="{ 'active': activeSections[1] }" class="toggle-icon">+</span>
-        </h3>
-        <ul :class="{ 'active': activeSections[1] }">
-          <li><a href="#">帮助中心</a></li>
-          <li><a href="#">最新功能</a></li>
-          <li><a href="#">服务条款</a></li>
-          <li><a href="#">开发者中心</a></li>
-        </ul>
-      </div>
-      <div class="footer-section">
-        <h3 class="section-title" @click="toggleSection(2)">
-          商务
-          <span :class="{ 'active': activeSections[2] }" class="toggle-icon">+</span>
-        </h3>
-        <ul :class="{ 'active': activeSections[2] }">
-          <li><a href="#">社区合作</a></li>
-          <li><a href="#">活动</a></li>
-          <li><a href="#">产品推广</a></li>
-          <li><a href="#">校园合作</a></li>
-        </ul>
-      </div>
-      <div class="footer-section">
-        <h3 class="section-title" @click="toggleSection(3)">
-          联系我们
-          <span :class="{ 'active': activeSections[3] }" class="toggle-icon">+</span>
-        </h3>
-        <ul :class="{ 'active': activeSections[3] }">
-          <li><a href="#">电话</a></li>
-          <li><a href="#">邮箱</a></li>
-          <li><a href="#">公众号</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <div class="">
-        <a href="#">© 2025 SlothAsk</a>
+
+      <div class="footer-links">
+        <div class="link-group">
+          <a href="#">首页</a>
+          <a href="#">关于我们</a>
+          <a href="#">作者团队</a>
+        </div>
+        <div class="link-group">
+          <a href="#">投稿指南</a>
+          <a href="#">编辑标准</a>
+          <a href="#">可持续发展</a>
+        </div>
+        <div class="link-group">
+          <a href="#">联系我们</a>
+          <a href="#">订阅邮件</a>
+        </div>
+        <div class="link-group">
+          <a href="#">爱心支持</a>
+          <a href="#">站内搜索</a>
+        </div>
       </div>
     </div>
   </footer>
 </template>
 
-<script setup>
-import {ref} from 'vue';
-
-// 控制各部分展开/折叠的状态
-const activeSections = ref([true, false, false, false]);
-const isMobile = ref(window.innerWidth <= 768);
-
-// 监听窗口大小变化，更新移动端状态
-window.addEventListener('resize', () => {
-  isMobile.value = window.innerWidth <= 768;
-  // 在非移动端时展开所有部分
-  if (!isMobile.value) {
-    activeSections.value = [true, true, true, true];
-  } else {
-    // 移动端时只展开第一部分
-    activeSections.value = [true, false, false, false];
-  }
-});
-
-// 初始化
-if (!isMobile.value) {
-  activeSections.value = [true, true, true, true];
-}
-
-// 切换部分展开/折叠
-const toggleSection = (index) => {
-  if (isMobile.value) {
-    activeSections.value[index] = !activeSections.value[index];
-  }
+<script>
+export default {
+  name: 'Footer',
 };
 </script>
 
 <style scoped>
 .footer {
-  background-color: #1a1a1a;
+  background-color: #1e262c;
+  color: #a8b2b9;
+  padding: clamp(1.5rem, 3vw, 2.5rem) clamp(1rem, 2vw, 2rem);
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.footer-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0 clamp(0.5rem, 2vw, 1rem);
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .footer-container {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+.footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo-img {
+  width: clamp(2rem, 5vw, 4rem);
+  height: clamp(2rem, 5vw, 4rem);
+  object-fit: contain;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+.logo-text-small {
   color: #ffffff;
-  padding: 25px 0 10px;
+  font-size: clamp(0.8rem, 1vw, 1.2rem);
+  margin-top: 0;
+  margin-bottom: 0.1rem;
+  line-height: 1;
+}
+
+.logo-text-large {
+  color: #ffffff;
+  font-size: clamp(1.2rem, 1.7vw, 1.7rem);
+  font-weight: 900;
+  line-height: 1;
+  margin-top: 0.1rem;
+  margin-bottom: 0;
+}
+
+.privacy-link {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #5da9dd;
+  text-decoration: none;
+}
+
+.privacy-link:hover {
+  text-decoration: underline;
+}
+
+.copyright-text {
+  font-size: 0.7rem;
+}
+
+.footer-links {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  font-size: 0.8rem;
+  padding: 0.5rem;
   width: 100%;
   box-sizing: border-box;
 }
 
-.footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
+@media (min-width: 768px) {
+  .footer-links {
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 800px;
+  }
+}
+
+.link-group {
   display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  padding: 0 15px;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.footer-section {
-  margin-bottom: 20px;
-  min-width: 180px;
-  flex: 1 1 auto;
-  padding: 0 10px;
-}
-
-.section-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: default;
-}
-
-.toggle-icon {
-  display: none;
-}
-
-.footer-section h3 {
-  font-size: 15px;
-  margin-bottom: 15px;
-  color: #ffffff;
-}
-
-.footer-section ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  max-height: 500px;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-}
-
-.footer-section ul li {
-  margin-bottom: 8px;
-}
-
-.footer-section ul li a {
-  color: #999999;
+.link-group a {
+  color: #b8c2c8;
   text-decoration: none;
-  transition: color 0.3s ease;
-  display: inline-block;
-  padding: 2px 0;
-  font-size: 14px;
+  font-size: clamp(0.75rem, 0.9vw, 0.9rem);
 }
 
-.footer-section ul li a:hover {
-  color: #ffffff;
-}
-
-.footer-bottom {
-  text-align: center;
-  margin-top: 25px;
-  padding-top: 15px;
-  border-top: 1px solid #333333;
-}
-
-.footer-bottom a {
-  color: #666666;
-  text-decoration: none;
-  margin: 3px 0;
-  font-size: 13px;
-  display: inline-block;
-  padding: 3px;
-}
-
-@media (max-width: 992px) {
-  .footer-section {
-    min-width: 140px;
-    flex: 1 1 30%;
-  }
-}
-
-@media (max-width: 768px) {
-  .footer {
-    padding: 15px 0 8px;
-  }
-  
-  .footer-content {
-    flex-direction: column;
-    align-items: stretch;
-    text-align: left;
-    padding: 0 8px;
-  }
-
-  .footer-section {
-    margin-bottom: 8px;
-    width: 100%;
-    flex: none;
-    padding: 0 3px;
-    border-bottom: 1px solid #333333;
-  }
-  
-  .section-title {
-    cursor: pointer;
-    padding: 8px 0;
-    margin-bottom: 0;
-  }
-  
-  .toggle-icon {
-    display: inline-block;
-    font-size: 16px;
-    transition: transform 0.3s ease;
-  }
-  
-  .toggle-icon.active {
-    transform: rotate(45deg);
-  }
-  
-  .footer-section h3 {
-    margin-bottom: 0;
-    font-size: 14px;
-  }
-  
-  .footer-section ul {
-    max-height: 0;
-    opacity: 0;
-  }
-  
-  .footer-section ul.active {
-    max-height: 500px;
-    opacity: 1;
-    padding: 3px 0 8px;
-  }
-  
-  .footer-section ul li {
-    margin-bottom: 6px;
-  }
-  
-  .footer-section ul li a {
-    padding: 3px 0;
-    font-size: 13px;
-  }
-  
-  .footer-bottom {
-    margin-top: 12px;
-    padding-top: 8px;
-  }
-  
-  .footer-bottom a {
-    font-size: 12px;
-    padding: 2px;
-  }
+.link-group a:hover {
+  text-decoration: underline;
 }
 
 @media (max-width: 480px) {
-  .footer {
-    padding: 8px 0 3px;
+  .footer-container {
+    padding: 1rem 0.5rem;
   }
-  
-  .footer-section {
-    margin-bottom: 3px;
-    padding: 0;
+  .footer-links {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
-  
-  .footer-section h3 {
-    font-size: 13px;
+  .link-group {
+    gap: 0.3rem;
   }
-  
-  .footer-section ul li a {
-    font-size: 12px;
-    padding: 3px 0;
+  .link-group a {
+    font-size: 0.75rem;
   }
-  
-  .footer-content {
-    padding: 0 5px;
+  .logo-text-small {
+    font-size: 0.8rem;
   }
-  
-  .footer-bottom {
-    margin-top: 8px;
-    padding-top: 5px;
+  .logo-text-large {
+    font-size: 1.2rem;
   }
 }
+
 </style>

@@ -99,9 +99,6 @@ const checkFavoriteStatus = async (virtualId: string) => {
       params: {
         virtualId
       },
-      headers: {
-        'X-User-Id': localStorage.getItem('userId') || '0'
-      }
     });
 
     if (response.data.status === 200) {

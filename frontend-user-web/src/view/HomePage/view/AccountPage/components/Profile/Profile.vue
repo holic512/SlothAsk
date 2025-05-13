@@ -1,13 +1,33 @@
 <script setup lang="ts">
-import {ref, computed, onMounted} from 'vue';
+import {computed, onMounted, ref} from 'vue';
 import {ElMessage} from 'element-plus';
-import {Edit, Upload, Delete, Location, Calendar} from '@element-plus/icons-vue';
+import {Delete, Edit, Upload, User} from '@element-plus/icons-vue';
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import {apiUpdateAvatar} from "@/view/HomePage/view/AccountPage/components/Profile/service/ApiUpdateAvatar";
 import {apiDeleteAvatar} from "@/view/HomePage/view/AccountPage/components/Profile/service/ApiDeleteAvatar";
 import {getUserProfile} from "@/view/HomePage/view/AccountPage/components/Profile/service/ApiGetUserProfile";
 import {updateUserProfile} from "@/view/HomePage/view/AccountPage/components/Profile/service/ApiUpdateUserProfile";
+import {useRoute, useRouter} from 'vue-router';
+import {useSessionStore} from "@/pinia/Session";
 
+const router = useRouter();
+const route = useRoute();
+const userSession = useSessionStore();
+
+// 判断用户是否登录
+const isLoggedIn = computed(() => {
+  return userSession.userSession && userSession.userSession.tokenValue;
+});
+
+// 处理登录跳转
+const handleLogin = () => {
+  router.push({
+    path: '/sign/email',
+    query: {
+      redirect: route.fullPath
+    }
+  });
+};
 
 interface UserProfileData {
   avatar: string;
@@ -41,6 +61,11 @@ const genderOptions = [
 
 // 处理头像上传
 const handleAvatarUpload = async (event: Event) => {
+  if (!isLoggedIn.value) {
+    handleLogin();
+    return;
+  }
+  
   const target = event.target as HTMLInputElement;
   if (target && target.files && target.files[0]) {
     const file = target.files[0];
@@ -79,6 +104,11 @@ const handleAvatarUpload = async (event: Event) => {
 
 // 处理头像删除
 const handleAvatarDelete = () => {
+  if (!isLoggedIn.value) {
+    handleLogin();
+    return;
+  }
+  
   userInfo.value.avatar = '';
   apiDeleteAvatar()
   ElMessage.success('头像已删除');
@@ -86,6 +116,11 @@ const handleAvatarDelete = () => {
 
 // 处理个人资料更新
 const handleUpdateProfile = async () => {
+  if (!isLoggedIn.value) {
+    handleLogin();
+    return;
+  }
+  
   try {
     // 调用更新用户资料API
     const response = await updateUserProfile({
@@ -122,19 +157,19 @@ const provinces = [
 ];
 
 onMounted(async () => {
-  const response = await getUserProfile();
-  if(response.status === 200){
-    userInfo.value = response.data as UserProfileData;
+  if (isLoggedIn.value) {
+    const response = await getUserProfile();
+    if(response.status === 200){
+      userInfo.value = response.data as UserProfileData;
+    }
   }
-
-
 })
 </script>
 
 <template>
   <div class="profile-container">
     <!-- 头像部分 -->
-    <div class="avatar-section">
+    <div v-if="isLoggedIn" class="avatar-section">
       <div class="avatar-wrapper">
         <el-avatar :size="120" :src="userInfo.avatar" v-if="userInfo.avatar">
           {{ avatarContent }}
@@ -172,7 +207,7 @@ onMounted(async () => {
     </div>
 
     <!-- 基本信息表单 -->
-    <div class="form-container">
+    <div v-if="isLoggedIn" class="form-container">
       <div class="form-row">
         <div class="form-group flex-1">
           <label class="form-label">昵称</label>
@@ -278,8 +313,18 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div class="form-footer">
+    <div v-if="isLoggedIn" class="form-footer">
       <button class="save-button" @click="handleUpdateProfile">保存修改</button>
+    </div>
+    
+    <!-- 用户未登录遮罩 -->
+    <div v-if="!isLoggedIn" class="login-overlay">
+      <div class="login-card">
+        <el-icon class="login-icon"><User /></el-icon>
+        <h2>您还未登录</h2>
+        <p>登录后才能管理个人资料</p>
+        <el-button type="primary" @click="handleLogin">登录 / 注册</el-button>
+      </div>
     </div>
   </div>
 </template>
@@ -289,9 +334,58 @@ onMounted(async () => {
   max-width: 700px;
   margin: 0 auto;
   padding: 40px 40px;
-
   background-color: white;
   border-radius: 12px;
+  position: relative;
+  min-height: 500px; /* 添加最小高度确保容器有足够空间 */
+  overflow: hidden; /* 防止内容溢出 */
+}
+
+/* 登录遮罩样式 */
+.login-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9); /* 提高透明度使背景更明显 */
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100; /* 提高 z-index 确保在最上层 */
+  border-radius: 12px;
+}
+
+.login-card {
+  background: white;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 320px;
+  animation: fadeIn 0.3s ease-out;
+  margin-top: -60px; /* 向上偏移，视觉上更居中 */
+}
+
+.login-icon {
+  font-size: 48px;
+  color: var(--el-color-primary);
+  background-color: var(--el-color-primary-light-9);
+  padding: 16px;
+  border-radius: 50%;
+  margin-bottom: 16px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .profile-title {

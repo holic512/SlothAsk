@@ -35,22 +35,22 @@ public class GitHubLoginController {
      * GitHub OAuth回调处理
      * 处理GitHub授权后的回调，获取用户信息并完成登录
      *
-     * @param code GitHub授权码
+     * @param code  GitHub授权码
      * @param state 状态参数，用于防止CSRF攻击
      * @return 响应对象，包含登录结果
      */
-    @GetMapping("/callback")
+    @GetMapping("/login")
     public ApiResponse githubCallback(@RequestParam("code") String code, @RequestParam("state") String state) {
         try {
             // 1. 使用授权码获取访问令牌
             String accessToken = gitHubAuthService.getAccessToken(code, state);
-            
+
             // 2. 使用访问令牌获取GitHub用户信息
             GitHubUserDTO user = gitHubAuthService.getUserInfo(accessToken);
-            
-            // 3. 处理GitHub用户登录
-            Pair<PostUserSignEnum, Object> result = gitHubAuthService.handleGitHubLogin(user);
-            
+
+            // 3. 处理GitHub用户登录，传入accessToken以便获取邮箱信息
+            Pair<PostUserSignEnum, Object> result = gitHubAuthService.handleGitHubLogin(user, accessToken);
+
             // 4. 根据结果返回响应
             if (result.getFirst() == PostUserSignEnum.SUCCESS_LOGIN) {
                 SaTokenInfo tokenInfo = (SaTokenInfo) result.getSecond();

@@ -2,7 +2,7 @@
 import {onMounted, ref} from 'vue';
 import {useRouter} from 'vue-router';
 import {setTitle} from "@/utils/title";
-import {generateGithubAuthUrl} from "@/view/Sign/service/useGithubAuth";
+import {generateGithubAuthUrl} from "@/utils/generateGithubAuthUrl";
 
 const router = useRouter();
 const isAgreeTerms = ref(false);
@@ -27,7 +27,7 @@ onMounted(() => {
 });
 
 function redirectToGitHub() {
-  window.location.href = generateGithubAuthUrl()
+  window.location.href = generateGithubAuthUrl("login")
 }
 
 </script>

@@ -1,6 +1,6 @@
 <!--题库推荐页面-->
 <script setup lang="ts">
-import {ref, onMounted} from 'vue';
+import {onBeforeMount, ref} from 'vue';
 import {useRouter} from 'vue-router';
 import {ArrowRight} from '@element-plus/icons-vue'
 import {Category} from "@/view/HomePage/view/StudyPage/interface/CategoryInterface";
@@ -15,19 +15,37 @@ const loading = ref<boolean>(true)
 // 骨架屏显示的占位数量
 const skeletonCount = ref<number>(6)
 
-// 当页面渲染时 获取推荐的 分类list
-onMounted(async () => {
+// 提前获取数据，并使用缓存
+const fetchCategoryData = async () => {
+  // 尝试从缓存获取数据
+  const cache = localStorage.getItem('recommendCategory');
+  if (cache) {
+    try {
+      recommendCategoryList.value = JSON.parse(cache);
+      loading.value = false;
+    } catch (error) {
+      console.error('解析缓存数据失败:', error);
+    }
+  }
+
   try {
     const response = await ApiGetRecommendCategory();
     if (response && response.status === 200) {
       recommendCategoryList.value = response.data;
+      // 更新缓存
+      localStorage.setItem('recommendCategory', JSON.stringify(response.data));
     }
   } catch (error) {
     console.error('获取推荐分类失败:', error);
   } finally {
     loading.value = false;
   }
-})
+}
+
+// 在组件挂载前开始请求数据
+onBeforeMount(() => {
+  fetchCategoryData();
+});
 
 const handleViewMore = (): void => {
   router.push('/questionbank');
@@ -70,7 +88,7 @@ const handleCategoryClick = (categoryId: number): void => {
         <div class="category-item" v-for="item in recommendCategoryList" :key="item.id"
              @click="handleCategoryClick(item.id)">
           <div class="icon-wrapper">
-            <img class="recommend-category-icon" :src="item.avatarUrl">
+            <img :src="item.avatarUrl" class="recommend-category-icon" loading="lazy">
           </div>
           <div class="content">
             <h3 class="category-item-title">{{ item.name }}</h3>
@@ -171,8 +189,7 @@ const handleCategoryClick = (categoryId: number): void => {
   border: 1px solid #eee;
   transition: all 0.1s ease;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06),
-  0 2px 4px rgba(0, 0, 0, 0.03);
+  box-shadow: none;
 }
 
 .category-item:hover {

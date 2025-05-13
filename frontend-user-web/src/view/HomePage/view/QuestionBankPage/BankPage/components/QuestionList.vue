@@ -7,7 +7,8 @@
                 stripe
                 v-loading="loading"
                 :default-sort="{ prop: 'id', order: 'ascending' }"
-                :size="tableSize"
+                class="desktop-table"
+                size="default"
       >
         <el-table-column prop="title" label="标题" min-width="280" :show-overflow-tooltip="true">
           <template #default="scope">
@@ -18,7 +19,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column :visible="screenWidth > 768" label="难度" prop="difficulty" width="90">
+        <el-table-column class="difficulty-column" label="难度" prop="difficulty" width="90">
           <template #default="scope">
             <el-tag v-bind="getTagProps(scope.row.difficulty)" disable-transitions>
               {{ getTagProps(scope.row.difficulty).label }}
@@ -26,7 +27,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column :visible="screenWidth > 576" label="类型" prop="type" width="90">
+        <el-table-column class="type-column" label="类型" prop="type" width="90">
           <template #default="scope">
             <el-tag v-bind="getQuestionTypeProps(scope.row.type)" disable-transitions>
               {{ getQuestionTypeProps(scope.row.type).label }}
@@ -67,7 +68,7 @@
       </el-table>
 
       <!-- 移动设备视图 - 条目列表 -->
-      <div v-if="screenWidth <= 576" class="mobile-question-list">
+      <div class="mobile-question-list">
         <div v-for="question in paginatedQuestions" :key="question.id" class="mobile-question-item" @click="handleQuestionClick(question.virtualId)">
           <div class="mobile-question-title">
             <span class="question-index">{{ question.id }}. </span>
@@ -108,8 +109,8 @@
             v-model:current-page="currentPage"
             v-model:page-size="pageSize"
             :total="questionStore.questions.length"
-            :layout="screenWidth > 576 ? 'prev, pager, next' : 'prev, next'"
-            :small="screenWidth <= 768"
+            class="pagination"
+            layout="prev, pager, next"
             @current-change="handlePageChange"
         />
       </div>
@@ -129,18 +130,6 @@ const props = defineProps<{ selectedCategory: number }>();
 
 const currentPage = ref(1);
 const pageSize = ref(20);
-const screenWidth = ref(window.innerWidth);
-
-// 监听窗口大小变化
-window.addEventListener('resize', () => {
-  screenWidth.value = window.innerWidth;
-});
-
-// 根据屏幕宽度计算表格大小
-const tableSize = computed(() => {
-  if (screenWidth.value <= 768) return 'small';
-  return 'default';
-});
 
 // 计算当前页的数据
 const paginatedQuestions = computed(() => {
@@ -262,7 +251,12 @@ const handleQuestionClick = (questionId: number) => {
 
 /* 移动设备视图样式 */
 .mobile-question-list {
-  display: flex;
+  display: none; /* 默认隐藏移动视图 */
+}
+
+/* 默认隐藏移动设备视图 */
+.mobile-question-list {
+  display: none;
   flex-direction: column;
   gap: 0.75rem;
   margin-top: 1rem;
@@ -317,21 +311,53 @@ const handleQuestionClick = (questionId: number) => {
   .question-container {
     padding-top: 0.5rem;
   }
+  
+  :deep(.el-table) {
+    font-size: 14px;
+  }
 }
 
 @media (max-width: 768px) {
   .pagination-container {
     margin-top: 1rem;
   }
+  
+  /* 隐藏"难度"列 */
+  .difficulty-column {
+    display: none;
+  }
+  
+  :deep(.el-table) {
+    font-size: 13px;
+  }
+  
+  .pagination {
+    small: true;
+  }
 }
 
 @media (max-width: 576px) {
-  .question-list > .el-table {
+  /* 在小屏幕上隐藏表格，显示移动视图 */
+  .desktop-table {
     display: none;
+  }
+  
+  .mobile-question-list {
+    display: flex;
+  }
+  
+  /* 使用简化的分页布局 */
+  .pagination {
+    layout: "prev, next";
   }
   
   .mobile-question-title {
     font-size: 0.875rem;
+  }
+  
+  /* 隐藏"类型"列 */
+  .type-column {
+    display: none;
   }
 }
 </style>

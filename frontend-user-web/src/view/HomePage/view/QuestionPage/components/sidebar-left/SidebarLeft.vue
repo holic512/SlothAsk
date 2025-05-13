@@ -63,6 +63,7 @@ import {useRoute, useRouter} from 'vue-router';
 import {ElMessage} from 'element-plus';
 import {QuestionListInterface} from '../../interface/QuestionListInterface';
 import {ApiGetCategoryQuestions} from '../../service/ApiGetCategoryQuestions';
+import {useScrollbarStore} from '@/pinia/ScrollbarStore';
 
 // 路由相关
 const route = useRoute();
@@ -94,6 +95,21 @@ const handleQuestionClick = (virtualId: string) => {
     params: {
       questionId: virtualId
     }
+  }).then(() => {
+    // 导航成功后等待DOM更新完成再滚动
+    setTimeout(() => {
+      // 先获取scrollbarStore
+      const scrollbarStore = useScrollbarStore();
+      scrollbarStore.scrollToTop();
+      
+      // 备用方案：如果store中的scrollbar引用失效，尝试直接使用DOM API
+      if (!scrollbarStore.scrollbarRef) {
+        const scrollWrap = document.querySelector('.el-scrollbar__wrap');
+        if (scrollWrap) {
+          scrollWrap.scrollTop = 0;
+        }
+      }
+    }, 100);
   });
   
   // 如果在移动视图下且有提供关闭函数，则关闭侧边栏
@@ -340,7 +356,7 @@ onMounted(async () => {
 
   .question-list-container {
     margin: 0;
-    padding: 0 8px;
+    padding: 0 2px;
     flex: 1;
     height: auto !important; /* 覆盖之前设置的固定高度 */
   }

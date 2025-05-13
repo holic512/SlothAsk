@@ -11,6 +11,9 @@ import {ArrowRight, Bell, Menu, QuestionFilled, Reading, User} from '@element-pl
 const router = useRouter();
 const route = useRoute();
 
+// 控制用户工具弹出窗口的可见性
+const isPopoverVisible = ref(false);
+
 // 菜单配置项
 const menuItems = ref([
   {path: '/study', name: '学习', icon: Reading},
@@ -163,9 +166,10 @@ const toggleMobileMenu = () => {
               trigger="click"
               popper-class="custom-avatar-popover"
               :width="isMobile ? 280 : 300"
+              v-model:visible="isPopoverVisible"
               :hide-after="0"
           >
-            <UserUtil :userInfo="userInfo"/>
+            <UserUtil :userInfo="userInfo" @closePopover="isPopoverVisible = false"/>
             <template #reference>
               <div class="avatar-container">
                 <el-avatar

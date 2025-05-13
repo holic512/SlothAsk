@@ -1,13 +1,15 @@
-import {createWebHistory, createRouter} from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
 
 import HomeRoute from '../view/HomePage/router.js'
 import SignRoute from '../view/Sign/router.js'
+import CallbackRoute from '../view/Callback/router.js'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
         ...HomeRoute,
         ...SignRoute,
+        ...CallbackRoute,
         // 添加默认重定向
         {
             path: '/',

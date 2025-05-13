@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit;
 public class GitHubAuthServiceImpl implements GitHubAuthService {
 
     private static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
-    
+
     // 区分用户错误和系统错误的常量
     private static final String ERROR_CODE_EXPIRED = "The code passed is incorrect or expired";
     private static final String ERROR_BAD_VERIFICATION_CODE = "bad_verification_code";
@@ -79,12 +79,12 @@ public class GitHubAuthServiceImpl implements GitHubAuthService {
      * @param objectMapper JSON序列化/反序列化组件
      */
     @Autowired
-    public GitHubAuthServiceImpl(OkHttpClient okHttpClient, 
-                                ObjectMapper objectMapper,
-                                UserAuthMapper userAuthMapper,
-                                UserSignUserMapper userSignUserMapper,
-                                UserSignProfileMapper userSignProfileMapper,
-                                UserSignUpcMapper userSignUpcMapper) {
+    public GitHubAuthServiceImpl(OkHttpClient okHttpClient,
+                                 ObjectMapper objectMapper,
+                                 UserAuthMapper userAuthMapper,
+                                 UserSignUserMapper userSignUserMapper,
+                                 UserSignProfileMapper userSignProfileMapper,
+                                 UserSignUpcMapper userSignUpcMapper) {
         this.okHttpClient = okHttpClient;
         this.objectMapper = objectMapper;
         this.userAuthMapper = userAuthMapper;
@@ -97,7 +97,7 @@ public class GitHubAuthServiceImpl implements GitHubAuthService {
     /**
      * 获取GitHub访问令牌
      *
-     * @param code GitHub授权码
+     * @param code  GitHub授权码
      * @param state 状态参数，用于防止CSRF攻击
      * @return GitHub访问令牌
      * @throws GitHubAuthException 如果发生认证相关错误
@@ -122,14 +122,14 @@ public class GitHubAuthServiceImpl implements GitHubAuthService {
 
             // 构建请求体
             String requestBody = String.format("""
-                    {
-                      "client_id": "%s",
-                      "client_secret": "%s",
-                      "code": "%s",
-                      "redirect_uri": "%s",
-                      "state": "%s"
-                    }
-                """, clientId, clientSecret, code, redirectUri, state);
+                        {
+                          "client_id": "%s",
+                          "client_secret": "%s",
+                          "code": "%s",
+                          "redirect_uri": "%s",
+                          "state": "%s"
+                        }
+                    """, clientId, clientSecret, code, redirectUri, state);
 
             // 构建请求
             Request request = new Request.Builder()
@@ -155,9 +155,9 @@ public class GitHubAuthServiceImpl implements GitHubAuthService {
                 if (json.has("error")) {
                     String errorType = json.get("error").asText();
                     String errorMessage = json.get("error_description").asText();
-                    
+
                     // 判断是否是用户错误（如授权码过期）
-                    if (ERROR_BAD_VERIFICATION_CODE.equals(errorType) || 
+                    if (ERROR_BAD_VERIFICATION_CODE.equals(errorType) ||
                             (errorMessage != null && errorMessage.contains(ERROR_CODE_EXPIRED))) {
                         log.warn("GitHub OAuth用户错误: {}. 错误描述: {}", errorType, errorMessage);
                         throw new GitHubAuthException("GitHub认证失败: " + errorMessage, true);
@@ -253,67 +253,190 @@ public class GitHubAuthServiceImpl implements GitHubAuthService {
     }
 
     /**
-     * 处理GitHub用户登录
-     * 如果GitHub用户未绑定系统用户，则自动创建新用户
-     * 如果已绑定，则直接登录该用户
+     * 获取GitHub用户的主要邮箱
+     * 如果用户信息中没有邮箱，尝试从GitHub的emails API获取主要邮箱
      *
-     * @param githubUser GitHub用户信息
+     * @param accessToken GitHub访问令牌
+     * @param githubUser  GitHub用户信息
+     * @return 用户的主要邮箱，如果无法获取则返回null
+     * @throws GitHubAuthException 如果获取邮箱失败
+     */
+    @Retryable(
+            value = {IOException.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
+    private String getGitHubUserEmail(String accessToken, GitHubUserDTO githubUser) throws GitHubAuthException {
+        // 首先检查用户信息中是否已包含邮箱
+        if (githubUser.getEmail() != null && !githubUser.getEmail().trim().isEmpty()) {
+            log.info("用户信息中已包含邮箱: {}", githubUser.getEmail());
+            return githubUser.getEmail();
+        }
+
+        log.info("用户信息中没有邮箱，尝试从GitHub的emails API获取");
+        // 如果用户信息中没有邮箱，尝试从GitHub的emails API获取
+        String emailsUrl = "https://api.github.com/user/emails";
+
+        try {
+            // 构建请求
+            Request request = new Request.Builder()
+                    .url(emailsUrl)
+                    .header("Accept", "application/json")
+                    .header("Authorization", "Bearer " + accessToken)
+                    .build();
+
+            // 执行请求
+            OkHttpClient clientWithTimeout = okHttpClient.newBuilder()
+                    .callTimeout(10, TimeUnit.SECONDS)
+                    .build();
+
+            try (Response response = clientWithTimeout.newCall(request).execute()) {
+                if (!response.isSuccessful() || response.body() == null) {
+                    log.error("获取GitHub用户邮箱失败，状态码: {}", response.code());
+                    // 这里我们不抛出异常，而是返回null，让调用方处理
+                    return null;
+                }
+
+                // 解析响应
+                String responseBody = response.body().string();
+                log.debug("GitHub用户邮箱响应: {}", responseBody);
+
+                // 解析邮箱列表
+                JsonNode emailsArray = objectMapper.readTree(responseBody);
+                if (emailsArray.isArray()) {
+                    // 查找主要且已验证的邮箱
+                    for (JsonNode emailNode : emailsArray) {
+                        boolean isPrimary = emailNode.has("primary") && emailNode.get("primary").asBoolean();
+                        boolean isVerified = emailNode.has("verified") && emailNode.get("verified").asBoolean();
+
+                        if (isPrimary && isVerified && emailNode.has("email")) {
+                            String email = emailNode.get("email").asText();
+                            log.info("找到GitHub用户的主要验证邮箱: {}", email);
+                            return email;
+                        }
+                    }
+
+                    // 如果没有找到主要且已验证的邮箱，尝试找到任何已验证的邮箱
+                    for (JsonNode emailNode : emailsArray) {
+                        boolean isVerified = emailNode.has("verified") && emailNode.get("verified").asBoolean();
+
+                        if (isVerified && emailNode.has("email")) {
+                            String email = emailNode.get("email").asText();
+                            log.info("找到GitHub用户的已验证邮箱: {}", email);
+                            return email;
+                        }
+                    }
+
+                    // 如果没有找到已验证的邮箱，返回第一个邮箱
+                    if (!emailsArray.isEmpty() && emailsArray.get(0).has("email")) {
+                        String email = emailsArray.get(0).get("email").asText();
+                        log.info("找到GitHub用户的邮箱(未验证): {}", email);
+                        return email;
+                    }
+                }
+
+                log.warn("未找到GitHub用户的邮箱");
+                return null;
+            }
+        } catch (Exception e) {
+            log.error("获取GitHub用户邮箱时发生异常: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
+     * 处理GitHub用户登录
+     * 新策略：
+     * 1. 如果GitHub账号已经绑定系统用户，直接登录该用户
+     * 2. 如果未绑定但GitHub用户的邮箱在系统中存在，则绑定到该邮箱账户
+     * 3. 如果邮箱不存在，则创建新用户，并确保设置邮箱
+     *
+     * @param githubUser  GitHub用户信息
+     * @param accessToken GitHub访问令牌，用于获取额外信息如邮箱
      * @return 处理结果和登录令牌
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Pair<PostUserSignEnum, Object> handleGitHubLogin(GitHubUserDTO githubUser) {
+    public Pair<PostUserSignEnum, Object> handleGitHubLogin(GitHubUserDTO githubUser, String accessToken) {
         if (githubUser == null || githubUser.getId() == null) {
             log.warn("GitHub用户信息为空");
             throw new GitHubAuthException("无效的GitHub用户信息", true);
         }
-        
+
         String provider = AuthProvider.GITHUB.getValue();
         String openId = githubUser.getId().toString(); // GitHub用户ID作为openId
-        
+
         try {
+            // 获取GitHub用户邮箱
+            String email = getGitHubUserEmail(accessToken, githubUser);
+            if (email == null || email.trim().isEmpty()) {
+                log.warn("无法获取GitHub用户的邮箱，将使用生成的邮箱");
+                // 生成一个基于GitHub用户名的邮箱地址
+                String username = githubUser.getLogin() != null ? githubUser.getLogin() : "github_user";
+                email = username + "_" + githubUser.getId() + "@github.generated.com";
+            }
+
             // 检查该GitHub账号是否已经绑定了系统用户
             UserAuth userAuth = userAuthMapper.findByProviderAndOpenId(provider, openId);
-            
+
             User user;
-            if (userAuth == null) {
-                // 如果未绑定，创建新用户
-                log.info("GitHub用户{}首次登录，创建新用户", githubUser.getLogin());
-                user = createUserWithGitHub(githubUser);
-            } else {
+            if (userAuth != null) {
                 // 如果已绑定，获取对应的用户
                 log.info("GitHub用户{}已绑定系统用户，直接登录", githubUser.getLogin());
                 user = userSignUserMapper.selectById(userAuth.getUserId());
-                
+
                 if (user == null) {
                     log.error("绑定的用户不存在，用户ID: {}", userAuth.getUserId());
                     throw new GitHubAuthException("绑定的用户账号不存在", false);
                 }
+            } else {
+                // 如果未绑定，首先根据邮箱查找用户
+                User existingUser = userSignUserMapper.getUserByEmail(email);
+
+                if (existingUser != null) {
+                    // 如果邮箱对应的用户存在，则将GitHub账号绑定到该用户
+                    log.info("GitHub用户{}的邮箱{}在系统中已存在，绑定到现有账户",
+                            githubUser.getLogin(), email);
+                    user = existingUser;
+
+                    // 创建认证绑定记录
+                    UserAuth newAuth = new UserAuth();
+                    newAuth.setUserId(user.getId());
+                    newAuth.setProvider(provider);
+                    newAuth.setOpenId(openId);
+                    newAuth.setStatus(1); // 正常状态
+                    newAuth.setIsDeleted(0); // 未删除
+                    userAuthMapper.insert(newAuth);
+                } else {
+                    // 如果邮箱不存在，创建新用户
+                    log.info("GitHub用户{}首次登录，创建新用户", githubUser.getLogin());
+                    user = createUserWithGitHub(githubUser, email);
+                }
             }
-            
+
             // 登录用户
             StpKit.USER.login(user.getId());
             SaTokenInfo saTokenInfo = StpKit.USER.getTokenInfo();
-            
+
             // 获取或设置用户项目类别ID
             Long userUpcId = userSignUpcMapper.selectPidByUid(user.getId());
-            
+
             // 如果用户项目id为空 则设置为 默认 1
             if (userUpcId == null) {
                 UserProjectCategory userPc = new UserProjectCategory();
                 userPc.setUserId(user.getId());
                 userPc.setProjectId(1L);
                 userSignUpcMapper.insert(userPc);
-                
+
                 userUpcId = 1L;
             }
-            
+
             SaSession session = StpKit.USER.getSession();
             session.set("userUpcId", userUpcId);
-            
+
             // 返回token
             return Pair.of(PostUserSignEnum.SUCCESS_LOGIN, saTokenInfo);
-            
+
         } catch (GitHubAuthException e) {
             throw e;
         } catch (Exception e) {
@@ -321,37 +444,38 @@ public class GitHubAuthServiceImpl implements GitHubAuthService {
             throw new GitHubAuthException("登录过程中发生错误", e, false);
         }
     }
-    
+
     /**
      * 创建新用户并绑定GitHub账号
      *
      * @param githubUser GitHub用户信息
+     * @param email      用户邮箱
      * @return 创建的用户
      */
-    private User createUserWithGitHub(GitHubUserDTO githubUser) {
+    private User createUserWithGitHub(GitHubUserDTO githubUser, String email) {
         // 1. 创建用户基本信息
         User user = new User();
         // 使用GitHub名称作为起始，生成随机用户名
         String baseUsername = githubUser.getLogin() != null ? githubUser.getLogin() : "github";
         String username = baseUsername;
-        
+
         // 检查用户名是否存在，如果存在则添加随机数后缀
         User existingUser = userSignUserMapper.getUserByUsername(username);
         if (existingUser != null) {
-            username = baseUsername + "_" + (int)(Math.random() * 10000);
+            username = baseUsername + (int) (Math.random() * 10000);
         }
-        
+
         user.setUsername(username);
-        user.setEmail(githubUser.getEmail()); // GitHub可能不返回邮箱
+        user.setEmail(email); // 设置邮箱，确保不为空
         user.setPassword(""); // GitHub登录不需要密码
-        
+
         // 保存用户信息
         userSignUserMapper.insert(user);
-        
+
         // 2. 创建用户个人资料
         UserProfile userProfile = new UserProfile();
         userProfile.setUserId(user.getId());
-        
+
         // 使用GitHub名称作为昵称，如果为空则生成随机昵称
         String nickname = githubUser.getName();
         if (nickname == null || nickname.trim().isEmpty()) {
@@ -360,14 +484,14 @@ public class GitHubAuthServiceImpl implements GitHubAuthService {
         if (nickname == null || nickname.trim().isEmpty()) {
             nickname = NicknameGenerator.generateNickname();
         }
-        
+
         userProfile.setNickname(nickname);
         userProfile.setAvatar(githubUser.getAvatarUrl()); // 使用GitHub头像
         userProfile.setBio(githubUser.getBio()); // 使用GitHub简介
-        
+
         // 保存用户资料
         userSignProfileMapper.insert(userProfile);
-        
+
         // 3. 创建第三方认证绑定记录
         UserAuth userAuth = new UserAuth();
         userAuth.setUserId(user.getId());
@@ -375,16 +499,16 @@ public class GitHubAuthServiceImpl implements GitHubAuthService {
         userAuth.setOpenId(githubUser.getId().toString());
         userAuth.setStatus(1); // 正常状态
         userAuth.setIsDeleted(0); // 未删除
-        
+
         // 保存认证绑定信息
         userAuthMapper.insert(userAuth);
-        
+
         // 4. 设置默认项目类别
         UserProjectCategory userPc = new UserProjectCategory();
         userPc.setUserId(user.getId());
         userPc.setProjectId(1L);
         userSignUpcMapper.insert(userPc);
-        
+
         return user;
     }
 }

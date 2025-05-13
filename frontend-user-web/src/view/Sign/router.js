@@ -26,14 +26,6 @@ export default [
                     title: '用户注册'
                 }
             },
-            {
-                path: 'GitHubCallback',
-                name: 'GitHubCallback',
-                component: () => import('./view/GitHubCallback.vue'),
-                meta: {
-                    title: 'github'
-                }
-            }
         ]
     }
 ];

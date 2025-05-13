@@ -75,6 +75,19 @@ const handleKeyDown = (e) => {
 // 切换左侧边栏显示状态
 const toggleLeftSidebar = () => {
   showLeftSidebar.value = !showLeftSidebar.value;
+  
+  // 如果是展开侧边栏，则在短暂延迟后滚动到激活的题目
+  if (showLeftSidebar.value) {
+    setTimeout(() => {
+      const activeQuestion = document.querySelector('.question-item.active');
+      if (activeQuestion) {
+        activeQuestion.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
+    }, 200); // 给予足够时间让侧边栏动画完成
+  }
 };
 
 // 关闭侧边栏
@@ -136,9 +149,10 @@ onBeforeUnmount(() => {
 }
 
 .container {
+  min-width: 900px;
   width: 100%;
   margin: 16px 0;
-  padding: 0 16px;
+  padding: 0;
   transition: all 0.3s ease;
 }
 
@@ -205,7 +219,7 @@ onBeforeUnmount(() => {
     top: 0;
     left: 0;
     height: 100vh;
-    width: 280px;
+    width: 320px;
     background: white;
     z-index: 999;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
@@ -223,9 +237,7 @@ onBeforeUnmount(() => {
 
 /* 平板视图样式 */
 @media (max-width: 900px) {
-  .content-wrapper {
-    width: 700px; /* 再缩小 */
-  }
+
 }
 
 /* 移动设备视图样式 */
@@ -242,6 +254,7 @@ onBeforeUnmount(() => {
   .container {
     margin: 12px 0;
     padding: 0;
+    min-width: 0;
   }
 }
 
@@ -253,6 +266,7 @@ onBeforeUnmount(() => {
 
   .container {
     margin: 8px 0;
+    min-width: 0;
   }
 }
 

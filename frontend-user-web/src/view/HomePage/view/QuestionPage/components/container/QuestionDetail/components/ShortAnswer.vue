@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref, watch} from 'vue';
+import {computed, onMounted, ref, watch} from 'vue';
 import DOMPurify from 'dompurify';
 import {
   ApiGetQuestionAnswerByVirtualId
@@ -50,6 +50,21 @@ const userSession = useSessionStore();
 const isLoggedIn = computed(() => {
   return userSession.userSession && userSession.userSession.tokenValue;
 });
+
+// 防抖函数
+const debounce = (fn: Function, delay: number) => {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  return function(this: any, ...args: any[]) {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => {
+      fn.apply(this, args);
+      timer = null;
+    }, delay);
+  };
+};
+
+// 防抖状态标志
+const isToggling = ref(false);
 
 // 显示登录提示
 const showLoginTip = () => {
@@ -84,36 +99,103 @@ const props = defineProps({
 const showAnswer = ref(false);
 const isLoading = ref(false);
 
+// 从缓存获取答案
+const getAnswerFromCache = (virtualId: string): string | null => {
+  try {
+    return localStorage.getItem(`answer_cache_${virtualId}`);
+  } catch (e) {
+    console.warn('无法访问本地存储', e);
+    return null;
+  }
+};
+
+// 将答案存入缓存
+const saveAnswerToCache = (virtualId: string, answer: string): void => {
+  try {
+    localStorage.setItem(`answer_cache_${virtualId}`, answer);
+  } catch (e) {
+    console.warn('无法写入本地存储', e);
+  }
+};
+
+// 初始化时检查缓存
+onMounted(() => {
+  const cachedAnswer = getAnswerFromCache(props.question.virtualId);
+  if (cachedAnswer && !props.question.answer) {
+    props.question.answer = cachedAnswer;
+  }
+});
+
 watch(
     () => props.question,
     () => {
       showAnswer.value = false;
       isLoading.value = false;
+      isToggling.value = false;
+      
+      // 当问题变化时，检查缓存中是否有答案
+      const cachedAnswer = getAnswerFromCache(props.question.virtualId);
+      if (cachedAnswer && !props.question.answer) {
+        props.question.answer = cachedAnswer;
+      }
     }
 );
 
 const sanitizedContent = computed(() => DOMPurify.sanitize(props.question.content || ''));
 const sanitizedAnswer = computed(() => DOMPurify.sanitize(props.question.answer || ''));
 
-const toggleAnswer = async () => {
+// 不带防抖的切换答案函数
+const toggleAnswerWithoutDebounce = async () => {
+  // 如果正在处理中，直接返回
+  if (isToggling.value) return;
+  
+  // 设置处理标志
+  isToggling.value = true;
+  
   if (!showAnswer.value) {
     // 如果未登录，不执行后续操作
     if (!isLoggedIn.value) {
       ElMessage.warning('登录后才能查看答案');
+      isToggling.value = false;
       return;
     }
     
-    isLoading.value = true;
-    if (!props.question.answer) {
-      const res = await ApiGetQuestionAnswerByVirtualId(props.question.virtualId);
-      if (res.status === 200) props.question.answer = res.data;
+    // 先检查缓存
+    const cachedAnswer = getAnswerFromCache(props.question.virtualId);
+    if (cachedAnswer && !props.question.answer) {
+      props.question.answer = cachedAnswer;
     }
-    isLoading.value = false;
+    
+    // 如果缓存没有，则请求API
+    if (!props.question.answer) {
+      isLoading.value = true;
+      
+      try {
+        const res = await ApiGetQuestionAnswerByVirtualId(props.question.virtualId);
+        if (res.status === 200) {
+          props.question.answer = res.data;
+          // 保存到缓存
+          saveAnswerToCache(props.question.virtualId, res.data);
+        }
+      } catch (error) {
+        console.error('加载答案失败', error);
+        ElMessage.error('加载答案失败，请稍后重试');
+      }
+      
+      isLoading.value = false;
+    }
+    
     showAnswer.value = true;
   } else {
     showAnswer.value = false;
   }
+  
+  // 重置处理标志
+  isToggling.value = false;
 };
+
+// 使用防抖包装切换答案函数
+const toggleAnswer = debounce(toggleAnswerWithoutDebounce, 100);
 </script>
 
 <style scoped>

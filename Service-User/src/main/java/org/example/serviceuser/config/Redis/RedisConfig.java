@@ -17,10 +17,9 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
-    // 通过公共方法在类内部访问 private 属性
+    // Redis键前缀，公开为公共静态常量
     @Getter
-    private final static String key = "SlothAsk:";
-
+    public static final String key = "SlothAsk:";
 
     // Bean redis 用来调用
     @Bean

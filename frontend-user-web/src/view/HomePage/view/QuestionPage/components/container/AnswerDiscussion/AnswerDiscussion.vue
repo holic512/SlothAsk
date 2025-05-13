@@ -94,7 +94,7 @@
                   <span>回复</span>
                 </div>
 
-                <el-dropdown v-if="comment.isAuthor === 1">
+                <el-dropdown v-if="comment.isAuthor === 1" trigger="click">
                   <div class="action-btn">
                     <el-icon><more-filled /></el-icon>
                   </div>
@@ -332,6 +332,21 @@ const replyToSubId = ref<number | null>(null);  // 当前回复的子回复ID
 const replyToUserId = ref<number | null>(null); // 被回复用户ID
 const replyContent = ref<string>('');           // 回复内容
 const expandedComments = ref<number[]>([]);     // 已展开所有回复的评论ID列表
+
+// 防抖函数
+const debounce = (fn: Function, delay: number) => {
+  let timer: number | null = null;
+  return function(...args: any[]) {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => {
+      fn.apply(this, args);
+      timer = null;
+    }, delay);
+  };
+};
+
+// 点赞防抖Map，用于存储每个评论/回复的防抖状态
+const likeDebounceMap = new Map<number, boolean>();
 
 // 获取评论的所有回复（考虑是否展开）
 const getAllReplies = (comment: CommentType): ReplyType[] => {
@@ -580,12 +595,20 @@ const handleSortChange = (sortType: SortType): void => {
 };
 
 // 处理点赞
-const handleLike = async (id: number): Promise<void> => {
+const handleLikeWithoutDebounce = async (id: number): Promise<void> => {
+  // 检查是否正在处理中
+  if (likeDebounceMap.get(id)) {
+    return;
+  }
+  
   // 检查用户是否登录
   if (!isLoggedIn.value) {
     ElMessage.warning('登录后才能点赞');
     return;
   }
+  
+  // 标记为处理中
+  likeDebounceMap.set(id, true);
   
   // 查找对应的评论或回复
   let target: any = null;
@@ -611,7 +634,10 @@ const handleLike = async (id: number): Promise<void> => {
     }
   }
 
-  if (!target) return;
+  if (!target) {
+    likeDebounceMap.set(id, false);
+    return;
+  }
 
   // 更新本地状态
   if (target.isLike === 1) {
@@ -645,7 +671,13 @@ const handleLike = async (id: number): Promise<void> => {
       target.likeCount = Math.max(0, target.likeCount - 1);
     }
   }
+  
+  // 处理完成，移除标记
+  likeDebounceMap.set(id, false);
 };
+
+// 使用防抖包装点赞函数
+const handleLike = debounce(handleLikeWithoutDebounce, 300);
 
 // 处理删除评论
 const handleDeleteComment = async (commentId: number): Promise<void> => {

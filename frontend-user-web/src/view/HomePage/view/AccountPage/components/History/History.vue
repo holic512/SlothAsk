@@ -1,35 +1,63 @@
 <script setup lang="ts">
-import {onMounted, ref, computed, onUnmounted} from 'vue';
+import {computed, onMounted, onUnmounted, ref} from 'vue';
 import {setTitle} from '@/utils/title';
-import {useRouter} from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
 import {
+  ElBacktop,
+  ElButton,
+  ElDivider,
   ElEmpty,
-  ElTag,
+  ElMessage,
+  ElMessageBox,
+  ElScrollbar,
   ElSkeleton,
   ElSkeletonItem,
-  ElButton,
-  ElTooltip,
-  ElDivider,
-  ElScrollbar,
-  ElBacktop,
-  ElMessage,
-  ElMessageBox
+  ElTag,
+  ElTooltip
 } from 'element-plus';
-import {
-  Clock,
-  Delete,
-  ArrowDown,
-  Refresh
-} from '@element-plus/icons-vue';
+import {ArrowDown, Clock, Delete, Refresh, User} from '@element-plus/icons-vue';
 import {getUserHistory, HistoryGroup} from './service';
-import {deleteHistoryRecord, clearDayHistoryRecords} from './service/deleteService';
+import {clearDayHistoryRecords, deleteHistoryRecord} from './service/deleteService';
+import {debounce} from 'lodash-es';
+import {useSessionStore} from "@/pinia/Session";
+
+// 难度映射为常量
+const DIFFICULTY_TYPE_MAP: Record<string, string> = {
+  简单: 'success',
+  中等: 'warning',
+  困难: 'danger',
+  入门: 'info',
+  专家: 'danger',
+};
+
+// 日期优先级常量
+const DATE_PRIORITY = ['今天', '昨天', '前天'];
 
 const router = useRouter();
+const route = useRoute();
+const userSession = useSessionStore();
+
+// 判断用户是否登录
+const isLoggedIn = computed(() => {
+  return userSession.userSession && userSession.userSession.tokenValue;
+});
+
+// 处理登录跳转
+const handleLogin = () => {
+  router.push({
+    path: '/sign/email',
+    query: {
+      redirect: route.fullPath
+    }
+  });
+};
 
 // 页面标题设置
 onMounted(() => {
   setTitle('历史浏览');
-  loadHistoryData();
+  if (isLoggedIn.value) {
+    loadHistoryData();
+  }
   window.addEventListener('resize', handleResize);
 });
 
@@ -45,36 +73,55 @@ const selectedFilter = ref('全部');
 const isMobileView = ref(window.innerWidth < 768);
 const currentPage = ref(1);
 
-// 处理窗口大小变化
-const handleResize = () => {
+// 处理窗口大小变化 - 添加防抖
+const handleResize = debounce(() => {
   isMobileView.value = window.innerWidth < 768;
-};
+}, 200);
 
 // 历史记录数据
 const historyList = ref<HistoryGroup[]>([]);
 
+// 过滤并排序后的历史列表，只在 historyList 或 selectedFilter 变化时重新计算
+const filteredHistoryList = computed<HistoryGroup[]>(() => {
+  // 先过滤
+  const filtered = selectedFilter.value === '全部'
+    ? historyList.value
+    : historyList.value.map(day => ({
+        date: day.date,
+        records: day.records.filter(r => r.category === selectedFilter.value)
+      })).filter(day => day.records.length > 0);
 
-// 过滤后的历史记录
-const filteredHistoryList = computed(() => {
-  if (selectedFilter.value === '全部') {
-    return historyList.value;
-  }
-
-  return historyList.value.map(day => {
-    const filteredRecords = day.records.filter(record =>
-        record.category === selectedFilter.value
-    );
-
-    return {
-      date: day.date,
-      records: filteredRecords
-    };
-  }).filter(day => day.records.length > 0);
+  // 再排优先级和时间
+  return filtered
+    .sort((a, b) => {
+      const aIndex = DATE_PRIORITY.indexOf(a.date);
+      const bIndex = DATE_PRIORITY.indexOf(b.date);
+      
+      // 如果两者都在优先日期中
+      if (aIndex !== -1 && bIndex !== -1) {
+        return aIndex - bIndex;
+      }
+      // 如果只有一个在优先日期中
+      else if (aIndex !== -1) {
+        return -1;
+      }
+      else if (bIndex !== -1) {
+        return 1;
+      }
+      
+      // 其他日期按日期排序
+      return b.date.localeCompare(a.date);
+    });
 });
+
+// 是否存在任何记录
+const hasAnyRecord = computed(() =>
+  filteredHistoryList.value.some(day => day.records.length > 0)
+);
 
 // 加载历史记录数据
 const loadHistoryData = async () => {
-  if (loading.value) return;
+  if (loading.value || !isLoggedIn.value) return;
 
   loading.value = true;
 
@@ -121,16 +168,23 @@ const mergeHistoryData = (newData: HistoryGroup[]) => {
     }
   });
 
-  // 按日期排序
+  // 按日期排序 - 这里不需要重新实现排序逻辑，因为我们已经有了计算属性
   historyList.value.sort((a, b) => {
-    // 今天、昨天、前天排在前面
-    if (a.date === '今天') return -1;
-    if (b.date === '今天') return 1;
-    if (a.date === '昨天') return -1;
-    if (b.date === '昨天') return 1;
-    if (a.date === '前天') return -1;
-    if (b.date === '前天') return 1;
-
+    const aIndex = DATE_PRIORITY.indexOf(a.date);
+    const bIndex = DATE_PRIORITY.indexOf(b.date);
+    
+    // 如果两者都在优先日期中
+    if (aIndex !== -1 && bIndex !== -1) {
+      return aIndex - bIndex;
+    }
+    // 如果只有一个在优先日期中
+    else if (aIndex !== -1) {
+      return -1;
+    }
+    else if (bIndex !== -1) {
+      return 1;
+    }
+    
     // 其他日期按日期排序
     return b.date.localeCompare(a.date);
   });
@@ -138,13 +192,15 @@ const mergeHistoryData = (newData: HistoryGroup[]) => {
 
 // 加载更多数据
 const loadMore = () => {
-  if (!hasMore.value || loading.value) return;
+  if (!hasMore.value || loading.value || !isLoggedIn.value) return;
   loadHistoryData();
 };
 
 
 // 删除记录
 const deleteHistory = (dayIndex: number, recordIndex: number) => {
+  if (!isLoggedIn.value) return;
+  
   const list = selectedFilter.value === '全部' ? historyList.value : filteredHistoryList.value;
   const day = list[dayIndex];
   const record = day.records[recordIndex];
@@ -203,6 +259,8 @@ const deleteHistory = (dayIndex: number, recordIndex: number) => {
 
 // 清空某一天的历史
 const clearDayHistory = (dayIndex: number) => {
+  if (!isLoggedIn.value) return;
+  
   const list = selectedFilter.value === '全部' ? historyList.value : filteredHistoryList.value;
   const day = list[dayIndex];
 
@@ -255,6 +313,8 @@ const clearDayHistory = (dayIndex: number) => {
 
 // 刷新数据
 const refreshHistory = () => {
+  if (!isLoggedIn.value) return;
+  
   historyList.value = [];
   currentPage.value = 1;
   hasMore.value = true;
@@ -263,26 +323,15 @@ const refreshHistory = () => {
 
 // 查看题目
 const viewQuestion = (id: string) => {
-  router.push(`/questionpage/question/${id}`);
+  if (!isLoggedIn.value) {
+    handleLogin();
+    return;
+  }
+  router.push(`/question/${id}`);
 };
 
-// 根据难度获取对应的Element Plus类型
-const getDifficultyType = (difficulty: string) => {
-  switch (difficulty) {
-    case '简单':
-      return 'success';
-    case '中等':
-      return 'warning';
-    case '困难':
-      return 'danger';
-    case '入门':
-      return 'info';
-    case '专家':
-      return 'danger';
-    default:
-      return 'info';
-  }
-};
+// 根据难度获取对应的Element Plus类型 - 简化为使用映射表
+const getDifficultyType = (difficulty: string) => DIFFICULTY_TYPE_MAP[difficulty] || 'info';
 
 
 </script>
@@ -314,7 +363,7 @@ const getDifficultyType = (difficulty: string) => {
       <div class="history-content">
         <!-- 无数据展示 -->
         <el-empty
-            v-if="!loading && (filteredHistoryList.length === 0 || filteredHistoryList.every(day => day.records.length === 0))"
+            v-if="!loading && !hasAnyRecord && isLoggedIn"
             description="暂无历史记录"
             class="empty-history"
         >
@@ -462,7 +511,7 @@ const getDifficultyType = (difficulty: string) => {
         </div>
 
         <!-- 加载更多 -->
-        <div class="load-more" v-if="hasMore && !loading && filteredHistoryList.some(day => day.records.length > 0)">
+        <div v-if="hasMore && !loading && hasAnyRecord" class="load-more">
           <el-button type="primary" plain @click="loadMore" class="load-more-button">
             加载更多
             <el-icon class="el-icon--right">
@@ -472,7 +521,7 @@ const getDifficultyType = (difficulty: string) => {
         </div>
 
         <!-- 没有更多数据 -->
-        <div class="no-more" v-if="!hasMore && filteredHistoryList.some(day => day.records.length > 0)">
+        <div v-if="!hasMore && hasAnyRecord" class="no-more">
           没有更多历史记录了 ~
         </div>
       </div>
@@ -480,6 +529,16 @@ const getDifficultyType = (difficulty: string) => {
 
     <!-- 回到顶部 -->
     <el-backtop target=".history-scrollbar .el-scrollbar__wrap" :right="30" :bottom="30"/>
+    
+    <!-- 用户未登录遮罩 -->
+    <div v-if="!isLoggedIn" class="login-overlay">
+      <div class="login-card">
+        <el-icon class="login-icon"><User /></el-icon>
+        <h2>您还未登录</h2>
+        <p>登录后才能查看历史记录</p>
+        <el-button type="primary" @click="handleLogin">登录 / 注册</el-button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -489,6 +548,7 @@ const getDifficultyType = (difficulty: string) => {
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
 
   .history-header {
     display: flex;
@@ -536,6 +596,54 @@ const getDifficultyType = (difficulty: string) => {
   .history-scrollbar {
     flex: 1;
     overflow: auto;
+  }
+  
+  /* 登录遮罩样式 */
+  .login-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    height: 100%;
+    width: 100%;
+  }
+
+  .login-card {
+    background: white;
+    padding: 32px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 320px;
+    animation: fadeIn 0.3s ease-out;
+    margin-bottom: 60px; /* 稍微向上偏移，视觉上更居中 */
+  }
+
+  .login-icon {
+    font-size: 48px;
+    color: var(--el-color-primary);
+    background-color: var(--el-color-primary-light-9);
+    padding: 16px;
+    border-radius: 50%;
+    margin-bottom: 16px;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .history-content {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, defineProps} from 'vue';
+import {computed, defineEmits, defineProps} from 'vue';
 import {useRouter} from 'vue-router';
 // 引入Element Plus图标组件
 import {
@@ -19,6 +19,9 @@ import {useSessionStore} from "@/pinia/Session";
 
 const router = useRouter();
 const userSession = useSessionStore();
+
+// 定义事件
+const emit = defineEmits(['closePopover']);
 
 // 接收父组件传递的用户信息
 const props = defineProps({
@@ -59,6 +62,7 @@ const settingItems = [
 // 点击工具项的处理函数
 const handleToolClick = (path: string) => {
   router.push(path);
+  emit('closePopover'); // 触发关闭弹窗事件
 };
 
 // 点击设置项的处理函数
@@ -72,6 +76,7 @@ const handleSettingClick = (path: string) => {
   } else {
     router.push(path);
   }
+  emit('closePopover'); // 触发关闭弹窗事件
 };
 </script>
 

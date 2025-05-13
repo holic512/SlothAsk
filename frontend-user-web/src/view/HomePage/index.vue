@@ -42,7 +42,7 @@ watch(() => route.path, () => {
       <FooterMenu v-if="showFooter"/>
 
       <!-- 返回顶部按钮 -->
-      <el-backtop :bottom="40" :right="40" target=".el-scrollbar__wrap"/>
+      <el-backtop :bottom="100" :right="40" target=".el-scrollbar__wrap"/>
     </el-scrollbar>
   </div>
 </template>
@@ -52,5 +52,6 @@ watch(() => route.path, () => {
   height: 100vh;
   overflow-x: hidden; /* 防止横向滚动条 */
 }
+
 
 </style>

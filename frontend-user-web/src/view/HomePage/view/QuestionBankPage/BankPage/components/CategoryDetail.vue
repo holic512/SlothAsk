@@ -51,6 +51,7 @@ onMounted(async () => {
   await categoryStore.fetchCategoryById(categoryId.value);
   await questionStore.fetchQuestionCount(categoryId.value);
 
+  // 在获取分类详情后直接设置标题，避免使用额外的watcher
   if (category.value) {
     setTitle(`${category.value.name}`);
   }
@@ -59,12 +60,11 @@ onMounted(async () => {
 // 当分类ID变化时重新获取题目数量
 watch(categoryId, async (newId: number) => {
   await questionStore.fetchQuestionCount(newId);
-});
-
-// 当分类名称变化时更新标题
-watch(() => category.value?.name, (newTitle) => {
-  if (newTitle) {
-    setTitle(newTitle);
+  
+  // 在分类ID变化后，获取新的分类详情并更新标题
+  await categoryStore.fetchCategoryById(newId);
+  if (category.value) {
+    setTitle(`${category.value.name}`);
   }
 });
 </script>

@@ -143,21 +143,28 @@ public class PostUserSignServiceImpl implements PostUserSignService {
             // 创建新用户
             user = new User();
             user.setEmail(email);
-            
+
             // 生成随机用户名
-            String randomUsername = NicknameGenerator.generateNickname();
+            String randomUsername = UuidUtil.generateUuid();
+
+            // 检查用户名是否存在，如果存在则添加随机数后缀
+            User existingUser = userSignUserMapper.getUserByUsername(randomUsername);
+            if (existingUser != null) {
+                randomUsername = randomUsername + (int) (Math.random() * 10000);
+            }
+
             user.setUsername(randomUsername);
-            
+
             // 设置空密码或默认密码（根据需求可修改）
             user.setPassword(""); // 或者设置默认密码：SCryptUtil.hashPassword("defaultPassword")
-            
+
             // 保存用户信息
             int result = userSignUserMapper.insert(user);
-            
+
             if (result <= 0) {
                 return Pair.of(PostUserSignEnum.REGISTER_FAILED, "null");
             }
-            
+
             // 插入用户的个人资料
             Long userId = user.getId();
             // 生成用户随机详细信息
@@ -165,7 +172,7 @@ public class PostUserSignServiceImpl implements PostUserSignService {
             UserProfile userProfile = new UserProfile(userId, nickName);
             // 保存用户详情信息
             userSignProfileMapper.insert(userProfile);
-            
+
             // 设置默认项目类别
             UserProjectCategory userPc = new UserProjectCategory();
             userPc.setUserId(user.getId());
@@ -176,10 +183,10 @@ public class PostUserSignServiceImpl implements PostUserSignService {
         // 登录并获取token
         StpKit.USER.login(user.getId());
         SaTokenInfo saTokenInfo = StpKit.USER.getTokenInfo();
-        
+
         // 获取或设置用户项目类别ID
         Long userUpcId = userSignUpcMapper.selectPidByUid(user.getId());
-        
+
         // 如果用户项目id为空 则设置为 默认 1
         if (userUpcId == null) {
             UserProjectCategory userPc = new UserProjectCategory();

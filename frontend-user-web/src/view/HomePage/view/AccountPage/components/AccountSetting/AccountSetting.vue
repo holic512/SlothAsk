@@ -1,139 +1,105 @@
 <script lang="ts" setup>
-import {ref} from 'vue';
-import {ElMessage, ElMessageBox} from 'element-plus';
+/**
+ * 账户设置组件
+ * 已集成后端API：
+ * - 获取用户账户信息（用户名和邮箱）
+ * - 更新用户名
+ * - 更新邮箱（包含验证码验证）
+ *
+ * 待后端实现的API：
+ * - 修改密码相关接口
+ */
+import {computed, onMounted, ref} from 'vue';
+import {ElMessage} from 'element-plus';
+import {useRoute, useRouter} from 'vue-router';
+import {getUserAccount} from './service/ApiGetUserAccount';
+import {updateUsername} from './service/ApiUpdateUserAccount';
+import {useSessionStore} from "@/pinia/Session";
+import {User} from '@element-plus/icons-vue';
 
-const username = ref('');
-const email = ref('');
-const newPassword = ref('');
-const confirmPassword = ref('');
-const thirdPartyBinds = ref({
-  github: false,
-  wechat: false,
-  qq: true
+// 导入子组件
+import UsernameEditor from './components/UsernameEditor.vue';
+import EmailEditor from './components/EmailEditor.vue';
+import PasswordEditor from './components/PasswordEditor.vue';
+import ThirdPartyBinder from './components/ThirdPartyBinder.vue';
+
+const router = useRouter();
+const route = useRoute();
+const userSession = useSessionStore();
+
+// 判断用户是否登录
+const isLoggedIn = computed(() => {
+  return userSession.userSession && userSession.userSession.tokenValue;
 });
 
-// 是否有绑定邮箱
-const hasEmail = ref(false);
+// 处理登录跳转
+const handleLogin = () => {
+  router.push({
+    path: '/sign/email',
+    query: {
+      redirect: route.fullPath
+    }
+  });
+};
 
-// 模拟更新用户名
-const handleUpdateUsername = () => {
-  if (!username.value) {
+// 用户账户信息
+const username = ref('');
+const email = ref('');
+const remainingUsernameChanges = ref(3);
+
+// 获取用户账户信息
+const fetchUserAccount = async () => {
+  if (!isLoggedIn.value) return;
+  
+  try {
+    const response = await getUserAccount();
+    if (response.status === 200) {
+      username.value = response.data.username;
+      email.value = response.data.email;
+      // 获取剩余修改次数
+      remainingUsernameChanges.value = response.data.remainingUsernameChanges || 0;
+    } else {
+      ElMessage.error('获取用户信息失败');
+    }
+  } catch (error) {
+    console.error('获取用户信息出错:', error);
+    ElMessage.error('获取用户信息出错');
+  }
+};
+
+// 组件挂载时获取用户信息
+onMounted(() => {
+  if (isLoggedIn.value) {
+    fetchUserAccount();
+  }
+});
+
+// 处理用户名更新
+const handleUsernameUpdate = async (newUsername) => {
+  if (!newUsername) {
     ElMessage.warning('用户名不能为空');
     return;
   }
-  ElMessage.success('用户名修改成功');
-};
-
-// 模拟更新邮箱
-const handleUpdateEmail = () => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email.value)) {
-    ElMessage.warning('请输入正确的邮箱格式');
+  
+  if (remainingUsernameChanges.value <= 0) {
+    ElMessage.warning('本月修改次数已用完');
     return;
   }
-  ElMessage.success('邮箱修改成功');
-  hasEmail.value = true;
-};
-
-// 选择密码验证方式
-const showPasswordVerificationChoice = () => {
-  if (hasEmail.value) {
-    ElMessageBox.confirm(
-      '请选择验证方式',
-      '修改密码',
-      {
-        confirmButtonText: '使用旧密码验证',
-        cancelButtonText: '使用邮箱验证',
-        type: 'info',
-        showClose: false,
-        distinguishCancelAndClose: true,
-        callback: (action) => {
-          if (action === 'confirm') {
-            verifyWithOldPassword();
-          } else if (action === 'cancel') {
-            verifyWithEmail();
-          }
-        }
-      }
-    );
-  } else {
-    ElMessageBox.alert(
-      '您当前还未绑定邮箱，请先绑定邮箱或使用旧密码验证',
-      '提示',
-      {
-        confirmButtonText: '使用旧密码验证',
-        type: 'warning',
-        callback: () => {
-          verifyWithOldPassword();
-        }
-      }
-    );
-  }
-};
-
-// 使用旧密码验证
-const verifyWithOldPassword = () => {
-  ElMessageBox.prompt('请输入当前密码', '密码验证', {
-    confirmButtonText: '确认',
-    cancelButtonText: '取消',
-    inputType: 'password',
-    inputValidator: (value) => {
-      return !!value || '密码不能为空';
+  
+  try {
+    const response = await updateUsername({ username: newUsername });
+    if (response.status === 200 && response.data) {
+      ElMessage.success('用户名修改成功');
+      username.value = newUsername;
+      // 更新剩余修改次数
+      remainingUsernameChanges.value -= 1;
+    } else {
+      ElMessage.error(response.message || '用户名修改失败');
     }
-  }).then(({ value }) => {
-    // 模拟验证成功，显示修改密码表单
-    ElMessage.success('验证成功，请设置新密码');
-    showResetPasswordForm();
-  }).catch(() => {
-    // 用户取消操作
-  });
-};
-
-// 使用邮箱验证
-const verifyWithEmail = () => {
-  ElMessageBox.prompt('验证码已发送至您的邮箱，请输入验证码', '邮箱验证', {
-    confirmButtonText: '验证',
-    cancelButtonText: '取消',
-    inputPattern: /^\d{6}$/,
-    inputErrorMessage: '验证码格式不正确'
-  }).then(({ value }) => {
-    // 模拟验证成功，显示修改密码表单
-    ElMessage.success('验证成功，请设置新密码');
-    showResetPasswordForm();
-  }).catch(() => {
-    // 用户取消操作
-  });
-};
-
-// 显示重置密码表单
-const showResetPasswordForm = () => {
-  ElMessageBox.prompt(
-    '请输入新密码',
-    '修改密码',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      inputType: 'password',
-      inputValidator: (value) => {
-        return value.length >= 6 || '密码长度至少为6位';
-      }
-    }
-  ).then(({ value }) => {
-    // 模拟修改密码成功
-    ElMessage.success('密码修改成功');
-  }).catch(() => {
-    // 用户取消操作
-  });
-};
-
-// 模拟绑定操作，只允许操作GitHub
-const toggleBind = (platform: 'github' | 'wechat' | 'qq') => {
-  if (platform !== 'github') {
-    ElMessage.info('当前仅支持GitHub绑定');
-    return;
+  } catch (error) {
+    console.error('更新用户名出错:', error);
+    ElMessage.error('更新用户名出错');
   }
-  thirdPartyBinds.value[platform] = !thirdPartyBinds.value[platform];
-  ElMessage.success(`GitHub已${thirdPartyBinds.value[platform] ? '绑定' : '解绑'}`);
 };
 </script>
 
@@ -143,25 +109,17 @@ const toggleBind = (platform: 'github' | 'wechat' | 'qq') => {
     <div class="section">
       <div class="section-title">基本信息</div>
       
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">用户名</label>
-          <div class="input-group">
-            <el-input v-model="username" class="slim-input" placeholder="请输入用户名" />
-            <el-button type="primary" @click="handleUpdateUsername">修改</el-button>
-          </div>
-        </div>
-      </div>
+      <!-- 用户名组件 -->
+      <UsernameEditor 
+        v-model:remaining-changes="remainingUsernameChanges"
+        v-model:username="username"
+        @update-username="handleUsernameUpdate"
+      />
       
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">邮箱</label>
-          <div class="input-group">
-            <el-input v-model="email" class="slim-input" placeholder="请输入邮箱" />
-            <el-button type="primary" @click="handleUpdateEmail">修改</el-button>
-          </div>
-        </div>
-      </div>
+      <!-- 邮箱组件 -->
+      <EmailEditor 
+        v-model:email="email"
+      />
     </div>
     
     <el-divider />
@@ -169,13 +127,9 @@ const toggleBind = (platform: 'github' | 'wechat' | 'qq') => {
     <!-- 密码修改区域 -->
     <div class="section">
       <div class="section-title">密码修改</div>
-      
-      <div class="form-row password-section">
-        <el-button type="primary" @click="showPasswordVerificationChoice">修改密码</el-button>
-        <div class="password-tip">
-          点击按钮后将提示您选择验证方式，完成验证后可修改密码
-        </div>
-      </div>
+      <PasswordEditor 
+        :email="email"
+      />
     </div>
     
     <el-divider />
@@ -183,45 +137,16 @@ const toggleBind = (platform: 'github' | 'wechat' | 'qq') => {
     <!-- 第三方绑定区域 -->
     <div class="section">
       <div class="section-title">第三方绑定</div>
-      
-      <!-- GitHub 放在第一位 -->
-      <div class="form-row auth-row">
-        <div class="auth-platform">
-          <span class="platform-label">GitHub</span>
-          <el-tag :type="thirdPartyBinds.github ? 'success' : 'info'" class="status-tag">
-            {{ thirdPartyBinds.github ? '已绑定' : '未绑定' }}
-          </el-tag>
-        </div>
-        <el-button size="small" type="primary" @click="toggleBind('github')">
-          {{ thirdPartyBinds.github ? '解绑' : '绑定' }}
-        </el-button>
-      </div>
-      
-      <!-- 禁用其他选项 -->
-      <div class="form-row auth-row">
-        <div class="auth-platform">
-          <span class="platform-label">微信</span>
-          <el-tag class="status-tag" type="info">
-            {{ thirdPartyBinds.wechat ? '已绑定' : '未绑定' }}
-          </el-tag>
-        </div>
-        <div class="action-area">
-          <el-button disabled size="small">绑定</el-button>
-          <span class="bind-tip">暂不支持</span>
-        </div>
-      </div>
-      
-      <div class="form-row auth-row">
-        <div class="auth-platform">
-          <span class="platform-label">QQ</span>
-          <el-tag class="status-tag" type="info">
-            {{ thirdPartyBinds.qq ? '已绑定' : '未绑定' }}
-          </el-tag>
-        </div>
-        <div class="action-area">
-          <el-button disabled size="small">绑定</el-button>
-          <span class="bind-tip">暂不支持</span>
-        </div>
+      <ThirdPartyBinder />
+    </div>
+    
+    <!-- 用户未登录遮罩 -->
+    <div v-if="!isLoggedIn" class="login-overlay">
+      <div class="login-card">
+        <el-icon class="login-icon"><User /></el-icon>
+        <h2>您还未登录</h2>
+        <p>登录后才能访问账户设置</p>
+        <el-button type="primary" @click="handleLogin">登录 / 注册</el-button>
       </div>
     </div>
   </div>
@@ -231,14 +156,14 @@ const toggleBind = (platform: 'github' | 'wechat' | 'qq') => {
 .account-settings {
   max-width: 700px;
   margin: 0 auto;
-  padding: 40px;
+  padding: 24px;
   background-color: white;
-  border-radius: 12px;
+  position: relative;
 }
 
 .section {
   margin-bottom: 20px;
-  padding: 10px 0;
+  padding: 4px 0;
 }
 
 .section-title {
@@ -248,121 +173,70 @@ const toggleBind = (platform: 'github' | 'wechat' | 'qq') => {
   margin-bottom: 24px;
 }
 
-.form-row {
-  margin-bottom: 20px;
+:deep(.el-divider--horizontal) {
+  margin: 24px 0;
 }
 
-.form-group {
+/* 登录遮罩样式 */
+.login-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
   display: flex;
-  align-items: flex-start;
-}
-
-.form-label {
-  width: 70px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #1a1a1a;
-  line-height: 32px;
-  text-align: right;
-  margin-right: 16px;
-  flex-shrink: 0;
-}
-
-.input-group {
-  display: flex;
-  flex: 1;
-  gap: 12px;
-}
-
-.slim-input {
-  max-width: 320px;
-}
-
-.password-section {
-  display: flex;
+  justify-content: center;
   align-items: center;
-  padding-left: 86px;
+  z-index: 10;
+  height: 100%;
+  width: 100%;
+  border-radius: 12px;
 }
 
-.password-tip {
-  margin-left: 16px;
-  color: #909399;
-  font-size: 13px;
+.login-card {
+  background: white;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 320px;
+  animation: fadeIn 0.3s ease-out;
+  margin-bottom: 60px; /* 稍微向上偏移，视觉上更居中 */
 }
 
-.auth-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px 0 86px;
+.login-icon {
+  font-size: 48px;
+  color: var(--el-color-primary);
+  background-color: var(--el-color-primary-light-9);
+  padding: 16px;
+  border-radius: 50%;
   margin-bottom: 16px;
 }
 
-.auth-platform {
-  display: flex;
-  align-items: center;
-}
-
-.platform-label {
-  width: 80px;
-  font-size: 14px;
-}
-
-.status-tag {
-  margin-left: 12px;
-}
-
-.action-area {
-  display: flex;
-  align-items: center;
-}
-
-.bind-tip {
-  margin-left: 12px;
-  color: #909399;
-  font-size: 12px;
-}
-
-:deep(.el-divider--horizontal) {
-  margin: 24px 0;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 768px) {
   .account-settings {
     padding: 20px;
+    margin: 0;
+    width: 100%;
+    border-radius: 0;
+    box-shadow: none;
   }
-  
-  .form-group {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .form-label {
-    text-align: left;
-    margin-bottom: 8px;
-  }
-  
-  .input-group {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .auth-row {
-    padding-left: 0;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-  
-  .password-section {
-    padding-left: 0;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .password-tip {
-    margin-left: 0;
-    margin-top: 8px;
+
+  .login-overlay {
+    border-radius: 0;
   }
 }
 </style>

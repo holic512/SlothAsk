@@ -98,49 +98,96 @@
 
 <script setup lang="ts">
 import FilterSection from "@/view/HomePage/view/StudyPage/components/FilterSection.vue";
-import {ref, watch, onMounted} from 'vue';
+import {onMounted, reactive, ref, watch} from 'vue';
 import {useQuestionBankStore} from '@/view/HomePage/view/StudyPage/store/QuestionBank';
 import {useRouter} from 'vue-router';
-import {Histogram, TrendCharts, Star, View} from '@element-plus/icons-vue'
+import {Histogram, Star, TrendCharts, View} from '@element-plus/icons-vue'
 import {apiGetQuestionList} from '../service/ApiGetQuestionList'
+import {debounce} from 'lodash-es';
+import {useScrollbarStore} from '@/pinia/ScrollbarStore';
 
 const questionBankStore = useQuestionBankStore()
 const loading = ref(false); // 添加 loading 状态
+// 用于存储上一次的请求参数，避免重复请求
+const prevParams = reactive({
+  searchText: '',
+  filterCategory: 0,
+  filterType: 0,
+  filterDifficulty: 0,
+  filterTags: [] as number[],
+  pageNum: 1
+});
 
 // 获取分类 的名字
 const getCategoryById = (id: number) => {
   return questionBankStore.FilterCategoryList.find((Category) => Category.id === id)?.name;
 }
 
+// 使用Map避免重复计算的难度映射
+const difficultyMap = new Map([
+  [1, {label: "简单", type: "success"}],
+  [2, {label: "中等", type: "warning"}],
+  [3, {label: "困难", type: "danger"}]
+]);
+
 // 获取难度
 const getTagProps = (id: number) => {
-  const tagMap = {
-    1: {label: "简单", type: "success"},
-    2: {label: "中等", type: "warning"},
-    3: {label: "困难", type: "danger"},
-  };
-  return tagMap[id] || {label: "未知", type: "easy"};
+  return difficultyMap.get(id) || {label: "未知", type: "easy"};
 };
+
+// 使用Map避免重复计算的问题类型映射
+const questionTypeMap = new Map([
+  [1, {label: "单选", type: "success"}], // 绿色
+  [2, {label: "多选", type: "warning"}], // 橙色
+  [3, {label: "判断", type: "info"}],    // 蓝色
+  [4, {label: "简答", type: "danger"}]   // 红色
+]);
 
 // 获取类型
 const getQuestionTypeProps = (id) => {
-  const typeMap = {
-    1: {label: "单选", type: "success"}, // 绿色
-    2: {label: "多选", type: "warning"}, // 橙色
-    3: {label: "判断", type: "info"}, // 蓝色
-    4: {label: "简答", type: "danger"}, // 红色
-  };
-  return typeMap[id] || {label: "未知", type: "default"};
+  return questionTypeMap.get(id) || {label: "未知", type: "default"};
+};
+
+// 检查参数是否有变化
+const hasParamsChanged = () => {
+  const currentParams = questionBankStore.pagination;
+  
+  return (
+    prevParams.searchText !== currentParams.searchText ||
+    prevParams.filterCategory !== currentParams.filterCategory ||
+    prevParams.filterType !== currentParams.filterType ||
+    prevParams.filterDifficulty !== currentParams.filterDifficulty ||
+    prevParams.pageNum !== currentParams.pageNum ||
+    JSON.stringify(prevParams.filterTags) !== JSON.stringify(currentParams.filterTags)
+  );
+};
+
+// 更新上一次的参数
+const updatePrevParams = () => {
+  const current = questionBankStore.pagination;
+  prevParams.searchText = current.searchText;
+  prevParams.filterCategory = current.filterCategory;
+  prevParams.filterType = current.filterType;
+  prevParams.filterDifficulty = current.filterDifficulty;
+  prevParams.filterTags = [...current.filterTags];
+  prevParams.pageNum = current.pageNum;
 };
 
 // 加载题目数据
 const loadQuestions = async () => {
+  // 如果参数没有变化，则不重新请求
+  if (!hasParamsChanged()) {
+    return;
+  }
+  
   loading.value = true; // 开始加载
   try {
     const result = await apiGetQuestionList(questionBankStore.pagination)
     if (result.status === 200) {
       questionBankStore.questions = result.data.records
       questionBankStore.pagination.total = result.data.total
+      // 更新上一次请求的参数
+      updatePrevParams();
     }
   } catch (error) {
     console.error('加载题目失败:', error)
@@ -149,10 +196,13 @@ const loadQuestions = async () => {
   }
 }
 
+// 创建防抖版本的加载函数
+const debouncedLoadQuestions = debounce(loadQuestions, 300);
+
 // 页码变化处理
 const handlePageChange = (page: number) => {
   questionBankStore.pagination.pageNum = page
-  loadQuestions()
+  loadQuestions() // 这里可以不使用防抖，因为是用户主动点击触发
 }
 
 // 监听过滤条件变化
@@ -165,8 +215,8 @@ watch(() => [
 ], () => {
   // 重置页码并重新加载
   questionBankStore.pagination.pageNum = 1
-  loadQuestions()
-}, {deep: true})
+  debouncedLoadQuestions() // 使用防抖版本避免频繁请求
+})
 
 // 初始加载
 onMounted(() => {
@@ -175,12 +225,27 @@ onMounted(() => {
 
 // 处理点击题目
 const router = useRouter();
-const handleQuestionClick = (questionId: number) => {
+const handleQuestionClick = (questionId: string) => {
   router.push({
     name: 'QuestionPage',
     params: {
-      questionId: questionId.toString()
+      questionId: questionId
     }
+  }).then(() => {
+    // 导航成功后等待DOM更新完成再滚动
+    setTimeout(() => {
+      // 先获取scrollbarStore
+      const scrollbarStore = useScrollbarStore();
+      scrollbarStore.scrollToTop();
+      
+      // 备用方案：如果store中的scrollbar引用失效，尝试直接使用DOM API
+      if (!scrollbarStore.scrollbarRef) {
+        const scrollWrap = document.querySelector('.el-scrollbar__wrap');
+        if (scrollWrap) {
+          scrollWrap.scrollTop = 0;
+        }
+      }
+    }, 100);
   });
 };
 

@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import Category from './components/Category.vue'
+import Category from './components/RecommendCategory.vue'
 import Question from './components/Question.vue'
 import Sidebar from './components/Sidebar.vue'
 import {onMounted} from 'vue';
 import {setTitle} from '@/utils/title';
+import RightBox from "@/view/HomePage/components/RightBox.vue";
 
 onMounted(() => {
   setTitle('学习');
@@ -31,6 +32,9 @@ onMounted(() => {
       </div>
     </div>
   </div>
+
+  <RightBox/>
+
 </template>
 
 <style scoped>
