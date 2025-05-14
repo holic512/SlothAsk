@@ -11,7 +11,7 @@
         </el-icon>
       </el-button>
 
-      <div class="carousel">
+      <div class="carousel" ref="carouselRef">
         <div
             class="carousel-inner"
             :style="{ transform: `translateX(-${currentSlide * 100}%)` }"
@@ -25,11 +25,7 @@
               <el-col
                   v-for="category in slide"
                   :key="category.id"
-                  :xs="24"
-                  :sm="12"
-                  :md="8"
-                  :lg="8"
-                  :xl="6"
+                  :span="Math.floor(24 / columnsPerRow)"
               >
                 <el-card shadow="hover" class="category-card" @click="goToDetail(category.id)">
                   <div class="card-content">
@@ -80,7 +76,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, ref, watch} from 'vue';
+import {ref, computed, onMounted, onUnmounted, watch, nextTick} from 'vue';
 import {useRouter} from 'vue-router';
 import {ArrowLeft, ArrowRight, View} from '@element-plus/icons-vue';
 import {useCategoryStore} from "../store/CategoryStore"
@@ -92,24 +88,59 @@ const props = defineProps({
 const categoryStore = useCategoryStore();
 const currentSlide = ref(0);
 
-// 将分类数据分成每组的幻灯片，根据屏幕大小动态调整
-const itemsPerSlide = computed(() => {
-  // 根据窗口宽度决定每页显示的项目数
-  const width = window.innerWidth;
-  if (width < 576) return 3; // 手机
-  if (width < 992) return 6; // 平板
-  return 9; // 桌面
+const carouselRef = ref<HTMLElement | null>(null);
+const containerWidth = ref(window.innerWidth);
+
+// 更新容器宽度
+const updateContainerWidth = () => {
+  if (carouselRef.value) {
+    containerWidth.value = carouselRef.value.clientWidth;
+  }
+};
+
+//监听元素尺寸变化
+let resizeObserver: ResizeObserver | null = null;
+
+// 在容器尺寸变化时自动更新
+onMounted(() => {
+  nextTick(() => {
+    updateContainerWidth();
+    if (carouselRef.value) {
+      resizeObserver = new ResizeObserver(() => {
+        updateContainerWidth();
+      });
+      resizeObserver.observe(carouselRef.value);
+    }
+  });
 });
 
-// 监听窗口大小变化
-window.addEventListener('resize', () => {
-  if (categoryStore.categories.length > 0) {
-    // 重新计算幻灯片，保持当前比例
-    const currentIndex = currentSlide.value * (slides.value[0]?.length || 0);
-    const newItemsPerSlide = itemsPerSlide.value;
-    if (newItemsPerSlide > 0) {
-      currentSlide.value = Math.floor(currentIndex / newItemsPerSlide);
-    }
+onUnmounted(() => {
+  if (resizeObserver && carouselRef.value) {
+    resizeObserver.unobserve(carouselRef.value);
+  }
+});
+
+// 每页展示数量
+const itemsPerSlide = computed(() => {
+  const width = containerWidth.value;
+  if (width < 576) return 3;
+  if (width < 992) return 6;
+  return 9;
+});
+
+// 每行展示的列数（用于 el-col span 控制）
+const columnsPerRow = computed(() => {
+  const width = containerWidth.value;
+  if (width < 576) return 1;
+  if (width < 992) return 2;
+  return 3;
+});
+
+// 当前页在尺寸变化时定位到正确位置
+watch(itemsPerSlide, (newPerSlide, oldPerSlide) => {
+  if (categoryStore.categories.length > 0 && oldPerSlide > 0) {
+    const currentIndex = currentSlide.value * oldPerSlide;
+    currentSlide.value = Math.floor(currentIndex / newPerSlide);
   }
 });
 
@@ -125,22 +156,22 @@ const slides = computed(() => {
 
 watch(() => props.projectId, (newProjectId) => {
   if (newProjectId) {
-    // 改用分页方法获取分类
     categoryStore.fetchCategoriesByProjectIdPaged(newProjectId, 1, itemsPerSlide.value * 2);
     currentSlide.value = 0;
   }
 }, {immediate: true});
 
-// 加载更多分类的方法
 const loadMoreCategories = () => {
-  if (props.projectId && slides.value.length > 0 && 
-      currentSlide.value === slides.value.length - 1 && 
-      categoryStore.categories.length < categoryStore.totalCategories) {
+  if (
+      props.projectId &&
+      slides.value.length > 0 &&
+      currentSlide.value === slides.value.length - 1 &&
+      categoryStore.categories.length < categoryStore.totalCategories
+  ) {
     categoryStore.loadMoreCategories(props.projectId);
   }
 };
 
-// 监听幻灯片变化，当到达最后一页时自动加载更多
 watch(currentSlide, (newValue) => {
   if (newValue === slides.value.length - 1) {
     loadMoreCategories();
@@ -167,6 +198,7 @@ const goToSlide = (index: number) => {
   currentSlide.value = index;
 };
 </script>
+
 
 <style scoped>
 .category-page {
