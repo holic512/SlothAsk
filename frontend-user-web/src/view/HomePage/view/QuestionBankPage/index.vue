@@ -54,12 +54,13 @@ const breakpoint = 1000 // 抽屉模式断点
 
 // 监听窗口尺寸变化
 const handleResize = () => {
-  windowWidth.value = window.innerWidth
-  if (windowWidth.value < breakpoint) {
-    collapsed.value = true
-  } else if (windowWidth.value >= breakpoint && windowWidth.value <= breakpoint + 100) {
-    // 当窗口从小变大，超过断点时，自动展开侧边栏
-    collapsed.value = false
+  const prevIsDrawerMode = isDrawerMode.value;
+  windowWidth.value = window.innerWidth;
+  const newIsDrawerMode = windowWidth.value < breakpoint;
+
+  // 如果进入抽屉模式（变小屏），自动折叠
+  if (!prevIsDrawerMode && newIsDrawerMode) {
+    collapsed.value = true;
   }
 }
 
