@@ -546,19 +546,18 @@ CREATE TABLE `user_project_category`
   ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Table structure for user_question_record
+-- Optimized Table structure for user_question_record
 -- ----------------------------
 DROP TABLE IF EXISTS `user_question_record`;
 CREATE TABLE `user_question_record`
 (
-    `id`          bigint                                                NOT NULL AUTO_INCREMENT COMMENT '记录ID',
-    `user_id`     bigint                                                NOT NULL COMMENT '用户ID',
-    `question_id` bigint                                                NOT NULL COMMENT '题目ID',
-    `user_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户答案',
-    `is_correct`  tinyint                                               NOT NULL DEFAULT 0 COMMENT '是否正确 1:正确 0:错误',
-    `answer_time` int                                                   NOT NULL DEFAULT 0 COMMENT '答题用时(秒)',
-    `create_time` datetime                                              NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time` datetime                                              NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `id`           bigint                                                NOT NULL AUTO_INCREMENT COMMENT '记录ID',
+    `user_id`      bigint                                                NOT NULL COMMENT '用户ID',
+    `question_id`  bigint                                                NOT NULL COMMENT '题目ID',
+    `user_answer`  text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户答案',
+    `is_submitted` tinyint                                               NOT NULL DEFAULT 0 COMMENT '是否提交 1:已提交 0:未提交',
+    `create_time`  datetime                                              NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`  datetime                                              NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`) USING BTREE,
     INDEX `idx_user_question` (`user_id` ASC, `question_id` ASC) USING BTREE,
     INDEX `idx_question` (`question_id` ASC) USING BTREE,
@@ -570,6 +569,30 @@ CREATE TABLE `user_question_record`
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_general_ci COMMENT = '答题记录表'
   ROW_FORMAT = Dynamic;
+
+
+-- ----------------------------
+-- Table structure for user_answer_ai_analysis
+-- ----------------------------
+DROP TABLE IF EXISTS `user_answer_ai_analysis`;
+CREATE TABLE `user_answer_ai_analysis`
+(
+    `id`               bigint                                                NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `record_id`        bigint                                                NOT NULL COMMENT '答题记录ID（外键）',
+    `accuracy_rate`    decimal(5, 2)                                         NOT NULL COMMENT 'AI判定的准确率（0~100%，保留两位小数）',
+    `ai_explanation`   text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'AI生成的解析内容',
+    `create_time`      datetime                                              NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`      datetime                                              NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE KEY `uk_record_id` (`record_id`) USING BTREE,  -- 一条答题记录最多对应一条AI分析
+    CONSTRAINT `fk_ai_analysis_record` FOREIGN KEY (`record_id`) REFERENCES `user_question_record` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 1
+  CHARACTER SET = utf8mb4
+  COLLATE = utf8mb4_general_ci COMMENT = '用户答案AI分析表'
+  ROW_FORMAT = Dynamic;
+
+
 
 -- ----------------------------
 -- Table structure for user_question_stats

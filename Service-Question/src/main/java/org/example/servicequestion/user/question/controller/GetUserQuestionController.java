@@ -93,7 +93,7 @@ public class GetUserQuestionController {
     }
 
     /**
-     * 根据虚拟ID获取同分类下的题目列表，并确保当前题目在返回的列表中
+     * 根据虚拟ID获取同分类下的题目列表，并确保当前题目在返回的列表中  默认为10道题
      *
      * @param virtualId 虚拟题目ID
      * @param page      请求的页码，默认为1

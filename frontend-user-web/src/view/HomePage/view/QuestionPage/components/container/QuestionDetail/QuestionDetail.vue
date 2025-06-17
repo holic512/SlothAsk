@@ -77,7 +77,7 @@ const TrueFalse = defineAsyncComponent(() =>
     import('./components/TrueFalse.vue')
 );
 const ShortAnswer = defineAsyncComponent(() =>
-    import('./components/ShortAnswer.vue')
+    import('./components/ShortAnswer/ShortAnswer.vue')
 );
 
 const route = useRoute();

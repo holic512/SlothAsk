@@ -1,11 +1,11 @@
 /**
  * File Name: ServiceImageFeign.java
- * Description: Todo
+ * Description: 图片服务Feign客户端接口，用于与图片微服务进行远程调用
  * Author: holic512
  * Created Date: 2025-02-06
  * Version: 1.0
  * Usage:
- * Todo
+ * 提供图片上传、预览、删除和批量获取预览URL等功能，通过OpenFeign实现微服务间的通信
  */
 package org.example.servicequestion.feign;
 
