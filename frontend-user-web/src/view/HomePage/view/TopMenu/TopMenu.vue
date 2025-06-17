@@ -2,8 +2,9 @@
 import {useRoute, useRouter} from 'vue-router';
 import {computed, onMounted, onUnmounted, ref, watch} from 'vue';
 import {useTopMenuStore} from "@/view/HomePage/view/TopMenu/pinia/topMenuStore";
-import {getUserNameAndAvatar} from "@/view/HomePage/view/TopMenu/Api/ApiUserInfo";
+import {getUserBasicInfo} from "@/view/HomePage/view/TopMenu/Api/ApiUserInfo";
 import {useSessionStore} from "@/pinia/Session";
+import {useUserProfileStore} from "@/pinia/UserProfile";
 import UserUtil from "@/view/HomePage/view/TopMenu/components/UserUtil/UserUtil.vue";
 import SearchBox from "@/view/HomePage/view/TopMenu/components/SearchBox/SearchBox.vue";
 import {ArrowRight, Bell, Menu, QuestionFilled, Reading, User} from '@element-plus/icons-vue';
@@ -43,19 +44,18 @@ onUnmounted(() => {
   window.removeEventListener('resize', updateWindowWidth);
 });
 
-// 用户信息
-const userInfo = ref({
-  nickname: '',
-  avatar: ''
-});
-
 // 获取用户信息的方法
 const fetchUserInfo = async () => {
   try {
-    const response = await getUserNameAndAvatar();
+    const response = await getUserBasicInfo();
     if (response.status === 200) {
-      userInfo.value = response.data;
-      // 将用户信息保存到Session中
+      // 将用户信息保存到UserProfile store中
+      userProfileStore.updateBasicInfo(
+        response.data.username,
+        response.data.nickname,
+        response.data.avatar
+      );
+      // 同时更新Session中的昵称和头像（保持兼容性）
       userSession.updateUserInfo(response.data.nickname, response.data.avatar);
       return 200;
     }
@@ -91,8 +91,17 @@ const handleLogin = () => {
 // 获取用户session pinia实例
 const userSession = useSessionStore();
 
+// 获取用户个人信息 pinia实例
+const userProfileStore = useUserProfileStore();
+
 // 获取用于 管理 topMenu的 pinia实例
 const topMenuStore = useTopMenuStore();
+
+// 计算属性：从UserProfile store获取用户信息用于显示
+const userInfo = computed(() => ({
+  nickname: userProfileStore.userProfile.nickname || '',
+  avatar: userProfileStore.userProfile.avatarUrl || ''
+}));
 
 watch(() => userSession.userSession, async (newValue) => {
   if (newValue === null) {

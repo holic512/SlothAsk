@@ -2,6 +2,7 @@ export type SortType = 'newest' | 'oldest' | 'popular';
 
 export interface UserInfo {
   id: number;
+  username:string;
   nickname: string;
   avatar: string;
   isAuthor?: number; // 是否是作者

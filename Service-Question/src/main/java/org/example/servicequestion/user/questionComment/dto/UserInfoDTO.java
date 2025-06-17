@@ -20,4 +20,9 @@ public class UserInfoDTO {
      * 用户头像
      */
     private String avatar;
-} 
+    
+    /**
+     * 用户名
+     */
+    private String username;
+}

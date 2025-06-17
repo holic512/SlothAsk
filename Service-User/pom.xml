@@ -82,6 +82,12 @@
             <version>8.0.33</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-jsqlparser</artifactId>
+            <version>3.5.10.1</version>
+        </dependency>
+
         <!-- MyBatis Plus 核心依赖 -->
         <dependency>
             <groupId>com.baomidou</groupId>

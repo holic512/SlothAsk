@@ -8,9 +8,9 @@
         @click="handleStarClick"
     >
       <!-- 非加载时显示心形图标，加载中显示旋转图标 -->
-      <svg v-if="!loading" class="icon" fill="currentColor" viewBox="0 0 20 20">
-        <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/>
-      </svg>
+      <el-icon v-if="!loading">
+        <Star/>
+      </el-icon>
       <svg v-else class="icon loading-icon" viewBox="0 0 50 50">
         <circle cx="25" cy="25" fill="none" r="20" stroke-width="5"/>
       </svg>
@@ -20,7 +20,8 @@
     <!-- 分享按钮 -->
     <button class="btn" @click="share">
       <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
-        <path d="M15 8a3 3 0 10-2.83-4H9a1 1 0 000 2h3.17A3.001 3.001 0 0015 8zM5 10a1 1 0 000 2h10a1 1 0 000-2H5zm10 4a3.001 3.001 0 00-2.83 2H9a1 1 0 000 2h3.17A3 3 0 1015 14z"/>
+        <path
+            d="M15 8a3 3 0 10-2.83-4H9a1 1 0 000 2h3.17A3.001 3.001 0 0015 8zM5 10a1 1 0 000 2h10a1 1 0 000-2H5zm10 4a3.001 3.001 0 00-2.83 2H9a1 1 0 000 2h3.17A3 3 0 1015 14z"/>
       </svg>
       <span>分享</span>
     </button>
@@ -33,6 +34,7 @@ import {useRoute, useRouter} from 'vue-router'
 import axios from '@/axios/axios'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {useSessionStore} from "@/pinia/Session";
+import {Star} from "@element-plus/icons-vue";
 
 const isFavorited = defineModel()
 
@@ -73,13 +75,13 @@ const handleLogin = () => {
 // 收藏/取消收藏
 const handleStarClick = async () => {
   if (loading.value) return
-  
+
   // 检查用户是否登录
   if (!isLoggedIn.value) {
     showLoginTip();
     return;
   }
-  
+
   loading.value = true
 
   const virtualId = route.params.questionId as string
@@ -92,7 +94,7 @@ const handleStarClick = async () => {
     if (isFavorited.value) {
       // 取消收藏
       const response = await axios.post('service-question/user/favQuestion/removeFav', null, {
-        params: { virtualId }
+        params: {virtualId}
       })
       if (response.data.status === 200) {
         isFavorited.value = false
@@ -103,7 +105,7 @@ const handleStarClick = async () => {
     } else {
       // 添加收藏
       const response = await axios.post('service-question/user/favQuestion/addFav', null, {
-        params: { virtualId }
+        params: {virtualId}
       })
       if (response.data.status === 200) {
         isFavorited.value = true
@@ -180,7 +182,11 @@ const share = () => {
 }
 
 @keyframes spin {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

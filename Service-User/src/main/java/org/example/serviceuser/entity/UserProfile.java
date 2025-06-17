@@ -13,9 +13,9 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -60,10 +60,10 @@ public class UserProfile {
     @TableField("display_achievement_id")
     private Long displayAchievementId;
 
-    @TableField(value = "create_time", exist = false)
+    @TableField(value = "create_time")
     private LocalDateTime createTime;
 
-    @TableField(value = "update_time", exist = false)
+    @TableField(value = "update_time")
     private LocalDateTime updateTime;
 
     // 便捷构造方法

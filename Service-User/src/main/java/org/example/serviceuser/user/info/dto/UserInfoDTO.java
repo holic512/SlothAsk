@@ -19,6 +19,11 @@ import lombok.NoArgsConstructor;
 public class UserInfoDTO {
     
     /**
+     * 用户名
+     */
+    private String username;
+    
+    /**
      * 用户昵称
      */
     private String nickname;
@@ -27,4 +32,4 @@ public class UserInfoDTO {
      * 用户头像URL
      */
     private String avatar;
-} 
+}

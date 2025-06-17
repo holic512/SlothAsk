@@ -32,19 +32,20 @@ public class GetUserInfoController {
     }
 
     /**
-     * 获取用户名和头像信息
+     * 获取用户基本信息（用户名、昵称、头像URL）
+     * 用于顶部导航栏显示
      *
      * @param userId 从请求头中获取的用户ID
-     * @return 包含用户名和头像的响应
+     * @return 包含用户名、昵称和头像URL的响应
      */
-    @GetMapping("UserNameAndAvtar")
-    public ApiResponse UserNameAndAvtar(@RequestHeader(value = "X-User-Id", required = false) Long userId) {
+    @GetMapping("UserBasicInfo")
+    public ApiResponse getUserBasicInfo(@RequestHeader(value = "X-User-Id", required = false) Long userId) {
         // 参数校验
         if (userId == null) {
             return new ApiResponse(400, "用户ID不能为空");
         }
 
-        // 调用服务获取用户信息
+        // 调用服务获取用户基本信息
         UserInfoDTO userInfo = getUserInfoService.getUserNameAndAvatar(userId);
 
         // 检查用户是否存在
@@ -52,8 +53,8 @@ public class GetUserInfoController {
             return new ApiResponse(404, "用户不存在");
         }
 
-        // 返回用户信息
-        return new ApiResponse(200, "获取成功", userInfo);
+        // 返回用户基本信息
+        return new ApiResponse(200, "获取用户基本信息成功", userInfo);
     }
 
     /**

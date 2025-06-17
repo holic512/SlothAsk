@@ -1,6 +1,6 @@
 /**
  * File Name: MyBatisPlusConfig.java
- * Description: Todo
+ * Description: mybatis分页插件配置
  * Author: holic512
  * Created Date: 2025-03-05
  * Version: 1.0

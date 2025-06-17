@@ -3,11 +3,10 @@ import {computed, defineEmits, defineProps} from 'vue';
 import {useRouter} from 'vue-router';
 // 引入Element Plus图标组件
 import {
-  Brush,
   Collection,
   DataAnalysis,
   Document,
-  Link,
+  House,
   Setting,
   Star,
   SwitchButton,
@@ -16,9 +15,11 @@ import {
   Warning
 } from '@element-plus/icons-vue';
 import {useSessionStore} from "@/pinia/Session";
+import {useUserProfileStore} from "@/pinia/UserProfile";
 
 const router = useRouter();
 const userSession = useSessionStore();
+const userProfileStore = useUserProfileStore();
 
 // 定义事件
 const emit = defineEmits(['closePopover']);
@@ -50,12 +51,13 @@ const toolItems = [
   { name: '我的题库', icon: Collection, color: '#20B2AA', path: '/account/my-bank' } // 青绿色
 ];
 
-// 设置项目
+// 设置项目  功能未开发 先隐藏
 const settingItems = [
+  { name: '我的主页', icon: House, path: 'myProfile' },
   { name: '个人资料', icon: User, path: '/account/profile' },
-  { name: '显示项目', icon: Link, path: '/account/projects' },
+  // { name: '显示项目', icon: Link, path: '/account/projects' },
   { name: '账号设置', icon: Setting, path: '/account/settings' },
-  { name: '外观', icon: Brush, path: '/account/appearance' },
+  // { name: '外观', icon: Brush, path: '/account/appearance' },
   { name: '退出登录', icon: SwitchButton, path: 'logout' }
 ];
 
@@ -73,6 +75,12 @@ const handleSettingClick = (path: string) => {
     console.log('退出登录');
     // 刷新页面
     window.location.reload();
+  } else if (path === 'myProfile') {
+    // 跳转到我的主页
+    const username = userProfileStore.getUserProfile().username;
+    if (username) {
+      router.push(`/userProfile/${username}`);
+    }
   } else {
     router.push(path);
   }

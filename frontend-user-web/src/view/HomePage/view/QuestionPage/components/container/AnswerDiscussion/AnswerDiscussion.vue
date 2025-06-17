@@ -7,13 +7,13 @@
         <el-dropdown trigger="click" @command="handleSortChange">
           <span class="sort-dropdown">
             {{ sortOptions[currentSort] }}
-            <el-icon><arrow-down /></el-icon>
+            <el-icon><arrow-down/></el-icon>
           </span>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item v-for="(label, key) in sortOptions"
-                               :key="key"
-                               :command="key">
+                                :key="key"
+                                :command="key">
                 {{ label }}
               </el-dropdown-item>
             </el-dropdown-menu>
@@ -26,29 +26,29 @@
     <div class="comment-form">
       <div class="form-content">
         <el-input
-          v-model="commentContent"
-          :maxlength="1000"
-          :rows="3"
-          placeholder="发一条友善的评论"
-          resize="none"
-          show-word-limit
-          type="textarea"
+            v-model="commentContent"
+            :maxlength="1000"
+            :rows="3"
+            placeholder="发一条友善的评论"
+            resize="none"
+            show-word-limit
+            type="textarea"
         />
         <div class="form-footer">
           <!-- 已登录时显示的按钮 -->
           <el-button
-            v-if="isLoggedIn"
-            :disabled="!commentContent.trim()"
-            type="primary"
-            @click="submitComment"
+              v-if="isLoggedIn"
+              :disabled="!commentContent.trim()"
+              type="primary"
+              @click="submitComment"
           >
             发布
           </el-button>
           <!-- 未登录时显示的按钮 -->
           <el-button
-            v-else
-            type="primary"
-            @click="showLoginTip"
+              v-else
+              type="primary"
+              @click="showLoginTip"
           >
             登录后发布
           </el-button>
@@ -63,7 +63,7 @@
         <!-- 评论主体 -->
         <div :id="`comment-${comment.id}`" class="comment-item">
           <div class="comment-main">
-            <el-avatar :size="40" :src="comment.userInfo.avatar"  class="user-avatar">
+            <el-avatar :size="40" :src="comment.userInfo.avatar" class="user-avatar">
               {{ comment.userInfo.nickname.charAt(0) }}
             </el-avatar>
 
@@ -71,10 +71,24 @@
               <!-- 用户信息和时间 -->
               <div class="comment-header">
                 <div class="user-info">
-                  <span :class="{'is-author': comment.isAuthor === 1}" class="username">
-                    {{ comment.isAuthor === 1 ? '我' : comment.userInfo.nickname }}
+                  <router-link 
+                    v-if="comment.isAuthor !== 1" 
+                    :class="{'is-author': comment.isAuthor === 1}"
+                    :to="`/userProfile/${comment.userInfo.username}`"
+                    class="username username-link"
+                  >
+                    {{ comment.userInfo.nickname }}
+                  </router-link>
+                  <span 
+                    v-else 
+                    :class="{'is-author': comment.isAuthor === 1}" 
+                    class="username"
+                  >
+                    我
                   </span>
-                  <el-tag v-if="comment.isAuthor === 1" class="author-tag" effect="plain" size="small" type="primary">作者</el-tag>
+                  <el-tag v-if="comment.isAuthor === 1" class="author-tag" effect="plain" size="small" type="primary">
+                    作者
+                  </el-tag>
                 </div>
                 <span class="comment-time">{{ formatTime(comment.createTime) }}</span>
               </div>
@@ -85,18 +99,24 @@
               <!-- 操作栏 -->
               <div class="comment-actions">
                 <div :class="{'is-active': comment.isLike === 1}" class="action-btn" @click="handleLike(comment.id)">
-                  <el-icon><thumb-up-icon :active="comment.isLike === 1" /></el-icon>
+                  <el-icon>
+                    <thumb-up-icon :active="comment.isLike === 1"/>
+                  </el-icon>
                   <span>{{ comment.likeCount > 0 ? comment.likeCount : '' }}</span>
                 </div>
 
                 <div class="action-btn" @click="handleReply(comment.id)">
-                  <el-icon><chat-line-round /></el-icon>
+                  <el-icon>
+                    <chat-line-round/>
+                  </el-icon>
                   <span>回复</span>
                 </div>
 
                 <el-dropdown v-if="comment.isAuthor === 1" trigger="click">
                   <div class="action-btn">
-                    <el-icon><more-filled /></el-icon>
+                    <el-icon>
+                      <more-filled/>
+                    </el-icon>
                   </div>
                   <template #dropdown>
                     <el-dropdown-menu>
@@ -109,20 +129,20 @@
               <!-- 回复表单 -->
               <div v-if="replyToId === comment.id && replyToSubId === null" class="reply-form">
                 <el-input
-                  v-model="replyContent"
-                  :maxlength="500"
-                  :placeholder="`回复 @${comment.userInfo.nickname}:`"
-                  :rows="2"
-                  show-word-limit
-                  type="textarea"
+                    v-model="replyContent"
+                    :maxlength="500"
+                    :placeholder="`回复 @${comment.userInfo.nickname}:`"
+                    :rows="2"
+                    show-word-limit
+                    type="textarea"
                 />
                 <div class="form-actions">
                   <el-button text @click="cancelReply">取消</el-button>
                   <el-button
-                    :disabled="!replyContent.trim()"
-                    size="small"
-                    type="primary"
-                    @click="submitReply(comment.id, comment.userInfo.id)"
+                      :disabled="!replyContent.trim()"
+                      size="small"
+                      type="primary"
+                      @click="submitReply(comment.id, comment.userInfo.id)"
                   >
                     回复
                   </el-button>
@@ -136,17 +156,31 @@
         <div v-if="comment.replies && comment.replies.length" class="replies-container">
           <!-- 显示的回复 -->
           <div v-for="reply in getAllReplies(comment)" :id="`comment-${reply.id}`" :key="reply.id" class="reply-item">
-            <el-avatar :size="32" :src="reply.userInfo.avatar" class="user-avatar" >
-                {{ reply.userInfo.nickname.charAt(0) }}
+            <el-avatar :size="32" :src="reply.userInfo.avatar" class="user-avatar">
+              {{ reply.userInfo.nickname.charAt(0) }}
             </el-avatar>
 
             <div class="reply-content">
               <div class="reply-header">
                 <div class="user-info">
-                  <span :class="{'is-author': reply.isAuthor === 1}" class="username">
-                    {{ reply.isAuthor === 1 ? '我' : reply.userInfo.nickname }}
+                  <router-link 
+                    v-if="reply.isAuthor !== 1" 
+                    :class="{'is-author': reply.isAuthor === 1}"
+                    :to="`/userProfile/${reply.userInfo.username}`"
+                    class="username username-link"
+                  >
+                    {{ reply.userInfo.nickname }}
+                  </router-link>
+                  <span 
+                    v-else 
+                    :class="{'is-author': reply.isAuthor === 1}" 
+                    class="username"
+                  >
+                    我
                   </span>
-                  <el-tag v-if="reply.isAuthor === 1" class="author-tag" effect="plain" size="small" type="primary">作者</el-tag>
+                  <el-tag v-if="reply.isAuthor === 1" class="author-tag" effect="plain" size="small" type="primary">
+                    作者
+                  </el-tag>
                 </div>
                 <span class="reply-time">{{ formatTime(reply.createTime) }}</span>
               </div>
@@ -154,7 +188,16 @@
               <!-- 回复对象 -->
               <p class="reply-reference">
                 回复
+                <router-link 
+                  v-if="reply.replyToUser && reply.replyToUser.isAuthor !== 1"
+                  :class="{'is-author': reply.replyToUser?.isAuthor === 1}"
+                  :to="`/userProfile/${getReplyToUsername(reply, comment)}`"
+                  class="reply-target reply-target-link"
+                >
+                  @{{ reply.replyToUser.nickname }}
+                </router-link>
                 <span
+                  v-else
                   :class="{'is-author': reply.replyToUser?.isAuthor === 1}"
                   class="reply-target"
                 >
@@ -169,18 +212,24 @@
               <!-- 回复操作栏 -->
               <div class="reply-actions">
                 <div :class="{'is-active': reply.isLike === 1}" class="action-btn" @click="handleLike(reply.id)">
-                  <el-icon><thumb-up-icon :active="reply.isLike === 1" /></el-icon>
+                  <el-icon>
+                    <thumb-up-icon :active="reply.isLike === 1"/>
+                  </el-icon>
                   <span>{{ reply.likeCount > 0 ? reply.likeCount : '' }}</span>
                 </div>
 
                 <div class="action-btn" @click="handleReply(comment.id, reply.id, reply.userInfo.id)">
-                  <el-icon><chat-line-round /></el-icon>
+                  <el-icon>
+                    <chat-line-round/>
+                  </el-icon>
                   <span>回复</span>
                 </div>
 
                 <el-dropdown v-if="reply.isAuthor === 1">
                   <div class="action-btn">
-                    <el-icon><more-filled /></el-icon>
+                    <el-icon>
+                      <more-filled/>
+                    </el-icon>
                   </div>
                   <template #dropdown>
                     <el-dropdown-menu>
@@ -193,20 +242,20 @@
               <!-- 嵌套回复表单 -->
               <div v-if="replyToId === comment.id && replyToSubId === reply.id" class="reply-form">
                 <el-input
-                  v-model="replyContent"
-                  :maxlength="500"
-                  :placeholder="`回复 @${reply.userInfo.nickname}:`"
-                  :rows="2"
-                  show-word-limit
-                  type="textarea"
+                    v-model="replyContent"
+                    :maxlength="500"
+                    :placeholder="`回复 @${reply.userInfo.nickname}:`"
+                    :rows="2"
+                    show-word-limit
+                    type="textarea"
                 />
                 <div class="form-actions">
                   <el-button text @click="cancelReply">取消</el-button>
                   <el-button
-                    :disabled="!replyContent.trim()"
-                    size="small"
-                    type="primary"
-                    @click="submitReply(comment.id, reply.userInfo.id)"
+                      :disabled="!replyContent.trim()"
+                      size="small"
+                      type="primary"
+                      @click="submitReply(comment.id, reply.userInfo.id)"
                   >
                     回复
                   </el-button>
@@ -218,7 +267,9 @@
           <!-- 加载更多回复 -->
           <div v-if="commentHasMoreReplies(comment)" class="load-more-replies">
             <el-button link type="primary" @click="toggleRepliesExpand(comment.id)">
-              {{ expandedComments.includes(comment.id) ? '收起回复' : `查看更多回复(${comment.replies.length - initialRepliesShown})` }}
+              {{
+                expandedComments.includes(comment.id) ? '收起回复' : `查看更多回复(${comment.replies.length - initialRepliesShown})`
+              }}
             </el-button>
           </div>
         </div>
@@ -233,6 +284,19 @@
     <!-- 加载状态 -->
     <div v-if="loading" class="loading-container">
       <el-loading :fullscreen="false" text="加载中..."/>
+    </div>
+
+    <!-- 分页组件 -->
+    <div v-if="comments.length > 0 && totalPages > 1" class="pagination-container">
+      <el-pagination
+        v-model:current-page="currentPage"
+        :hide-on-single-page="false"
+        :page-size="pageSize"
+        :total="totalCount"
+        background
+        layout="prev, pager, next, jumper, total"
+        @current-change="handlePageChange"
+      />
     </div>
   </div>
 </template>
@@ -316,6 +380,11 @@ const currentPage = ref<number>(1);
 const pageSize = ref<number>(10);
 const initialRepliesShown = 3; // 初始展示的回复数量
 
+// 计算总页数
+const totalPages = computed(() => {
+  return Math.ceil(totalCount.value / pageSize.value);
+});
+
 // 排序选项
 const sortOptions = {
   newest: '最新',
@@ -336,7 +405,7 @@ const expandedComments = ref<number[]>([]);     // 已展开所有回复的评�
 // 防抖函数
 const debounce = (fn: Function, delay: number) => {
   let timer: number | null = null;
-  return function(...args: any[]) {
+  return function (...args: any[]) {
     if (timer) clearTimeout(timer);
     timer = setTimeout(() => {
       fn.apply(this, args);
@@ -379,6 +448,24 @@ const getCommentOwnerName = (comment: CommentType): string => {
   return comment.isAuthor === 1 ? '我' : comment.userInfo.nickname;
 };
 
+// 获取被回复用户的username
+const getReplyToUsername = (reply: ReplyType, parentComment: CommentType): string => {
+  if (reply.replyToUser) {
+    // 如果有replyToUser信息，需要从评论或回复中找到对应的username
+    // 先在父评论中查找
+    if (parentComment.userInfo.id === reply.replyToUser.id) {
+      return parentComment.userInfo.username;
+    }
+    // 再在回复列表中查找
+    const targetReply = parentComment.replies?.find(r => r.userInfo.id === reply.replyToUser!.id);
+    if (targetReply) {
+      return targetReply.userInfo.username;
+    }
+  }
+  // 如果找不到，返回父评论的username
+  return parentComment.userInfo.username;
+};
+
 // 获取问题ID
 const getQuestionId = (): string => {
   return route.params.questionId as string;
@@ -391,7 +478,7 @@ const handleReply = (commentId: number, replyId?: number, userId?: number): void
     ElMessage.warning('登录后才能回复评论');
     return;
   }
-  
+
   toggleReplyForm(commentId, replyId, userId);
 };
 
@@ -420,7 +507,7 @@ const cancelReply = (): void => {
 // 提交评论
 const submitComment = async (): Promise<void> => {
   if (!commentContent.value.trim()) return;
-  
+
   // 检查用户是否登录
   if (!isLoggedIn.value) {
     ElMessage.warning('登录后才能发表评论');
@@ -454,7 +541,7 @@ const submitComment = async (): Promise<void> => {
 // 提交回复
 const submitReply = async (commentId: number, userId: number): Promise<void> => {
   if (!replyContent.value.trim()) return;
-  
+
   // 检查用户是否登录
   if (!isLoggedIn.value) {
     ElMessage.warning('登录后才能回复评论');
@@ -542,7 +629,7 @@ const buildCommentTree = (commentList: any[]): CommentType[] => {
 
     // 添加属于当前顶级评论的回复
     rootComment.replies = repliesComments.filter(reply =>
-      reply.parentId === rootComment.id
+        reply.parentId === rootComment.id
     );
   });
 
@@ -575,7 +662,8 @@ const loadComments = async (refresh: boolean = false): Promise<void> => {
     if (refresh) {
       comments.value = commentTree;
     } else {
-      comments.value = [...comments.value, ...commentTree];
+      // 对于分页，直接替换评论列表，不追加
+      comments.value = commentTree;
     }
 
     // 更新总数
@@ -594,22 +682,33 @@ const handleSortChange = (sortType: SortType): void => {
   loadComments(true);
 };
 
+// 处理分页变更
+const handlePageChange = (page: number): void => {
+  currentPage.value = page;
+  loadComments(false); // 不要重置页码，使用false
+  // 滚动到评论区域顶部
+  const discussionElement = document.querySelector('.answer-discussion');
+  if (discussionElement) {
+    discussionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
+
 // 处理点赞
 const handleLikeWithoutDebounce = async (id: number): Promise<void> => {
   // 检查是否正在处理中
   if (likeDebounceMap.get(id)) {
     return;
   }
-  
+
   // 检查用户是否登录
   if (!isLoggedIn.value) {
     ElMessage.warning('登录后才能点赞');
     return;
   }
-  
+
   // 标记为处理中
   likeDebounceMap.set(id, true);
-  
+
   // 查找对应的评论或回复
   let target: any = null;
   let isReply = false;
@@ -671,7 +770,7 @@ const handleLikeWithoutDebounce = async (id: number): Promise<void> => {
       target.likeCount = Math.max(0, target.likeCount - 1);
     }
   }
-  
+
   // 处理完成，移除标记
   likeDebounceMap.set(id, false);
 };
@@ -837,6 +936,26 @@ watch(currentSort, (newValue) => {
   color: #23ade5; /* B站作者颜色 */
 }
 
+.username-link {
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.username-link:hover {
+  color: #409eff;
+  text-decoration: underline;
+}
+
+.reply-target-link {
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.reply-target-link:hover {
+  color: #409eff;
+  text-decoration: underline;
+}
+
 .author-tag {
   font-size: 12px;
   height: 18px;
@@ -991,5 +1110,20 @@ watch(currentSort, (newValue) => {
   justify-content: center;
   align-items: center;
   z-index: 10;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+  padding: 16px 0;
+  border-top: 1px solid #ebeef5;
+}
+
+.pagination-container .el-pagination {
+  --el-pagination-font-size: 14px;
+  --el-pagination-bg-color: #f5f7fa;
+  --el-pagination-text-color: #606266;
+  --el-pagination-border-radius: 4px;
 }
 </style>

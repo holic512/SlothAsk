@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.example.servicequestion.config.Redis.RedisConfig;
 import org.example.servicequestion.entity.QuestionComment;
+import org.example.servicequestion.entity.User;
 import org.example.servicequestion.entity.UserProfile;
 import org.example.servicequestion.feign.ServiceImageFeign;
 import org.example.servicequestion.user.questionComment.dto.CommentDTO;
@@ -20,6 +21,7 @@ import org.example.servicequestion.user.questionComment.dto.CommentQueryDTO;
 import org.example.servicequestion.user.questionComment.dto.UserInfoDTO;
 import org.example.servicequestion.user.questionComment.mapper.QCQuestionCommentLikeMapper;
 import org.example.servicequestion.user.questionComment.mapper.QCQuestionCommentMapper;
+import org.example.servicequestion.user.questionComment.mapper.QCUserMapper;
 import org.example.servicequestion.user.questionComment.mapper.QCUserProfileMapper;
 import org.example.servicequestion.user.questionComment.service.GetQuestionCommentService;
 import org.example.servicequestion.util.IdEncryptor;
@@ -37,6 +39,7 @@ public class GetQuestionCommentServiceImpl implements GetQuestionCommentService 
     private final static String VidKey = RedisConfig.getKey() + "Question:VId:";
     private final QCQuestionCommentMapper commentMapper;
     private final QCUserProfileMapper userProfileMapper;
+    private final QCUserMapper userMapper;
     private final RedisTemplate<String, Object> redisTemplate;
     private final QCQuestionCommentLikeMapper commentLikeMapper;
     private final ServiceImageFeign serviceImageFeign;
@@ -44,11 +47,13 @@ public class GetQuestionCommentServiceImpl implements GetQuestionCommentService 
     @Autowired
     public GetQuestionCommentServiceImpl(QCQuestionCommentMapper commentMapper,
                                          QCUserProfileMapper userProfileMapper,
+                                         QCUserMapper userMapper,
                                          RedisTemplate<String, Object> redisTemplate,
                                          QCQuestionCommentLikeMapper commentLikeMapper,
                                          ServiceImageFeign serviceImageFeign) {
         this.commentMapper = commentMapper;
         this.userProfileMapper = userProfileMapper;
+        this.userMapper = userMapper;
         this.redisTemplate = redisTemplate;
         this.commentLikeMapper = commentLikeMapper;
         this.serviceImageFeign = serviceImageFeign;
@@ -95,6 +100,9 @@ public class GetQuestionCommentServiceImpl implements GetQuestionCommentService 
 
         // 批量查询用户信息
         Map<Long, UserProfile> userProfileMap = getUserProfiles(userIds);
+        
+        // 批量查询用户基本信息（username）
+        Map<Long, User> userMap = getUserBasicInfo(userIds);
 
 
         Set<Long> likedCommentIdSet;
@@ -120,7 +128,7 @@ public class GetQuestionCommentServiceImpl implements GetQuestionCommentService 
 
         // 转换为DTO
         List<CommentDTO> commentDTOs = commentPage.getRecords().stream()
-                .map(comment -> convertToDTO(comment, userProfileMap, user_id, likedCommentIdSet))
+                .map(comment -> convertToDTO(comment, userProfileMap, userMap, user_id, likedCommentIdSet))
                 .collect(Collectors.toList());
 
         // 组装返回结果
@@ -174,11 +182,27 @@ public class GetQuestionCommentServiceImpl implements GetQuestionCommentService 
                 .collect(Collectors.toMap(UserProfile::getUserId, profile -> profile));
     }
 
+    private Map<Long, User> getUserBasicInfo(List<Long> userIds) {
+        if (userIds.isEmpty()) {
+            return Map.of();
+        }
+
+        // 查询用户基本信息
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
+                .in(User::getId, userIds)
+                .select(User::getId, User::getUsername);
+
+        List<User> users = userMapper.selectList(queryWrapper);
+
+        return users.stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+    }
+
 
     /**
      * 将评论实体转换为DTO
      */
-    private CommentDTO convertToDTO(QuestionComment comment, Map<Long, UserProfile> userProfileMap, Long user_id, Set<Long> likedCommentIdSet) {
+    private CommentDTO convertToDTO(QuestionComment comment, Map<Long, UserProfile> userProfileMap, Map<Long, User> userMap, Long user_id, Set<Long> likedCommentIdSet) {
         CommentDTO dto = new CommentDTO();
         dto.setId(comment.getId());
         dto.setContent(comment.getContent());
@@ -189,9 +213,13 @@ public class GetQuestionCommentServiceImpl implements GetQuestionCommentService 
         // 设置用户信息
         UserInfoDTO userInfo = new UserInfoDTO();
         UserProfile profile = userProfileMap.get(comment.getUserId());
+        User user = userMap.get(comment.getUserId());
         if (profile != null) {
             userInfo.setNickname(profile.getNickname());
             userInfo.setAvatar(profile.getAvatar());
+        }
+        if (user != null) {
+            userInfo.setUsername(user.getUsername());
         }
         dto.setUserInfo(userInfo);
 

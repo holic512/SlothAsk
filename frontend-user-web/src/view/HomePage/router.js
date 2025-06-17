@@ -213,7 +213,17 @@ export default [
                     import(
                         /* webpackChunkName: "privacy" */ './view/Terms/Privacy.vue'
                         )
-            }
+            },
+
+            // 我的主页
+            {
+                path: 'userProfile/:username',
+                name: 'userProfile',
+                component: () =>
+                    import(
+                        /* webpackChunkName: "privacy" */ './view/UserProfile/index.vue'
+                        )
+            },
         ]
     }
 ];

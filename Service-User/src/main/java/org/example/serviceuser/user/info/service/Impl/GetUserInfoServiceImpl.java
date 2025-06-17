@@ -9,34 +9,62 @@
  */
 package org.example.serviceuser.user.info.service.Impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.serviceuser.common.UserAvatarService;
+import org.example.serviceuser.config.Redis.RedisConstants;
 import org.example.serviceuser.entity.User;
 import org.example.serviceuser.entity.UserProfile;
-import org.example.serviceuser.feign.ServiceImageFeign;
 import org.example.serviceuser.user.info.dto.UserInfoDTO;
 import org.example.serviceuser.user.info.dto.UserProfileDTO;
 import org.example.serviceuser.user.info.mapper.UserInfoUserMapper;
 import org.example.serviceuser.user.info.mapper.UserInfoUserProfileMapper;
 import org.example.serviceuser.user.info.service.GetUserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class GetUserInfoServiceImpl implements GetUserInfoService {
 
-    @Autowired
-    private UserInfoUserMapper userMapper;
+    private final UserInfoUserMapper userMapper;
+    private final UserInfoUserProfileMapper userProfileMapper;
+    private final UserAvatarService userAvatarService;
+    private final StringRedisTemplate redisTemplate;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    private UserInfoUserProfileMapper userProfileMapper;
-
-    @Autowired
-    private ServiceImageFeign serviceImageFeign;
+    public GetUserInfoServiceImpl(UserAvatarService userAvatarService,
+                                  UserInfoUserMapper userMapper, 
+                                  UserInfoUserProfileMapper userProfileMapper,
+                                  StringRedisTemplate redisTemplate,
+                                  ObjectMapper objectMapper) {
+        this.userAvatarService = userAvatarService;
+        this.userMapper = userMapper;
+        this.userProfileMapper = userProfileMapper;
+        this.redisTemplate = redisTemplate;
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public UserInfoDTO getUserNameAndAvatar(Long userId) {
         // 参数校验
         if (userId == null) {
             return null;
+        }
+
+        // 尝试从缓存获取用户信息
+        String cacheKey = RedisConstants.User.USER_INFO_PREFIX + userId;
+        String cachedUserInfo = redisTemplate.opsForValue().get(cacheKey);
+        
+        if (StringUtils.hasText(cachedUserInfo)) {
+            try {
+                return objectMapper.readValue(cachedUserInfo, UserInfoDTO.class);
+            } catch (JsonProcessingException e) {
+                // 缓存解析失败，删除缓存并继续查询数据库
+                redisTemplate.delete(cacheKey);
+            }
         }
 
         // 获取用户信息
@@ -47,30 +75,38 @@ public class GetUserInfoServiceImpl implements GetUserInfoService {
 
         // 获取用户资料信息
         UserProfile userProfile = userProfileMapper.selectByUserId(userId);
+        
+        String username = user.getUsername();
+        String nickname;
+        String realAvatarUrl = null;
+        
         if (userProfile == null) {
-            // 如果没有资料信息，则返回用户名作为昵称
-            return new UserInfoDTO(user.getUsername(), null);
+            // 如果没有资料信息，则昵称使用用户名
+            nickname = username;
+        } else {
+            // 获取昵称，如果昵称为空则使用用户名
+            nickname = userProfile.getNickname();
+            if (nickname == null || nickname.trim().isEmpty()) {
+                nickname = username;
+            }
+            
+            // 获取头像的真实URL
+            String avatarUrl = userProfile.getAvatar();
+            realAvatarUrl = userAvatarService.getUserAvatar(avatarUrl);
         }
 
-        // 获取昵称，如果昵称为空则使用用户名
-        String nickname = userProfile.getNickname();
-        if (nickname == null || nickname.trim().isEmpty()) {
-            nickname = user.getUsername();
+        UserInfoDTO userInfoDTO = new UserInfoDTO(username, nickname, realAvatarUrl);
+        
+        // 将结果缓存到Redis
+        try {
+            String userInfoJson = objectMapper.writeValueAsString(userInfoDTO);
+            redisTemplate.opsForValue().set(cacheKey, userInfoJson, RedisConstants.User.getUserInfoTtlWithJitter());
+        } catch (JsonProcessingException e) {
+            // 缓存失败不影响业务逻辑，记录日志即可
+            System.err.println("Failed to cache user info for userId: " + userId + ", error: " + e.getMessage());
         }
 
-        // 获取头像URL
-        String avatarUrl = userProfile.getAvatar();
-
-        // 检查头像URL是否以#开头，如果是则调用图片服务获取真实URL
-        if (avatarUrl != null && avatarUrl.startsWith("#")) {
-            // 去掉开头的#号，获取文件名
-            String fileName = avatarUrl.substring(1);
-            // 调用图片服务获取预览URL
-            String realUrl = serviceImageFeign.getPreviewUrl(fileName);
-            avatarUrl = realUrl;
-        }
-
-        return new UserInfoDTO(nickname, avatarUrl);
+        return userInfoDTO;
     }
 
     @Override
@@ -86,18 +122,11 @@ public class GetUserInfoServiceImpl implements GetUserInfoService {
             return null;
         }
 
-        // 获取头像URL
+        // 获取头像的真实URL/当用户的头像存储在系统库的时候
         String avatarUrl = userProfile.getAvatar();
-
-        // 检查头像URL是否以#开头，如果是则调用图片服务获取真实URL
-        if (avatarUrl != null && avatarUrl.startsWith("#")) {
-            // 去掉开头的#号，获取文件名
-            String fileName = avatarUrl.substring(1);
-            // 调用图片服务获取预览URL
-            String realUrl = serviceImageFeign.getPreviewUrl(fileName);
-            userProfile.setAvatar(realUrl);
-        }
-
+        String realAvatarUrl = userAvatarService.getUserAvatar(avatarUrl);
+        userProfile.setAvatar(realAvatarUrl);
+        
         // 转换为DTO返回
         return UserProfileDTO.fromEntity(userProfile);
     }

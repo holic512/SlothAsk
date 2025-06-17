@@ -15,18 +15,27 @@ interface UserInfoResponse {
     status: number;
     message: string;
     data: {
+        username: string;
         nickname: string;
         avatar: string;
     }
 }
 
 /**
- * 获取用户昵称和头像信息
- * @returns Promise 返回包含用户昵称和头像的对象
+ * 获取用户基本信息（用户名、昵称、头像URL）
+ * @returns Promise 返回包含用户基本信息的对象
  */
-export const getUserNameAndAvatar = async (): Promise<UserInfoResponse> => {
+export const getUserBasicInfo = async (): Promise<UserInfoResponse> => {
     const response = await axios.get(
-        "service-user/user/info/UserNameAndAvtar"
+        "service-user/user/info/UserBasicInfo"
     );
     return response.data;
-}; 
+};
+
+/**
+ * @deprecated 请使用 getUserBasicInfo 替代
+ * 获取用户昵称和头像信息（保持向后兼容）
+ */
+export const getUserNameAndAvatar = async (): Promise<UserInfoResponse> => {
+    return getUserBasicInfo();
+};
