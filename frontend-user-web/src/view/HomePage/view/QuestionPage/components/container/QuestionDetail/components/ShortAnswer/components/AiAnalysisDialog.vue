@@ -4,7 +4,7 @@
     :before-close="handleClose"
     class="ai-analysis-dialog"
     title="AI 详细解析"
-    width="60%"
+    width="35%"
   >
     <div class="dialog-content">
       <div class="analysis-header">
@@ -26,21 +26,21 @@
       </div>
       
       <div class="analysis-footer">
-        <div class="review-time">
-          <i class="el-icon-time"></i>
-          <span>分析时间：{{ formatTime(aiAnalysis.reviewTime) }}</span>
+        <div class="footer-info">
+          <div class="review-time">
+            <i class="el-icon-time"></i>
+            <span>分析时间：{{ formatTime(aiAnalysis.reviewTime) }}</span>
+          </div>
+          <div class="ai-source">
+            <i class="el-icon-cpu"></i>
+            <span>来源模型：{{ aiAnalysis.aiSource }}</span>
+          </div>
         </div>
       </div>
     </div>
     
     <template #footer>
       <div class="dialog-footer">
-        <el-button 
-          :loading="isReAnalyzing"
-          @click="requestReAnalysis"
-        >
-          重新分析
-        </el-button>
         <el-button type="primary" @click="handleClose">
           关闭
         </el-button>
@@ -52,13 +52,13 @@
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
 import DOMPurify from 'dompurify'
-import {ElMessage} from 'element-plus'
 
 // TypeScript 接口定义
 interface AiAnalysis {
   accuracy: number
   analysis: string
   reviewTime: string
+  aiSource: string
 }
 
 const props = defineProps<{
@@ -87,19 +87,6 @@ const sanitizedAnalysis = computed(() =>
 // 方法
 const handleClose = () => {
   visible.value = false
-}
-
-const requestReAnalysis = async () => {
-  isReAnalyzing.value = true
-  try {
-    emit('reAnalysis')
-    await new Promise(resolve => setTimeout(resolve, 1000)) // 等待父组件处理
-    ElMessage.success('重新分析完成')
-  } catch (error) {
-    ElMessage.error('重新分析失败')
-  } finally {
-    isReAnalyzing.value = false
-  }
 }
 
 const formatTime = (timeStr: string) => {
@@ -279,7 +266,16 @@ const formatTime = (timeStr: string) => {
   border-top: 1px solid #f0f0f0;
 }
 
-.review-time {
+.footer-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.review-time,
+.ai-source {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -287,8 +283,17 @@ const formatTime = (timeStr: string) => {
   font-size: 0.9rem;
 }
 
-.review-time i {
+.review-time i,
+.ai-source i {
   color: #c0c4cc;
+}
+
+.ai-source {
+  color: #606266;
+}
+
+.ai-source i {
+  color: #409eff;
 }
 
 .dialog-footer {
@@ -315,6 +320,12 @@ const formatTime = (timeStr: string) => {
   .accuracy-display {
     width: 100%;
     justify-content: space-between;
+  }
+  
+  .footer-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
   }
   
   .dialog-footer {

@@ -2,7 +2,9 @@
 <module type="WEB_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
-    <content url="file://$MODULE_DIR$/frontend-admin-web" />
+    <content url="file://$MODULE_DIR$/frontend-admin-web">
+      <excludeFolder url="file://$MODULE_DIR$/frontend-admin-web/dist" />
+    </content>
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

@@ -571,27 +571,24 @@ CREATE TABLE `user_question_record`
   ROW_FORMAT = Dynamic;
 
 
--- ----------------------------
--- Table structure for user_answer_ai_analysis
--- ----------------------------
 DROP TABLE IF EXISTS `user_answer_ai_analysis`;
 CREATE TABLE `user_answer_ai_analysis`
 (
-    `id`               bigint                                                NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `record_id`        bigint                                                NOT NULL COMMENT '答题记录ID（外键）',
-    `accuracy_rate`    decimal(5, 2)                                         NOT NULL COMMENT 'AI判定的准确率（0~100%，保留两位小数）',
-    `ai_explanation`   text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'AI生成的解析内容',
-    `create_time`      datetime                                              NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`      datetime                                              NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `id`             bigint                                                        NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `record_id`      bigint                                                        NOT NULL COMMENT '答题记录ID（外键）',
+    `accuracy_rate`  tinyint UNSIGNED                                              NOT NULL COMMENT 'AI判定的准确率（0~100 的整数）',
+    `ai_explanation` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci         NOT NULL COMMENT 'AI生成的解析内容',
+    `ai_source`      varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'AI来源模型，如 deepseek R1 7B',
+    `is_deleted`     tinyint(1)                                                    NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除，1-已删除（伪删除）',
+    `create_time`    datetime                                                      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`    datetime                                                      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE KEY `uk_record_id` (`record_id`) USING BTREE,  -- 一条答题记录最多对应一条AI分析
     CONSTRAINT `fk_ai_analysis_record` FOREIGN KEY (`record_id`) REFERENCES `user_question_record` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_general_ci COMMENT = '用户答案AI分析表'
   ROW_FORMAT = Dynamic;
-
 
 
 -- ----------------------------

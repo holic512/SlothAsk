@@ -84,6 +84,7 @@ import AiAnalysisSection from './AiAnalysisSection.vue'
 import {type AnswerRecordResponse, ApiGetAnswerRecord} from '../../../../../../service/ApiGetAnswerRecord'
 import {ApiSaveAnswer, type SaveAnswerRequest} from '../../../../../../service/ApiSaveAnswer'
 import {ApiSubmitAnswer, type SubmitAnswerRequest} from '../../../../../../service/ApiSubmitAnswer'
+import {ApiRetryAnswer, type RetryAnswerRequest} from '../../../../../../service/ApiRetryAnswer'
 
 // TypeScript 接口定义
 interface UserAnswer {
@@ -244,20 +245,37 @@ const reAnswerQuestion = async () => {
       type: 'warning'
     })
 
+    if (!userAnswer.value?.id) {
+      ElMessage.error('无法获取答案ID，请刷新页面重试')
+      return
+    }
+
     isReAnswering.value = true
 
-    // 模拟重置过程
-    await new Promise(resolve => setTimeout(resolve, 800))
+    // 调用重新回答API
+    const retryRequest: RetryAnswerRequest = {
+      answerId: parseInt(userAnswer.value.id)
+    }
 
-    // 重置到未提交状态
-    userAnswer.value = null
-    currentAnswer.value = ''
-    hasUnsavedChanges.value = false
-    currentAnswerId.value = null
+    const response = await ApiRetryAnswer(retryRequest)
 
-    ElMessage.success('已重置，可以重新回答')
-  } catch (error) {
+    if (response.status === 200) {
+      // 保存原答案内容
+      const originalAnswer = userAnswer.value.content
+      
+      // 重置到未提交状态，但保留答案内容
+      userAnswer.value = null
+      currentAnswer.value = originalAnswer
+      hasUnsavedChanges.value = false
+      currentAnswerId.value = null
+
+      ElMessage.success('已重置，可以重新回答')
+    } else {
+      ElMessage.error(response.message || '重置失败，请重试')
+    }
+  } catch (error: any) {
     if (error !== 'cancel') {
+      console.error('重新回答失败:', error)
       ElMessage.error('重置失败，请重试')
     }
   } finally {

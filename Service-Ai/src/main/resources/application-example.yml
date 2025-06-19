@@ -1,0 +1,13 @@
+# SiliconFlow AI服务配置示例
+# 请将此文件复制为 application.yml 或 application.properties 并填入真实的API密钥
+
+siliconflow:
+  api:
+    # 从 https://cloud.siliconflow.cn/ 获取您的API密钥
+    key: "your-api-key-here"
+    # API端点URL（通常不需要修改）
+    url: "https://api.siliconflow.cn/v1/chat/completions"
+
+# 如果使用 application.properties 格式，请使用以下配置：
+# siliconflow.api.key=your-api-key-here
+# siliconflow.api.url=https://api.siliconflow.cn/v1/chat/completions

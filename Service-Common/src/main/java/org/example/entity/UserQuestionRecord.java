@@ -1,11 +1,11 @@
 /**
- * File Name: UserAnswerAiAnalysis.java
- * Description: 用户答案AI分析实体类
+ * File Name: UserQuestionRecord.java
+ * Description: 用户答题记录实体类
  * Author: holic512
  * Created Date: 2025-06-17
  * Version: 1.0
  */
-package org.example.servicequestion.entity;
+package org.example.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
@@ -13,20 +13,23 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("user_answer_ai_analysis")
-public class UserAnswerAiAnalysis {
+@TableName("user_question_record")
+public class UserQuestionRecord {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @TableField("record_id")
-    private Long recordId;
+    @TableField("user_id")
+    private Long userId;
 
-    @TableField("accuracy_rate")
-    private Double accuracyRate;
+    @TableField("question_id")
+    private Long questionId;
 
-    @TableField("ai_explanation")
-    private String aiExplanation;
+    @TableField("user_answer")
+    private String userAnswer;
+
+    @TableField("is_submitted")
+    private Integer isSubmitted;
 
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
