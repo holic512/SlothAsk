@@ -7,7 +7,7 @@
  * Usage:
  * Todo
  */
-package org.example.serviceuser.config.ApiResponse;
+package org.example.servicecommon.ApiResponse;
 
 import lombok.Data;
 

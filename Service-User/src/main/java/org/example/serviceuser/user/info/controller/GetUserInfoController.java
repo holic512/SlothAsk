@@ -9,7 +9,7 @@
  */
 package org.example.serviceuser.user.info.controller;
 
-import org.example.serviceuser.config.ApiResponse.ApiResponse;
+import org.example.servicecommon.ApiResponse.ApiResponse;
 import org.example.serviceuser.user.info.dto.UserInfoDTO;
 import org.example.serviceuser.user.info.dto.UserProfileDTO;
 import org.example.serviceuser.user.info.service.GetUserInfoService;

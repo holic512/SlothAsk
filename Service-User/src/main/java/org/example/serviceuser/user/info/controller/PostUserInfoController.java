@@ -9,9 +9,8 @@
  */
 package org.example.serviceuser.user.info.controller;
 
-import org.example.serviceuser.config.ApiResponse.ApiResponse;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("user/info")

@@ -9,9 +9,9 @@
 package org.example.serviceuser.admin.controller;
 
 import jakarta.validation.constraints.Min;
+import org.example.servicecommon.ApiResponse.ApiResponse;
 import org.example.serviceuser.admin.request.BatchDeleteRequest;
 import org.example.serviceuser.admin.service.DeleteUserAdminService;
-import org.example.serviceuser.config.ApiResponse.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

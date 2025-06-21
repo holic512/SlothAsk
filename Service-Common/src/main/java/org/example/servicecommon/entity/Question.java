@@ -5,7 +5,7 @@
  * Created Date: 2024-03-21
  * Version: 1.0
  */
-package org.example.entity;
+package org.example.servicecommon.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;

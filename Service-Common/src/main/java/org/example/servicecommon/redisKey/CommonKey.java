@@ -7,7 +7,7 @@
  * Usage:
  * Todo
  */
-package org.example.redisKey;
+package org.example.servicecommon.redisKey;
 
 public class CommonKey {
     public static final String KEY = "SlothAsk:";

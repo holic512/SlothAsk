@@ -7,7 +7,7 @@
  * Usage:
  * 配置MyBatis-Plus分页拦截器，为系统提供高效的分页查询功能，支持用户个人资料、评论和收藏问题的分页展示
  */
-package org.example.serviceuser.config;
+package org.example.serviceuser.config.MyBatis;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;

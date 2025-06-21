@@ -10,7 +10,7 @@
 package org.example.servicequestion.user.aiAnalysis.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.example.entity.UserAnswerAiAnalysis;
+import org.example.servicecommon.entity.UserAnswerAiAnalysis;
 import org.example.servicequestion.config.Redis.RedisKey;
 import org.example.servicequestion.entity.UserQuestionRecord;
 import org.example.servicequestion.user.aiAnalysis.enums.GetAiAnalysisEnum;

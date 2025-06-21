@@ -10,7 +10,7 @@
 package org.example.servicequestion.user.aiAnalysis.service;
 
 import lombok.Getter;
-import org.example.entity.UserAnswerAiAnalysis;
+import org.example.servicecommon.entity.UserAnswerAiAnalysis;
 import org.example.servicequestion.user.aiAnalysis.enums.GetAiAnalysisEnum;
 
 public interface GetAiAnalysisService {

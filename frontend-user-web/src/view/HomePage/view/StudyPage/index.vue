@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Category from './components/RecommendCategory.vue'
 import Question from './components/Question.vue'
-import Sidebar from './components/Sidebar.vue'
+import Sidebar from './components/Sidebar/index.vue'
 import {onMounted} from 'vue';
 import {setTitle} from '@/utils/title';
 import RightBox from "@/view/HomePage/components/RightBox.vue";
@@ -26,9 +26,7 @@ onMounted(() => {
 
       <!--  右边  -->
       <div class="side-container">
-        <div class="side-content">
-          <Sidebar/>
-        </div>
+        <Sidebar/>
       </div>
     </div>
   </div>
@@ -42,7 +40,7 @@ onMounted(() => {
   max-width: 1400px;
   padding: 0 16px;
   /* 添加底部边距，防止内容被FooterMenu覆盖 */
-  margin: 20px auto 40px;
+  margin: 30px auto 40px;
   box-sizing: border-box;
 
   overflow-x: hidden;
@@ -75,18 +73,9 @@ onMounted(() => {
 }
 
 .side-container {
-  width: 300px;
+  width: 320px;
   flex-shrink: 0;
 }
-
-.side-content {
-  background-color: #fff;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border: 1px solid #eee;
-}
-
 
 @media (max-width: 1300px) {
   .side-container {

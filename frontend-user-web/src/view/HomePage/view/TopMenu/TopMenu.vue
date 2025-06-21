@@ -55,9 +55,7 @@ const fetchUserInfo = async () => {
         response.data.nickname,
         response.data.avatar
       );
-      // 同时更新Session中的昵称和头像（保持兼容性）
-      userSession.updateUserInfo(response.data.nickname, response.data.avatar);
-      return 200;
+         return 200;
     }
   } catch (error) {
     console.error('获取用户信息失败:', error);

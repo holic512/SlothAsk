@@ -9,7 +9,8 @@
  */
 package org.example.serviceuser.user.sign.controller;
 
-import org.example.serviceuser.config.ApiResponse.ApiResponse;
+import jakarta.validation.Valid;
+import org.example.servicecommon.ApiResponse.ApiResponse;
 import org.example.serviceuser.user.sign.enums.PostUserSignEnum;
 import org.example.serviceuser.user.sign.request.PasswordLoginRequest;
 import org.example.serviceuser.user.sign.request.RegisterRequest;
@@ -17,13 +18,7 @@ import org.example.serviceuser.user.sign.request.VerifySignVerificationCodeReque
 import org.example.serviceuser.user.sign.service.PostUserSignService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 用户登录注册控制器

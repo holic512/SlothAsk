@@ -9,14 +9,12 @@
  */
 package org.example.serviceuser.user.captcha;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.example.serviceuser.config.ApiResponse.ApiResponse;
-import org.example.serviceuser.util.SliderCaptchaGenerator.SliderCaptchaGenerator;
+import org.example.servicecommon.ApiResponse.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("user/captcha")

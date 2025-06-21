@@ -3,15 +3,9 @@ import {ref} from 'vue';
 
 // 定义用户会话的类型
 interface Session {
-    userId?: string;
     token?: string;
-    email?: string;
-    nickname?: string;
-    avatar?: string;
-
-    [key: string]: any; // 允许额外的字段
 }
-
+// 用来存储用户的 token 信息 以及检测用户是否登录 都靠这个
 export const useSessionStore = defineStore('Session', () => {
     // 使用 `ref` 创建响应式 session
     const userSession = ref<Session>({});
@@ -26,11 +20,6 @@ export const useSessionStore = defineStore('Session', () => {
         userSession.value = newSession;
     };
 
-    // 更新用户信息
-    const updateUserInfo = (nickname: string, avatar: string) => {
-        userSession.value.nickname = nickname;
-        userSession.value.avatar = avatar;
-    };
 
     // 清除 session
     const clearSession = () => {
@@ -41,7 +30,6 @@ export const useSessionStore = defineStore('Session', () => {
         userSession,
         getSession,
         setSession,
-        updateUserInfo,
         clearSession
     };
 },{

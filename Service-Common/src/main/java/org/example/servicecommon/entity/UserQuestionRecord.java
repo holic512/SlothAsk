@@ -5,7 +5,7 @@
  * Created Date: 2025-06-17
  * Version: 1.0
  */
-package org.example.entity;
+package org.example.servicecommon.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;

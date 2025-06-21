@@ -8,13 +8,11 @@
  */
 package org.example.serviceuser.admin.service.impl;
 
-import org.example.serviceuser.admin.dto.UserDto;
 import org.example.serviceuser.admin.enums.PutUserAdminEnum;
 import org.example.serviceuser.admin.mapper.AdminUserMapper;
 import org.example.serviceuser.admin.mapper.AdminUserProfileMapper;
 import org.example.serviceuser.admin.request.UpdateUserRequest;
 import org.example.serviceuser.admin.service.PutUserAdminService;
-import org.example.serviceuser.config.ApiResponse.ApiResponse;
 import org.example.serviceuser.entity.User;
 import org.example.serviceuser.entity.UserProfile;
 import org.example.serviceuser.util.SCryptUtil;

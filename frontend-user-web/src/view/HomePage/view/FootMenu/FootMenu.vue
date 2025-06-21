@@ -9,30 +9,34 @@
             <p class="logo-text-large">SlothAsk</p>
           </div>
         </div>
-        <a class="privacy-link" href="#">隐私政策</a>
+        <div class="policy-links">
+          <a class="privacy-link" href="/privacy">隐私政策</a>
+          <span class="separator">|</span>
+          <a class="privacy-link" href="/terms">用户协议</a>
+        </div>
         <p class="copyright-text">
-          Copyright © 2025 Adventure.com | Copyright © 2025 Adventure.com, LLC
+          Copyright © 2025 sloth.online | Copyright © 2025 sloth.online, LLC
         </p>
       </div>
 
       <div class="footer-links">
         <div class="link-group">
-          <a href="#">首页</a>
-          <a href="#">关于我们</a>
-          <a href="#">作者团队</a>
+          <span class="disabled-link">首页</span>
+          <span class="disabled-link">关于我们</span>
+          <span class="disabled-link">作者团队</span>
         </div>
         <div class="link-group">
-          <a href="#">投稿指南</a>
-          <a href="#">编辑标准</a>
-          <a href="#">可持续发展</a>
+          <span class="disabled-link">投稿指南</span>
+          <span class="disabled-link">编辑标准</span>
+          <span class="disabled-link">可持续发展</span>
         </div>
         <div class="link-group">
-          <a href="#">联系我们</a>
-          <a href="#">订阅邮件</a>
+          <span class="disabled-link">联系我们</span>
+          <span class="disabled-link">订阅邮件</span>
         </div>
         <div class="link-group">
-          <a href="#">爱心支持</a>
-          <a href="#">站内搜索</a>
+          <span class="disabled-link">爱心支持</span>
+          <span class="disabled-link">站内搜索</span>
         </div>
       </div>
     </div>
@@ -117,6 +121,12 @@ export default {
   margin-bottom: 0;
 }
 
+.policy-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .privacy-link {
   font-size: 0.75rem;
   font-weight: 600;
@@ -126,6 +136,11 @@ export default {
 
 .privacy-link:hover {
   text-decoration: underline;
+}
+
+.separator {
+  color: #a8b2b9;
+  font-size: 0.75rem;
 }
 
 .copyright-text {
@@ -163,6 +178,13 @@ export default {
 
 .link-group a:hover {
   text-decoration: underline;
+}
+
+.disabled-link {
+  color: #6c757d;
+  font-size: clamp(0.75rem, 0.9vw, 0.9rem);
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 @media (max-width: 480px) {

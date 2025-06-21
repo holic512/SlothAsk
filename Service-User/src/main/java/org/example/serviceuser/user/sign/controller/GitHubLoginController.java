@@ -12,7 +12,7 @@ package org.example.serviceuser.user.sign.controller;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.serviceuser.config.ApiResponse.ApiResponse;
+import org.example.servicecommon.ApiResponse.ApiResponse;
 import org.example.serviceuser.user.sign.dto.GitHubUserDTO;
 import org.example.serviceuser.user.sign.enums.PostUserSignEnum;
 import org.example.serviceuser.user.sign.exception.GitHubAuthException;

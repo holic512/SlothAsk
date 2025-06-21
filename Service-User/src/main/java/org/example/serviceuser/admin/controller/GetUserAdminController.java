@@ -8,9 +8,9 @@
  */
 package org.example.serviceuser.admin.controller;
 
+import org.example.servicecommon.ApiResponse.ApiResponse;
 import org.example.serviceuser.admin.dto.PageDto;
 import org.example.serviceuser.admin.service.GetUserAdminService;
-import org.example.serviceuser.config.ApiResponse.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

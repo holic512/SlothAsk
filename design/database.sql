@@ -613,29 +613,24 @@ CREATE TABLE `user_question_stats`
   COLLATE = utf8mb4_general_ci COMMENT = '用户刷题统计表'
   ROW_FORMAT = Dynamic;
 
--- ----------------------------
--- Table structure for user_sign_in
--- ----------------------------
-DROP TABLE IF EXISTS `user_sign_in`;
 CREATE TABLE `user_sign_in`
 (
-    `id`              bigint                                                       NOT NULL AUTO_INCREMENT COMMENT '签到ID',
-    `user_id`         bigint                                                       NOT NULL COMMENT '用户ID',
-    `sign_date`       date                                                         NOT NULL COMMENT '签到日期',
-    `sign_time`       datetime                                                     NOT NULL COMMENT '具体签到时间',
-    `sign_ip`         varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '签到IP地址',
-    `continuous_days` int                                                          NOT NULL DEFAULT 1 COMMENT '连续签到天数',
-    `points_earned`   int                                                          NOT NULL DEFAULT 0 COMMENT '获得积分',
-    `create_time`     datetime                                                     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`     datetime                                                     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `id`          BIGINT                                                       NOT NULL AUTO_INCREMENT COMMENT '签到ID',
+    `user_id`     BIGINT                                                       NOT NULL COMMENT '用户ID',
+    `sign_date`   DATE                                                         NOT NULL COMMENT '签到日期',
+    `sign_time`   DATETIME                                                     NOT NULL COMMENT '具体签到时间',
+    `sign_ip`     VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '签到IP地址',
+    `create_time` DATETIME                                                     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME                                                     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE INDEX `idx_user_date` (`user_id` ASC, `sign_date` ASC) USING BTREE,
-    INDEX `idx_date` (`sign_date` ASC) USING BTREE,
-    INDEX `idx_sign_time` (`sign_time` ASC) USING BTREE,
+    UNIQUE INDEX `idx_user_date` (`user_id`, `sign_date`) USING BTREE,
+    INDEX `idx_date` (`sign_date`) USING BTREE,
+    INDEX `idx_sign_time` (`sign_time`) USING BTREE,
     CONSTRAINT `fk_sign_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
 ) ENGINE = InnoDB
   CHARACTER SET = utf8mb4
-  COLLATE = utf8mb4_general_ci COMMENT = '签到记录表'
+  COLLATE = utf8mb4_general_ci
+    COMMENT = '签到记录表'
   ROW_FORMAT = Dynamic;
 
 -- ----------------------------

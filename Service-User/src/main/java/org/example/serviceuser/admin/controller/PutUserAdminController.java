@@ -9,14 +9,16 @@
 package org.example.serviceuser.admin.controller;
 
 import jakarta.validation.Valid;
-import org.example.serviceuser.admin.dto.UserDto;
+import org.example.servicecommon.ApiResponse.ApiResponse;
 import org.example.serviceuser.admin.enums.PutUserAdminEnum;
 import org.example.serviceuser.admin.request.UpdatePasswordRequest;
 import org.example.serviceuser.admin.request.UpdateUserRequest;
 import org.example.serviceuser.admin.service.PutUserAdminService;
-import org.example.serviceuser.config.ApiResponse.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/admin")

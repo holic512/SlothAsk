@@ -154,7 +154,7 @@ const closeCodeDialog = () => {
     <div class="auth-row">
       <div class="auth-info">
 
-        <img alt="" class="auth-icon" src="/AccountSetting/github-fill.png">
+        <img alt="" class="auth-icon" src="/HomePage/AccountSetting/github-fill.png">
 
         <div class="auth-details">
           <div class="auth-name">GitHub</div>
@@ -180,7 +180,7 @@ const closeCodeDialog = () => {
     <div class="auth-row disabled">
       <div class="auth-info">
 
-        <img alt="" class="auth-icon" src="/AccountSetting/wechat-fill.png">
+        <img alt="" class="auth-icon" src="/HomePage/AccountSetting/wechat-fill.png">
 
         <div class="auth-details">
           <div class="auth-name">微信</div>
@@ -195,7 +195,7 @@ const closeCodeDialog = () => {
     <!-- QQ绑定选项（暂不支持） -->
     <div class="auth-row disabled">
       <div class="auth-info">
-        <img alt="" class="auth-icon" src="/AccountSetting/QQ-square-fill.png">
+        <img alt="" class="auth-icon" src="/HomePage/AccountSetting/QQ-square-fill.png">
         <div class="auth-details">
           <div class="auth-name">QQ</div>
           <div class="auth-status">

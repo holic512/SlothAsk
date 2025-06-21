@@ -15,6 +15,7 @@ interface UserProfile {
     [key: string]: any; // 允许额外的字段
 }
 
+// 存储当前用户的 个人信息  仅用于数据展示 会 set一次 其他就调用这个就可以了
 export const useUserProfileStore = defineStore('UserProfile', () => {
     // 使用 `ref` 创建响应式用户个人信息
     const userProfile = ref<UserProfile>({});

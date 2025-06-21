@@ -10,7 +10,7 @@
 package org.example.serviceuser.user.account.controller;
 
 import jakarta.validation.Valid;
-import org.example.serviceuser.config.ApiResponse.ApiResponse;
+import org.example.servicecommon.ApiResponse.ApiResponse;
 import org.example.serviceuser.user.account.request.*;
 import org.example.serviceuser.user.account.service.PutUserAccountService;
 import org.example.serviceuser.util.PasswordValidator;

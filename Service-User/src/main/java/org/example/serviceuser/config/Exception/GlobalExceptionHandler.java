@@ -1,7 +1,7 @@
 package org.example.serviceuser.config.Exception;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.serviceuser.config.ApiResponse.ApiResponse;
+import org.example.servicecommon.ApiResponse.ApiResponse;
 import org.example.serviceuser.user.sign.exception.GitHubAuthException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;

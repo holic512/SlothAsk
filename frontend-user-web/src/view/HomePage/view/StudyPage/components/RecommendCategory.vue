@@ -183,32 +183,42 @@ const handleCategoryClick = (categoryId: number): void => {
 .category-item {
   display: flex;
   align-items: center;
-  padding: 12px;
+  padding: 16px;
   border-radius: 8px;
-  background: white;
-  border: 1px solid #eee;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   transition: all 0.1s ease;
   cursor: pointer;
-  box-shadow: none;
+  position: relative;
 }
 
 .category-item:hover {
-  transform: translateY(-2px);
+  background: #f8fafc;
+  border-color: #1890ff;
+}
+
+.category-item:active {
+  background: #f1f5f9;
 }
 
 .icon-wrapper {
   margin-right: 16px;
+  position: relative;
+  z-index: 1;
 }
 
 .recommend-category-icon{
   height: 72px;
   width: 72px;
-  border-radius: 4px;
+  border-radius: 6px;
+  transition: all 0.1s ease;
 }
 
 .content {
   flex: 1;
   min-width: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .category-item-title {
@@ -233,6 +243,8 @@ const handleCategoryClick = (categoryId: number): void => {
 /* 骨架屏样式 */
 .skeleton {
   pointer-events: none;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
 }
 
 .skeleton-img {

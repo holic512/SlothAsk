@@ -9,7 +9,7 @@
  */
 package org.example.serviceuser.user.account.controller;
 
-import org.example.serviceuser.config.ApiResponse.ApiResponse;
+import org.example.servicecommon.ApiResponse.ApiResponse;
 import org.example.serviceuser.user.account.dto.UserAccountDTO;
 import org.example.serviceuser.user.account.service.GetUserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;

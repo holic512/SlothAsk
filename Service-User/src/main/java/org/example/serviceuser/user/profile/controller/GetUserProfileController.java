@@ -10,7 +10,7 @@
 package org.example.serviceuser.user.profile.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.example.serviceuser.config.ApiResponse.ApiResponse;
+import org.example.servicecommon.ApiResponse.ApiResponse;
 import org.example.serviceuser.user.profile.dto.CommentDto;
 import org.example.serviceuser.user.profile.dto.FavQuestionItemDto;
 import org.example.serviceuser.user.profile.dto.UserProfileInfoDto;

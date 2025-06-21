@@ -9,10 +9,10 @@
 package org.example.serviceuser.admin.controller;
 
 import jakarta.validation.Valid;
+import org.example.servicecommon.ApiResponse.ApiResponse;
 import org.example.serviceuser.admin.enums.PostUserAdminEnum;
 import org.example.serviceuser.admin.request.AddUserRequest;
 import org.example.serviceuser.admin.service.PostUserAdminService;
-import org.example.serviceuser.config.ApiResponse.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

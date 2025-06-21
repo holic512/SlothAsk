@@ -11,7 +11,7 @@ package org.example.servicequestion.user.aiAnalysis.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
-import org.example.entity.UserAnswerAiAnalysis;
+import org.example.servicecommon.entity.UserAnswerAiAnalysis;
 
 @Mapper
 public interface AiAnalysisUAAiAnalysisMapper extends BaseMapper<UserAnswerAiAnalysis> {
