@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import Category from './components/RecommendCategory.vue'
-import Question from './components/Question.vue'
+import Category from './components/LeftBox/RecommendCategory.vue'
+import Question from './components/LeftBox/Question.vue'
 import Sidebar from './components/Sidebar/index.vue'
 import {onMounted} from 'vue';
 import {setTitle} from '@/utils/title';

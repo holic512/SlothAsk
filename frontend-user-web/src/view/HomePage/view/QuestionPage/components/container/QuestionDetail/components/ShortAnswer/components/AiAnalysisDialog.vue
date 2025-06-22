@@ -4,7 +4,7 @@
     :before-close="handleClose"
     class="ai-analysis-dialog"
     title="AI 详细解析"
-    width="35%"
+    width="45%"
   >
     <div class="dialog-content">
       <div class="analysis-header">

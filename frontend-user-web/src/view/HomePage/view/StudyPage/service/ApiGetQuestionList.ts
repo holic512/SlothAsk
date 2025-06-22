@@ -7,9 +7,13 @@ export const apiGetQuestionList = async (pagination: QuestionFilter) => {
         {
             params: {
                 searchText: pagination.searchText,
-                filterCategory: pagination.filterCategory,
-                filterType: pagination.filterType,
-                filterDifficulty: pagination.filterDifficulty,
+                matchAllConditions: pagination.matchAllConditions,
+                filterCategoryEquals: pagination.filterCategoryEquals,
+                filterCategoryNotEquals: pagination.filterCategoryNotEquals,
+                filterTypeEquals: pagination.filterTypeEquals,
+                filterTypeNotEquals: pagination.filterTypeNotEquals,
+                filterDifficultyEquals: pagination.filterDifficultyEquals,
+                filterDifficultyNotEquals: pagination.filterDifficultyNotEquals,
                 pageNum: pagination.pageNum,
                 filterTags: pagination.filterTags
             },
@@ -20,9 +24,12 @@ export const apiGetQuestionList = async (pagination: QuestionFilter) => {
                     if (params[key] === null || params[key] === undefined) continue;
                     
                     if (Array.isArray(params[key])) {
-                        params[key].forEach((value: any) => {
-                            queryParams.append(key, value);
-                        });
+                        // 只有当数组不为空时才添加参数
+                        if (params[key].length > 0) {
+                            params[key].forEach((value: any) => {
+                                queryParams.append(key, value);
+                            });
+                        }
                     } else {
                         queryParams.append(key, params[key]);
                     }

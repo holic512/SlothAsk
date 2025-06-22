@@ -87,12 +87,19 @@ public class GetUserStudyController {
 
     /**
      * 获取项目下符合过滤条件的题目列表
-     * 支持按分类、标签、类型、难度等条件过滤
+     * 支持按分类、标签、类型、难度等条件过滤，支持等于/不等于操作
+     * 支持条件匹配模式：全部满足(AND)或任一满足(OR)
      * 每页返回20条数据
      *
      * @param userId  用户ID,从请求头X-User-Id获取,可选
      * @param upcId   项目ID,从请求头X-Upc-Id获取,可选
-     * @param request 包含过滤条件的请求对象
+     * @param request 包含过滤条件的请求对象，支持以下筛选条件：
+     *                - matchAllConditions: 条件匹配模式，true=全部满足(AND)，false=任一满足(OR)
+     *                - filterCategoryEquals/NotEquals: 分类等于/不等于筛选
+     *                - filterTypeEquals/NotEquals: 类型等于/不等于筛选
+     *                - filterDifficultyEquals/NotEquals: 难度等于/不等于筛选
+     *                - filterTags: 标签筛选列表
+     *                - searchText: 关键词搜索
      * @return 包含分页题目列表的API响应
      */
     @GetMapping("/questionList")

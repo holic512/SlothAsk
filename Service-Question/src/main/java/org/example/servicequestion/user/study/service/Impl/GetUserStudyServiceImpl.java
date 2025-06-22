@@ -33,11 +33,13 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Service
@@ -187,19 +189,29 @@ public class GetUserStudyServiceImpl implements GetUserStudyService {
         cacheKeyBuilder.append(projectId != null ? projectId : "null")
                 .append(":")
                 .append(request.getPageNum())
-                .append(":");
+                .append(":")
+                .append("match:").append(request.getMatchAllConditions()).append(":");
         
         if (StringUtils.hasText(request.getSearchText())) {
             cacheKeyBuilder.append("st:").append(request.getSearchText()).append(":");
         }
-        if (request.getFilterCategory() != null) {
-            cacheKeyBuilder.append("fc:").append(request.getFilterCategory()).append(":");
+        if (request.getFilterCategoryEquals() != null) {
+            cacheKeyBuilder.append("fce:").append(request.getFilterCategoryEquals()).append(":");
         }
-        if (request.getFilterDifficulty() != null) {
-            cacheKeyBuilder.append("fd:").append(request.getFilterDifficulty()).append(":");
+        if (request.getFilterCategoryNotEquals() != null) {
+            cacheKeyBuilder.append("fcne:").append(request.getFilterCategoryNotEquals()).append(":");
         }
-        if (request.getFilterType() != null) {
-            cacheKeyBuilder.append("ft:").append(request.getFilterType()).append(":");
+        if (request.getFilterDifficultyEquals() != null) {
+            cacheKeyBuilder.append("fde:").append(request.getFilterDifficultyEquals()).append(":");
+        }
+        if (request.getFilterDifficultyNotEquals() != null) {
+            cacheKeyBuilder.append("fdne:").append(request.getFilterDifficultyNotEquals()).append(":");
+        }
+        if (request.getFilterTypeEquals() != null) {
+            cacheKeyBuilder.append("fte:").append(request.getFilterTypeEquals()).append(":");
+        }
+        if (request.getFilterTypeNotEquals() != null) {
+            cacheKeyBuilder.append("ftne:").append(request.getFilterTypeNotEquals()).append(":");
         }
         if (request.getFilterTags() != null && !request.getFilterTags().isEmpty()) {
             cacheKeyBuilder.append("tags:");
@@ -248,28 +260,67 @@ public class GetUserStudyServiceImpl implements GetUserStudyService {
             queryWrapper.select(allFields.toArray(new String[0]));
         }
 
+        // 构建筛选条件列表
+        List<Consumer<QueryWrapper<Question>>> conditions = new ArrayList<>();
+        
         // 如果关键字不为空，则在标题和内容中模糊搜索
         if (StringUtils.hasText(request.getSearchText())) {
-            queryWrapper.and(wrapper ->
-                    wrapper.like("title", request.getSearchText())
+            conditions.add(wrapper -> wrapper.and(w ->
+                    w.like("title", request.getSearchText())
                             .or().like("content", request.getSearchText())
-            );
+            ));
         }
 
-        if (request.getFilterCategory() != null) {
-            queryWrapper.eq("category_id", request.getFilterCategory());
+        // 分类过滤条件
+        if (request.getFilterCategoryEquals() != null) {
+            conditions.add(wrapper -> wrapper.eq("category_id", request.getFilterCategoryEquals()));
         }
-        if (request.getFilterDifficulty() != null) {
-            queryWrapper.eq("difficulty", request.getFilterDifficulty());
+        if (request.getFilterCategoryNotEquals() != null) {
+            conditions.add(wrapper -> wrapper.ne("category_id", request.getFilterCategoryNotEquals()));
         }
-        if (request.getFilterType() != null) {
-            queryWrapper.eq("type", request.getFilterType());
+        
+        // 难度过滤条件
+        if (request.getFilterDifficultyEquals() != null) {
+            conditions.add(wrapper -> wrapper.eq("difficulty", request.getFilterDifficultyEquals()));
+        }
+        if (request.getFilterDifficultyNotEquals() != null) {
+            conditions.add(wrapper -> wrapper.ne("difficulty", request.getFilterDifficultyNotEquals()));
+        }
+        
+        // 类型过滤条件
+        if (request.getFilterTypeEquals() != null) {
+            conditions.add(wrapper -> wrapper.eq("type", request.getFilterTypeEquals()));
+        }
+        if (request.getFilterTypeNotEquals() != null) {
+            conditions.add(wrapper -> wrapper.ne("type", request.getFilterTypeNotEquals()));
         }
 
         // 处理 tag_id 的 JSON 数组查询
         if (request.getFilterTags() != null && !request.getFilterTags().isEmpty()) {
-            for (Integer tag : request.getFilterTags()) {
-                queryWrapper.apply("JSON_CONTAINS(tag_category_ids, '" + tag + "')");
+            conditions.add(wrapper -> {
+                for (Integer tag : request.getFilterTags()) {
+                    wrapper.apply("JSON_CONTAINS(tag_category_ids, '" + tag + "')");
+                }
+            });
+        }
+        
+        // 根据匹配模式应用条件
+        if (!conditions.isEmpty()) {
+            if (request.getMatchAllConditions()) {
+                // 全部满足模式 (AND)
+                for (Consumer<QueryWrapper<Question>> condition : conditions) {
+                    condition.accept(queryWrapper);
+                }
+            } else {
+                // 任一满足模式 (OR)
+                queryWrapper.and(wrapper -> {
+                    for (int i = 0; i < conditions.size(); i++) {
+                        if (i > 0) {
+                            wrapper.or();
+                        }
+                        wrapper.nested(conditions.get(i));
+                    }
+                });
             }
         }
 

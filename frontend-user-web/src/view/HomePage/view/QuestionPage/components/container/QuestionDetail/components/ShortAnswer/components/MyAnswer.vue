@@ -167,7 +167,7 @@ const submitAnswer = async () => {
   }
 
   try {
-    await ElMessageBox.confirm('确定要提交答案吗？提交后将无法修改。', '确认提交', {
+    await ElMessageBox.confirm('确定要提交答案吗？', '确认提交', {
       confirmButtonText: '确定提交',
       cancelButtonText: '取消',
       type: 'warning'

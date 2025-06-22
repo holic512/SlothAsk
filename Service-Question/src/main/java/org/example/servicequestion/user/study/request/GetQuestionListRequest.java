@@ -23,19 +23,44 @@ public class GetQuestionListRequest {
     /** 搜索关键词 */
     private String searchText;
     
-    /** 分类过滤 */
-    private Integer filterCategory;
+    /** 条件匹配模式：true=全部满足(AND)，false=任一满足(OR)，默认为true */
+    private Boolean matchAllConditions = true;
+    
+    /** 分类过滤 - 等于 */
+    private Integer filterCategoryEquals;
+    
+    /** 分类过滤 - 不等于 */
+    private Integer filterCategoryNotEquals;
     
     /** 标签过滤列表 */
     private List<Integer> filterTags;
     
-    /** 类型过滤 */
-    private Integer filterType;
+    /** 类型过滤 - 等于 */
+    private Integer filterTypeEquals;
     
-    /** 难度过滤 */
-    private Integer filterDifficulty;
+    /** 类型过滤 - 不等于 */
+    private Integer filterTypeNotEquals;
+    
+    /** 难度过滤 - 等于 */
+    private Integer filterDifficultyEquals;
+    
+    /** 难度过滤 - 不等于 */
+    private Integer filterDifficultyNotEquals;
 
     /** 页码(必填) */
     @NotNull(message = "页码不能为空")
     private Integer pageNum;
+    
+    // 为了向后兼容，保留原有字段的getter方法
+    public Integer getFilterCategory() {
+        return filterCategoryEquals;
+    }
+    
+    public Integer getFilterType() {
+        return filterTypeEquals;
+    }
+    
+    public Integer getFilterDifficulty() {
+        return filterDifficultyEquals;
+    }
 }

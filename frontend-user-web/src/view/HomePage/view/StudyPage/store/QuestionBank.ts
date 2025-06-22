@@ -1,5 +1,5 @@
 import {defineStore} from 'pinia';
-import {ref, computed} from 'vue';
+import {ref} from 'vue';
 
 /**
  * 题目接口定义
@@ -57,12 +57,26 @@ interface FilterTagList {
  */
 export interface QuestionFilter {
     searchText: string | null;
-    filterCategory: number | null;
-    filterType: number | null;
-    filterDifficulty: number | null;
+    // 条件匹配模式：true=全部满足(AND)，false=任一满足(OR)
+    matchAllConditions: boolean;
+    // 分类过滤 - 等于/不等于
+    filterCategoryEquals: number | null;
+    filterCategoryNotEquals: number | null;
+    // 类型过滤 - 等于/不等于
+    filterTypeEquals: number | null;
+    filterTypeNotEquals: number | null;
+    // 难度过滤 - 等于/不等于
+    filterDifficultyEquals: number | null;
+    filterDifficultyNotEquals: number | null;
+    // 标签过滤
+    filterTags: Array<number>;
     pageNum: number;
-    filterTags: Array<number> | null;
     total?: number; // 添加总数字段
+    
+    // 为了向后兼容，保留原有字段
+    filterCategory?: number | null;
+    filterType?: number | null;
+    filterDifficulty?: number | null;
 }
 
 /**
@@ -83,12 +97,20 @@ export const useQuestionBankStore = defineStore('questionBank', () => {
     // 分页信息
      const pagination = ref<QuestionFilter>({
         searchText: null,
+        matchAllConditions: true,
+        filterCategoryEquals: null,
+        filterCategoryNotEquals: null,
+        filterTypeEquals: null,
+        filterTypeNotEquals: null,
+        filterDifficultyEquals: null,
+        filterDifficultyNotEquals: null,
+        filterTags: [],
+        pageNum: 1,
+        total: 0, // 初始化总数
+        // 向后兼容字段
         filterCategory: null,
         filterType: null,
         filterDifficulty: null,
-        pageNum: 1,
-        filterTags: null,
-        total: 0, // 初始化总数
     });
 
     return {
