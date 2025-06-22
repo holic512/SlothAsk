@@ -18,7 +18,7 @@ const isPopoverVisible = ref(false);
 // 菜单配置项
 const menuItems = ref([
   {path: '/study', name: '学习', icon: Reading},
-  {path: '/questionbank', name: '题库', icon: QuestionFilled},
+  {path: '/questionbank/questionbank', name: '题库', icon: QuestionFilled},
   // { path: '/contest', name: '竞赛' },
   // { path: '/discussion', name: '讨论' },
   // { path: '/interview', name: '面试分享' }
@@ -51,11 +51,11 @@ const fetchUserInfo = async () => {
     if (response.status === 200) {
       // 将用户信息保存到UserProfile store中
       userProfileStore.updateBasicInfo(
-        response.data.username,
-        response.data.nickname,
-        response.data.avatar
+          response.data.username,
+          response.data.nickname,
+          response.data.avatar
       );
-         return 200;
+      return 200;
     }
   } catch (error) {
     console.error('获取用户信息失败:', error);
@@ -130,7 +130,7 @@ const toggleMobileMenu = () => {
       <!-- 移动端菜单按钮 -->
       <button v-if="isMobile" class="mobile-menu-button" @click="toggleMobileMenu">
         <el-icon :size="20">
-          <Menu />
+          <Menu/>
         </el-icon>
       </button>
 
@@ -163,7 +163,7 @@ const toggleMobileMenu = () => {
           <!-- 消息通知 -->
           <button class="icon-button">
             <el-icon :size="isMobile ? 20 : 18">
-              <Bell />
+              <Bell/>
             </el-icon>
           </button>
 
@@ -226,12 +226,12 @@ const toggleMobileMenu = () => {
               <div class="mobile-nav-item-content">
                 <div class="mobile-nav-item-icon">
                   <el-icon :size="18">
-                    <component :is="item.icon" />
+                    <component :is="item.icon"/>
                   </el-icon>
                 </div>
                 <span class="mobile-nav-item-text">{{ item.name }}</span>
                 <el-icon class="mobile-nav-item-arrow">
-                  <ArrowRight />
+                  <ArrowRight/>
                 </el-icon>
               </div>
             </li>
@@ -247,7 +247,7 @@ const toggleMobileMenu = () => {
             <button class="mobile-login-button" @click="handleLogin">
               <div class="mobile-login-content">
                 <el-icon :size="18">
-                  <User />
+                  <User/>
                 </el-icon>
                 <span>登录 / 注册账号</span>
               </div>
@@ -305,29 +305,29 @@ const toggleMobileMenu = () => {
   display: flex;
   list-style: none;
   margin: 0;
-  padding: 0;
-  gap: 2px;
+  gap: 12px;
+  padding: 4px 0 0;
 }
 
 .nav-item {
-  padding: 6px 14px;
-  font-size: 13px;
-  color: #333;
+  padding: 12px 12px;
+  font-size: 15px;
+  color: #666;
   cursor: pointer;
-  border-radius: 4px;
   transition: all 0.2s ease;
   font-weight: 500;
+  position: relative;
+  border-bottom: 2px solid transparent;
 }
 
 .nav-item:hover {
-  background-color: #f5f5f5;
-  color: #000;
+  color: #333;
 }
 
 .nav-item.active {
-  color: #000;
+  color: #1a1a1a;
   font-weight: 600;
-  background-color: #f0f0f0;
+  border-bottom-color: #1a1a1a;
 }
 
 /* 右侧功能区 */
