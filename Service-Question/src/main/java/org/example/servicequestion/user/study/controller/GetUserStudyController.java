@@ -131,7 +131,7 @@ public class GetUserStudyController {
 
     /**
      * 获取用户提交次数统计
-     * 查询Redis中当天的提交次数缓存数据，同时从数据库中查询最近119天的提交记录
+     * 今天的数据从Redis获取，过去119天的数据从数据库查询（不包含今天），总共120天
      *
      * @param userId 用户ID,从请求头X-User-Id获取
      * @return 包含用户提交次数统计的API响应

@@ -524,10 +524,11 @@ public class GetUserStudyServiceImpl implements GetUserStudyService {
             // 1. 获取当前日期和119天前的日期
             LocalDate today = LocalDate.now();
             LocalDate startDate = today.minusDays(119);
+            LocalDate endDate = today.minusDays(1); // 数据库查询到昨天为止，不包含今天
             
-            // 2. 从数据库查询最近119天的提交记录
+            // 2. 从数据库查询过去119天的提交记录（不包含今天）
             List<UserDailySubmitCount> dbRecords = userDailySubmitCountMapper
-                    .selectUserSubmitCountByDateRange(userId, startDate, today);
+                    .selectUserSubmitCountByDateRange(userId, startDate, endDate);
             
             // 3. 将数据库记录转换为Map，便于查找
             Map<String, Integer> dbDataMap = new HashMap<>();
@@ -549,18 +550,18 @@ public class GetUserStudyServiceImpl implements GetUserStudyService {
                 // Redis查询失败，使用默认值0
             }
             
-            // 5. 构建结果列表，包含最近119天的数据
+            // 5. 构建结果列表，包含最近120天的数据
             List<UserSubmitCountDto> result = new ArrayList<>();
             
-            // 从今天开始，往前推119天
-            for (int i = 0; i < 119; i++) {
+            // 从今天开始，往前推120天
+            for (int i = 0; i < 120; i++) {
                 LocalDate currentDate = today.minusDays(i);
                 String dateStr = currentDate.toString();
                 
                 Integer count;
                 if (i == 0) {
-                    // 今天的数据优先使用Redis中的值
-                    count = Math.max(todayCount, dbDataMap.getOrDefault(dateStr, 0));
+                    // 今天的数据只从Redis中获取
+                    count = todayCount;
                 } else {
                     // 其他日期使用数据库中的值
                     count = dbDataMap.getOrDefault(dateStr, 0);

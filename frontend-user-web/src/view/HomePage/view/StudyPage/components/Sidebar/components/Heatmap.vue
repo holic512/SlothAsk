@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import {computed, onMounted, ref, watch} from 'vue';
-import {addDays, format, subDays} from 'date-fns';
+import {format, subDays} from 'date-fns';
 import {zhCN} from 'date-fns/locale';
 
 interface HeatmapData {
@@ -28,23 +28,23 @@ const today = new Date();
 // 生成热力图数据
 const generateHeatmapData = () => {
   const data: HeatmapData[] = [];
-  
+
   // 如果有后端数据，直接使用后端数据（120天）
   if (props.backendData && props.backendData.length > 0) {
     props.backendData.forEach(backendItem => {
       const backendDate = new Date(backendItem.date);
       const count = backendItem.answerTimes;
       let level = 0;
-      
+
       if (count === 0) level = 0;
       else if (count <= 3) level = 1;
       else if (count <= 7) level = 2;
       else if (count <= 12) level = 3;
       else level = 4;
-      
+
       data.push({ date: backendDate, count, level });
     });
-    
+
     // 按日期排序（从最早到最新）
     data.sort((a, b) => a.date.getTime() - b.date.getTime());
   } else {
@@ -53,11 +53,11 @@ const generateHeatmapData = () => {
       const date = subDays(today, i);
       const count = 0;
       const level = 0;
-      
+
       data.push({ date, count, level });
     }
   }
-  
+
   return data;
 };
 
@@ -80,14 +80,14 @@ const heatmapGrid = computed(() => {
       const dataIndex = week * 6 + day;
       if (dataIndex < data.length) {
         weekData.push(data[dataIndex]);
-      } else {
-        // 填充空数据
-        const emptyDate = addDays(data[data.length - 1].date, dataIndex - data.length + 1);
-        weekData.push({ date: emptyDate, count: 0, level: 0 });
       }
+      // 移除填充未来日期的逻辑，只显示实际的数据
     }
     
-    grid.push(weekData);
+    // 只有当这一周有数据时才添加到网格中
+    if (weekData.length > 0) {
+      grid.push(weekData);
+    }
   }
   
   return grid;

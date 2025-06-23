@@ -531,7 +531,6 @@ CREATE TABLE `user_profile`
     CONSTRAINT `fk_profile_achievement` FOREIGN KEY (`display_achievement_id`) REFERENCES `achievement` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
     CONSTRAINT `fk_profile_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB
-  AUTO_INCREMENT = 52
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_general_ci COMMENT = '用户个人资料表'
   ROW_FORMAT = Dynamic;
