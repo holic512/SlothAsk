@@ -5,15 +5,27 @@
 
     <!-- 题目列表 -->
     <div class="question-list">
-      <el-table :data="questionBankStore.questions"
+      <el-table :data="loading ? skeletonData : questionBankStore.questions"
                 style="width: 100%"
                 stripe
-                v-loading="loading"
                 :row-class-name="tableRowClassName"
       >
         <el-table-column :show-overflow-tooltip="true" label="标题" min-width="350" prop="title">
           <template #default="scope">
+            <!-- 骨架屏状态 -->
+            <div v-if="loading" class="skeleton-item">
+              <el-skeleton animated>
+                <template #template>
+                  <div class="skeleton-title">
+                    <el-skeleton-item style="width: 30px; margin-right: 8px;" variant="text" />
+                    <el-skeleton-item style="width: 60%;" variant="text" />
+                  </div>
+                </template>
+              </el-skeleton>
+            </div>
+            <!-- 正常数据状态 -->
             <el-popover
+                v-else
                 :show-after="1500"
                 :width="200"
                 trigger="hover"
@@ -58,7 +70,14 @@
 
         <el-table-column label="难度" prop="difficulty" width="80">
           <template #default="scope">
-            <span :class="getDifficultyClass(scope.row.difficulty)">
+            <!-- 骨架屏状态 -->
+            <el-skeleton v-if="loading" animated>
+              <template #template>
+                <el-skeleton-item style="width: 40px;" variant="text" />
+              </template>
+            </el-skeleton>
+            <!-- 正常数据状态 -->
+            <span v-else :class="getDifficultyClass(scope.row.difficulty)">
               {{ getDifficultyLabel(scope.row.difficulty) }}
             </span>
           </template>
@@ -66,7 +85,14 @@
 
         <el-table-column label="类型" prop="type" width="80">
           <template #default="scope">
-            <span :class="getQuestionTypeClass(scope.row.type)">
+            <!-- 骨架屏状态 -->
+            <el-skeleton v-if="loading" animated>
+              <template #template>
+                <el-skeleton-item style="width: 40px;" variant="text" />
+              </template>
+            </el-skeleton>
+            <!-- 正常数据状态 -->
+            <span v-else :class="getQuestionTypeClass(scope.row.type)">
               {{ getQuestionTypeLabel(scope.row.type) }}
             </span>
           </template>
@@ -74,7 +100,22 @@
 
         <el-table-column label="热度" prop="viewCount" width="100">
           <template #default="scope">
-            <el-tooltip :content="`浏览量: ${scope.row.viewCount}`" placement="top">
+            <!-- 骨架屏状态 -->
+            <div v-if="loading" class="heat-bar-container">
+              <el-skeleton animated>
+                <template #template>
+                  <div class="skeleton-heat-bar">
+                    <el-skeleton-item style="width: 8px; height: 12px; margin-right: 1px;" variant="text" />
+                    <el-skeleton-item style="width: 8px; height: 12px; margin-right: 1px;" variant="text" />
+                    <el-skeleton-item style="width: 8px; height: 12px; margin-right: 1px;" variant="text" />
+                    <el-skeleton-item style="width: 8px; height: 12px; margin-right: 1px;" variant="text" />
+                    <el-skeleton-item style="width: 8px; height: 12px;" variant="text" />
+                  </div>
+                </template>
+              </el-skeleton>
+            </div>
+            <!-- 正常数据状态 -->
+            <el-tooltip v-else :content="`浏览量: ${scope.row.viewCount}`" placement="top">
               <div class="heat-bar-container">
                 <div class="heat-bar">
                   <span
@@ -116,6 +157,18 @@ import {useScrollbarStore} from '@/pinia/ScrollbarStore';
 
 const questionBankStore = useQuestionBankStore()
 const loading = ref(false); // 添加 loading 状态
+
+// 骨架屏数据 - 固定20行
+const skeletonData = ref(Array.from({ length: 20 }, (_, index) => ({
+  id: index + 1,
+  title: '',
+  difficulty: 1,
+  type: 1,
+  viewCount: 0,
+  categoryId: 0,
+  tagCategoryIds: [],
+  virtualId: ''
+})))
 // 用于存储上一次的请求参数，避免重复请求
 const prevParams = reactive({
   searchText: '',
@@ -537,5 +590,26 @@ const tableRowClassName = ({rowIndex}: { rowIndex: number }) => {
 .type-unknown {
   color: #8c8c8c;
   font-weight: 500;
+}
+
+/* 骨架屏样式 */
+.skeleton-item {
+  padding: 4px 0;
+}
+
+.skeleton-title {
+  display: flex;
+  align-items: center;
+}
+
+.skeleton-heat-bar {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+/* 骨架屏动画优化 */
+.el-skeleton.is-animated .el-skeleton__item::after {
+  animation-duration: 1.5s;
 }
 </style>

@@ -1,10 +1,12 @@
 <script lang="ts" setup>
 import {onMounted, ref} from 'vue';
+import {useRouter} from 'vue-router';
+import {apiGetHotQuestions} from '@/view/HomePage/view/StudyPage/service/ApiGetHotQuestions.js';
 
 interface Question {
-  id: number;
+  virtualId: string;
   title: string;
-  views: number;
+  viewCount: number;
 }
 
 // Props 接收后端数据
@@ -13,47 +15,60 @@ const props = defineProps<{
 }>();
 
 const hotQuestions = ref<Question[]>([]);
+const loading = ref(true);
+const router = useRouter();
 
-// 生成模拟数据
-const generateMockData = (): Question[] => {
-  const mockTitles = [
-    "Vue3 组合式 API 的最佳实践",
-    "JavaScript 异步编程详解",
-    "TypeScript 类型系统深入理解",
-    "React Hooks 使用技巧",
-    "CSS Grid 布局完全指南",
-    "Node.js 性能优化策略",
-    "前端工程化配置详解",
-    "数据结构与算法基础",
-    "HTTP 协议原理分析",
-    "微前端架构设计思路"
-  ];
-  
-  return mockTitles.map((title, index) => ({
-    id: index + 1,
-    title,
-    views: Math.floor(Math.random() * 5000) + 100
+// 获取热门题目数据
+const fetchHotQuestions = async () => {
+  try {
+    loading.value = true;
+    const response = await apiGetHotQuestions();
+    if (response && response.status === 200 && response.data) {
+      hotQuestions.value = response.data;
+    } else {
+      console.error('获取热门题目失败: 响应格式错误');
+      hotQuestions.value = [];
+    }
+  } catch (error) {
+    console.error('获取热门题目失败:', error);
+    hotQuestions.value = [];
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 生成骨架屏数据
+const generateSkeletonData = (): Question[] => {
+  return Array.from({length: 10}, (_, index) => ({
+    virtualId: `skeleton_${index + 1}`,
+    title: '',
+    viewCount: 0
   }));
 };
 
 // 处理题目点击事件
 const handleQuestionClick = (question: Question) => {
-  console.log('跳转到题目详情页:', question.id);
-  // 这里可以添加路由跳转逻辑
-  // router.push(`/question/${question.id}`);
+  console.log('跳转到题目详情页:', question.virtualId);
+  // 跳转到题目详情页，使用虚拟ID
+  router.push(`/question/${question.virtualId}`);
 };
 
 // 格式化访问量显示
-const formatViews = (views: number): string => {
-  if (views >= 1000) {
-    return (views / 1000).toFixed(1) + 'k';
+const formatViews = (viewCount: number): string => {
+  if (viewCount >= 1000) {
+    return (viewCount / 1000).toFixed(1) + 'k';
   }
-  return views.toString();
+  return viewCount.toString();
 };
 
 onMounted(() => {
-  // 如果有后端数据则使用，否则使用模拟数据
-  hotQuestions.value = props.backendData || generateMockData();
+  // 如果有后端数据则使用，否则从API获取
+  if (props.backendData && props.backendData.length > 0) {
+    hotQuestions.value = props.backendData;
+    loading.value = false;
+  } else {
+    fetchHotQuestions();
+  }
 });
 </script>
 
@@ -62,35 +77,64 @@ onMounted(() => {
     <div class="card-header">
       <h3 class="title">
         <svg class="title-icon" height="16" viewBox="0 0 16 16" width="16">
-          <path d="M5.05.31c.81 2.17.41 3.38-.52 4.31C3.55 5.67 1.98 6.45.9 7.98c-1.45 2.05-1.7 6.53 3.53 7.7-2.2-1.16-2.67-4.52-.3-6.61-.61 2.03.53 3.33 1.94 2.86 1.39-.47 2.3.53 2.27 1.67-.02.78-.31 1.44-1.13 1.81 3.42-.59 4.78-3.42 4.78-5.56 0-2.84-2.53-3.22-1.25-5.61-1.52.13-2.03 1.13-1.89 2.75.09 1.08-1.02 1.8-1.86 1.33-.67-.41-.66-1.19-.06-1.78C8.18 5.31 8.68 2.45 5.05.32L5.05.31z" fill="#ff6b35"/>
+          <path
+              d="M5.05.31c.81 2.17.41 3.38-.52 4.31C3.55 5.67 1.98 6.45.9 7.98c-1.45 2.05-1.7 6.53 3.53 7.7-2.2-1.16-2.67-4.52-.3-6.61-.61 2.03.53 3.33 1.94 2.86 1.39-.47 2.3.53 2.27 1.67-.02.78-.31 1.44-1.13 1.81 3.42-.59 4.78-3.42 4.78-5.56 0-2.84-2.53-3.22-1.25-5.61-1.52.13-2.03 1.13-1.89 2.75.09 1.08-1.02 1.8-1.86 1.33-.67-.41-.66-1.19-.06-1.78C8.18 5.31 8.68 2.45 5.05.32L5.05.31z"
+              fill="#ff6b35"/>
         </svg>
         热门题目
       </h3>
     </div>
-    
+
     <div class="questions-list">
-      <div 
-        v-for="(question, index) in hotQuestions" 
-        :key="question.id"
-        class="question-item"
-        @click="handleQuestionClick(question)"
-      >
-        <div class="question-rank">{{ index + 1 }}</div>
-        <div class="question-content">
-          <div class="question-title">{{ question.title }}</div>
-          <div class="question-meta">
-            <svg class="view-icon" height="12" viewBox="0 0 16 16" width="12">
-              <path d="M8 2C4.5 2 1.5 4.5 0 8c1.5 3.5 4.5 6 8 6s6.5-2.5 8-6c-1.5-3.5-4.5-6-8-6zm0 10c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" fill="#6c757d"/>
-            </svg>
-            <span class="view-count">{{ formatViews(question.views) }} 次浏览</span>
+      <!-- 加载状态骨架屏 -->
+      <template v-if="loading">
+        <div
+            v-for="index in 10"
+            :key="`skeleton-${index}`"
+            class="question-item skeleton-item"
+        >
+          <div class="question-rank skeleton-rank"></div>
+          <div class="question-content">
+            <div class="question-title skeleton-title"></div>
+            <div class="question-meta">
+              <div class="skeleton-meta"></div>
+            </div>
           </div>
         </div>
-        <div class="question-arrow">
-          <svg height="12" viewBox="0 0 16 16" width="12">
-            <path d="M6 3l5 5-5 5V3z" fill="#adb5bd"/>
-          </svg>
+      </template>
+
+      <!-- 实际数据 -->
+      <template v-else>
+        <div
+            v-for="(question, index) in hotQuestions"
+            :key="question.virtualId"
+            class="question-item"
+            @click="handleQuestionClick(question)"
+        >
+          <div class="question-rank">{{ index + 1 }}</div>
+          <div class="question-content">
+            <div class="question-title">{{ question.title }}</div>
+            <div class="question-meta">
+              <svg class="view-icon" height="12" viewBox="0 0 16 16" width="12">
+                <path
+                    d="M8 2C4.5 2 1.5 4.5 0 8c1.5 3.5 4.5 6 8 6s6.5-2.5 8-6c-1.5-3.5-4.5-6-8-6zm0 10c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
+                    fill="#6c757d"/>
+              </svg>
+              <span class="view-count">{{ formatViews(question.viewCount) }} 次浏览</span>
+            </div>
+          </div>
+          <div class="question-arrow">
+            <svg height="12" viewBox="0 0 16 16" width="12">
+              <path d="M6 3l5 5-5 5V3z" fill="#adb5bd"/>
+            </svg>
+          </div>
         </div>
-      </div>
+
+        <!-- 无数据状态 -->
+        <div v-if="hotQuestions.length === 0" class="no-data">
+          <div class="no-data-text">暂无热门题目</div>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -276,19 +320,19 @@ onMounted(() => {
   .hot-questions-card {
     padding: 12px 16px;
   }
-  
+
   .title {
     font-size: 1.1rem;
   }
-  
+
   .question-item {
     padding: 10px 6px;
   }
-  
+
   .question-title {
     font-size: 0.85rem;
   }
-  
+
   .question-rank {
     width: 20px;
     height: 20px;
@@ -303,13 +347,64 @@ onMounted(() => {
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .question-title {
     font-size: 0.8rem;
   }
-  
+
   .view-count {
     font-size: 0.7rem;
   }
+}
+
+/* 骨架屏样式 */
+.skeleton-item {
+  pointer-events: none;
+}
+
+.skeleton-rank {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+.skeleton-title {
+  height: 16px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.skeleton-meta {
+  height: 12px;
+  width: 80px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* 无数据状态 */
+.no-data {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.no-data-text {
+  color: #999;
+  font-size: 0.9rem;
 }
 </style>

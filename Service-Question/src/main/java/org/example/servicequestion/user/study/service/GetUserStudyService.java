@@ -17,6 +17,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.example.servicequestion.entity.Question;
 import org.example.servicequestion.entity.QuestionCategory;
 import org.example.servicequestion.user.study.dto.CategoryIdAndNameDto;
+import org.example.servicequestion.user.study.dto.HotQuestionDto;
 import org.example.servicequestion.user.study.dto.TagIdAndNameDto;
 import org.example.servicequestion.user.study.dto.UserSubmitCountDto;
 import org.example.servicequestion.user.study.request.GetQuestionListRequest;
@@ -87,5 +88,14 @@ public interface GetUserStudyService {
      * @return 用户提交次数统计列表，包含时间和次数
      */
     List<UserSubmitCountDto> getUserSubmitCountStats(Long userId);
+
+    /**
+     * 获取浏览量最高的前10道题目
+     * 根据项目ID获取热门题目列表，按浏览量降序排列
+     * 
+     * @param projectId 项目ID，为null时获取全部项目的热门题目
+     * @return 热门题目列表，包含虚拟ID、标题和浏览量
+     */
+    List<HotQuestionDto> getHotQuestions(Long projectId);
 
 }

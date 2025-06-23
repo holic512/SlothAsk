@@ -23,6 +23,7 @@ import org.example.servicequestion.entity.Question;
 import org.example.servicequestion.entity.QuestionCategory;
 import org.example.servicequestion.feign.ServiceImageFeign;
 import org.example.servicequestion.user.study.dto.CategoryIdAndNameDto;
+import org.example.servicequestion.user.study.dto.HotQuestionDto;
 import org.example.servicequestion.user.study.dto.TagIdAndNameDto;
 import org.example.servicequestion.user.study.dto.UserSubmitCountDto;
 import org.example.servicequestion.user.study.mapper.QuestionCategoryMapper;
@@ -574,6 +575,67 @@ public class GetUserStudyServiceImpl implements GetUserStudyService {
             // 发生异常时返回空列表
             return new ArrayList<>();
         }
+    }
+
+    @Override
+    public List<HotQuestionDto> getHotQuestions(Long projectId) {
+        // 热门题目缓存键
+        String cacheKey = RedisConfig.getKey() + "HotQuestions:" + (projectId != null ? projectId : "all");
+        
+        // 先尝试从缓存获取
+        List<HotQuestionDto> cachedResult = (List<HotQuestionDto>) redisTemplate.opsForValue().get(cacheKey);
+        if (cachedResult != null && !cachedResult.isEmpty()) {
+            return cachedResult;
+        }
+        
+        // 构建查询条件
+        QueryWrapper<Question> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("id", "title", "view_count")
+                .eq("status", 1) // 只查询启用状态的题目
+                .orderByDesc("view_count") // 按浏览量降序排列
+                .last("LIMIT 10"); // 限制返回10条记录
+        
+        // 如果指定了项目ID，添加项目过滤条件
+        if (projectId != null) {
+            queryWrapper.eq("project_id", projectId);
+        }
+        
+        // 查询数据库
+        List<Question> questions = userQuestionMapper.selectList(queryWrapper);
+        
+        // 转换为DTO并生成虚拟ID
+        List<HotQuestionDto> result = new ArrayList<>();
+        Map<String, String> virtualIdMap = new ConcurrentHashMap<>();
+        
+        for (Question question : questions) {
+            // 先尝试从Redis获取虚拟ID
+            String redisKey = VidKey + question.getId();
+            String virtualId = (String) redisTemplate.opsForValue().get(redisKey);
+            
+            if (virtualId == null) {
+                // 如果缓存不存在，生成新的虚拟ID
+                virtualId = IdEncryptor.encryptId(question.getId());
+                // 建立双向映射
+                virtualIdMap.put(redisKey, virtualId);
+                virtualIdMap.put(VidKey + virtualId, String.valueOf(question.getId()));
+            }
+            
+            // 创建DTO对象
+            HotQuestionDto dto = new HotQuestionDto(virtualId, question.getTitle(), question.getViewCount());
+            result.add(dto);
+        }
+        
+        // 异步存储虚拟ID映射关系
+        if (!virtualIdMap.isEmpty()) {
+            CompletableFuture.runAsync(() -> {
+                redisTemplate.opsForValue().multiSet(virtualIdMap);
+            });
+        }
+        
+        // 将结果缓存10分钟
+        redisTemplate.opsForValue().set(cacheKey, result, 10, TimeUnit.MINUTES);
+        
+        return result;
     }
 
 }

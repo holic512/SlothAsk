@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import org.example.servicequestion.config.ApiResponse.ApiResponse;
 import org.example.servicequestion.entity.QuestionCategory;
 import org.example.servicequestion.user.study.dto.CategoryIdAndNameDto;
+import org.example.servicequestion.user.study.dto.HotQuestionDto;
 import org.example.servicequestion.user.study.dto.UserSubmitCountDto;
 import org.example.servicequestion.user.study.request.GetQuestionListRequest;
 import org.example.servicequestion.user.study.service.GetUserStudyService;
@@ -141,5 +142,23 @@ public class GetUserStudyController {
     ) {
         List<UserSubmitCountDto> stats = getUserStudyService.getUserSubmitCountStats(userId);
         return new ApiResponse(200, "获取用户提交次数统计成功", stats);
+    }
+
+    /**
+     * 获取浏览量最高的前10道题目
+     * 根据项目ID获取热门题目列表，按浏览量降序排列
+     * 返回题目的虚拟ID、标题和浏览量信息
+     *
+     * @param userId 用户ID,从请求头X-User-Id获取,可选
+     * @param upcId  项目ID,从请求头X-Upc-Id获取,可选
+     * @return 包含热门题目列表的API响应
+     */
+    @GetMapping("/hotQuestions")
+    public ApiResponse getHotQuestions(
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
+            @RequestHeader(value = "X-Upc-Id", required = false) Long upcId
+    ) {
+        List<HotQuestionDto> hotQuestions = getUserStudyService.getHotQuestions(upcId);
+        return new ApiResponse(200, "获取热门题目成功", hotQuestions);
     }
 }
