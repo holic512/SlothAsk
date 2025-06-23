@@ -18,6 +18,7 @@ import org.example.servicequestion.entity.Question;
 import org.example.servicequestion.entity.QuestionCategory;
 import org.example.servicequestion.user.study.dto.CategoryIdAndNameDto;
 import org.example.servicequestion.user.study.dto.TagIdAndNameDto;
+import org.example.servicequestion.user.study.dto.UserSubmitCountDto;
 import org.example.servicequestion.user.study.request.GetQuestionListRequest;
 
 import java.util.List;
@@ -77,5 +78,14 @@ public interface GetUserStudyService {
      * @return 下一题的虚拟ID,如果没有下一题则返回null
      */
     String getNextQuestionVid(String currentVid);
+
+    /**
+     * 获取用户提交次数统计
+     * 查询Redis中当天该用户的提交次数缓存数据，同时从数据库中查出该用户最近89天的提交记录
+     * 
+     * @param userId 用户ID
+     * @return 用户提交次数统计列表，包含时间和次数
+     */
+    List<UserSubmitCountDto> getUserSubmitCountStats(Long userId);
 
 }

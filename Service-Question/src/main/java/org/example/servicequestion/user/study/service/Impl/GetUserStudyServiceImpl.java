@@ -16,13 +16,17 @@ import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.servicecommon.entity.UserDailySubmitCount;
+import org.example.servicecommon.redisKey.AnswerAiKey;
 import org.example.servicequestion.config.Redis.RedisConfig;
 import org.example.servicequestion.entity.Question;
 import org.example.servicequestion.entity.QuestionCategory;
 import org.example.servicequestion.feign.ServiceImageFeign;
 import org.example.servicequestion.user.study.dto.CategoryIdAndNameDto;
 import org.example.servicequestion.user.study.dto.TagIdAndNameDto;
+import org.example.servicequestion.user.study.dto.UserSubmitCountDto;
 import org.example.servicequestion.user.study.mapper.QuestionCategoryMapper;
+import org.example.servicequestion.user.study.mapper.UserDailySubmitCountMapper;
 import org.example.servicequestion.user.study.mapper.UserQuestionMapper;
 import org.example.servicequestion.user.study.request.GetQuestionListRequest;
 import org.example.servicequestion.user.study.service.GetUserStudyService;
@@ -33,7 +37,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -48,6 +55,7 @@ public class GetUserStudyServiceImpl implements GetUserStudyService {
     private final QuestionCategoryMapper questionCategoryMapper;
     private final ServiceImageFeign serviceImageFeign;
     private final UserQuestionMapper userQuestionMapper;
+    private final UserDailySubmitCountMapper userDailySubmitCountMapper;
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
 
@@ -70,11 +78,13 @@ public class GetUserStudyServiceImpl implements GetUserStudyService {
     @Autowired
     GetUserStudyServiceImpl(QuestionCategoryMapper questionCategoryMapper, ServiceImageFeign serviceImageFeign,
                             UserQuestionMapper userQuestionMapper,
+                            UserDailySubmitCountMapper userDailySubmitCountMapper,
                             RedisTemplate<String, Object> redisTemplate,
                             ObjectMapper objectMapper) {
         this.questionCategoryMapper = questionCategoryMapper;
         this.serviceImageFeign = serviceImageFeign;
         this.userQuestionMapper = userQuestionMapper;
+        this.userDailySubmitCountMapper = userDailySubmitCountMapper;
         this.redisTemplate = redisTemplate;
         this.objectMapper = objectMapper;
     }
@@ -504,6 +514,65 @@ public class GetUserStudyServiceImpl implements GetUserStudyService {
             questionCategoryMapper.incrementViewCount(categoryId);
         } catch (Exception e) {
             // 忽略异常，不影响主流程
+        }
+    }
+
+    @Override
+    public List<UserSubmitCountDto> getUserSubmitCountStats(Long userId) {
+        try {
+            // 1. 获取当前日期和119天前的日期
+            LocalDate today = LocalDate.now();
+            LocalDate startDate = today.minusDays(119);
+            
+            // 2. 从数据库查询最近119天的提交记录
+            List<UserDailySubmitCount> dbRecords = userDailySubmitCountMapper
+                    .selectUserSubmitCountByDateRange(userId, startDate, today);
+            
+            // 3. 将数据库记录转换为Map，便于查找
+            Map<String, Integer> dbDataMap = new HashMap<>();
+            for (UserDailySubmitCount record : dbRecords) {
+                String dateStr = record.getSubmitDate().toString();
+                dbDataMap.put(dateStr, record.getSubmitCount());
+            }
+            
+            // 4. 查询Redis中当天的提交次数
+            String todayStr = today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            String redisKey = AnswerAiKey.DAILY_SUBMIT_COUNT_KEY + userId + ":" + todayStr;
+            Integer todayCount = 0;
+            try {
+                Object redisValue = redisTemplate.opsForValue().get(redisKey);
+                if (redisValue != null) {
+                    todayCount = Integer.valueOf(redisValue.toString());
+                }
+            } catch (Exception e) {
+                // Redis查询失败，使用默认值0
+            }
+            
+            // 5. 构建结果列表，包含最近119天的数据
+            List<UserSubmitCountDto> result = new ArrayList<>();
+            
+            // 从今天开始，往前推119天
+            for (int i = 0; i < 119; i++) {
+                LocalDate currentDate = today.minusDays(i);
+                String dateStr = currentDate.toString();
+                
+                Integer count;
+                if (i == 0) {
+                    // 今天的数据优先使用Redis中的值
+                    count = Math.max(todayCount, dbDataMap.getOrDefault(dateStr, 0));
+                } else {
+                    // 其他日期使用数据库中的值
+                    count = dbDataMap.getOrDefault(dateStr, 0);
+                }
+                
+                result.add(new UserSubmitCountDto(dateStr, count));
+            }
+            
+            return result;
+            
+        } catch (Exception e) {
+            // 发生异常时返回空列表
+            return new ArrayList<>();
         }
     }
 

@@ -32,7 +32,18 @@ public enum SiliconflowModelEnum {
     /**
      * 通义千问 Qwen3-14B 模型
      */
-    QWEN3_14B("Qwen/Qwen3-14B");
+    QWEN3_14B("Qwen/Qwen3-14B"),
+
+    /**
+     * Pro 版本 DeepSeek V3 模型
+     */
+    DEEPSEEK_V3("Pro/deepseek-ai/DeepSeek-V3"),
+
+    /**
+     * 通义千问 Qwen3-30B-A3B 模型
+     */
+    QWEN3_30B_A3B("Qwen/Qwen3-30B-A3B");
+
 
     private final String modelName;
 

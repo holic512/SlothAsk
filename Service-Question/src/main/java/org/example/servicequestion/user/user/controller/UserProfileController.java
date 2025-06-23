@@ -1,6 +1,6 @@
 /**
  * File Name: UserProfileController.java
- * Description: 用户个人资料控制器，提供与用户问题相关的信息查询接口
+ * Description: 用户个人资料控制器，提供与用户问题相关的信息查询接口,给用户微服务调用的
  * Author: holic512
  * Created Date: 2025-06-16
  * Version: 1.0

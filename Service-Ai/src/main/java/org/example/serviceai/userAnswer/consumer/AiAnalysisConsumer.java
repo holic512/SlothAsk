@@ -71,7 +71,7 @@ public class AiAnalysisConsumer {
                                         Channel channel) {
         String answerId = analysisMessage.getAnswerId();
         String threadName = Thread.currentThread().getName();
-        
+
         try {
             log.info("接收到 AI 解析消息，回答ID: {}, 线程: {}", answerId, threadName);
 
@@ -87,10 +87,10 @@ public class AiAnalysisConsumer {
 
         } catch (Exception e) {
             log.error("处理 AI 解析消息失败，回答ID: {}, 线程: {}", answerId, threadName, e);
-            
+
             // 即使处理失败也要解除 Redis 状态锁，避免死锁
             releaseAiAnalysisLock(answerId);
-            
+
             // 拒绝消息并重新入队
             rejectMessage(channel, deliveryTag);
             // TODO: 可以考虑添加重试机制或死信队列处理
@@ -107,16 +107,16 @@ public class AiAnalysisConsumer {
         // 1. 获取用户回答记录和问题信息
         UserQuestionRecord record = getUserQuestionRecord(answerId);
         Question question = getQuestion(record.getQuestionId());
-        
+
         // 2. 构建 AI 分析请求
         AiAnalysisRequest analysisRequest = buildAnalysisRequest(question, record.getUserAnswer());
-        
+
         // 3. 调用 AI 服务进行分析
         AiResponse aiResponse = callAiService(analysisRequest);
-        
+
         // 4. 解析 AI 响应并保存结果
         AiAnalysisResponse analysisResponse = parseAiResponse(aiResponse.getAnswer());
-        saveAnalysisResult(answerId, analysisResponse, aiResponse.getModelFull(),analysisRequest);
+        saveAnalysisResult(answerId, analysisResponse, aiResponse.getModelFull(), analysisRequest);
     }
 
     /**
@@ -142,7 +142,7 @@ public class AiAnalysisConsumer {
         if (questionId == null) {
             throw new IllegalArgumentException("问题ID不能为空");
         }
-        
+
         LambdaQueryWrapper<Question> queryWrapper = new LambdaQueryWrapper<Question>()
                 .eq(Question::getId, questionId)
                 .select(Question::getContent, Question::getAnswer);
@@ -199,14 +199,15 @@ public class AiAnalysisConsumer {
                 "输出格式（标准 JSON）：\n" +
                 "{\n" +
                 "  \"accuracy\": 60,\n" +
-                "  \"analysis\": \"你提到 Java 是编译型语言，但这种说法并不准确。<br/>Java 的源代码会被编译为字节码，而不是机器码，然后由 Java 虚拟机解释执行，因此它既具有编译型特性，也具有解释型特性。\"\n" +
+                "  \"analysis\": \"你提到 Java 是编译型语言，但这种说法并不准确。<br/><b>Java 的源代码会被编译为字节码，而不是机器码</b>，然后由 Java 虚拟机解释执行，因此它既具有编译型特性，也具有解释型特性。\"\n" +
                 "}\n" +
-                "输出要求：\n" +
+                "输出要求(重点,一定要遵顼)：\n" +
                 "- 只返回标准 JSON 格式；\n" +
                 "- 不包含额外描述、解释或非 JSON 内容；\n" +
                 "- 必须使用双引号包裹字段名和字符串；\n" +
-                "- 分析部分可使用 <br/> 进行换行；\n" +
-                "- 严格保证 JSON 格式合法，避免语法错误。";
+                "- 分析部分可使用 <br/> 换行，<b> 标签加粗重点；\n" +
+                "- 严格保证 JSON 格式合法，避免语法错误。\n" +
+                "- 请只返回标准 JSON 格式，不要包含代码块、Markdown 标记（如 ```json）或任何额外说明文字。";
     }
 
 
@@ -218,7 +219,35 @@ public class AiAnalysisConsumer {
      * @throws Exception JSON 解析异常
      */
     private AiAnalysisResponse parseAiResponse(String aiResponseJson) throws Exception {
-        return objectMapper.readValue(aiResponseJson, AiAnalysisResponse.class);
+        try {
+            // DEBUG：打印原始返回值（限制长度避免日志过大）
+            String preview = aiResponseJson == null ? "null" :
+                    aiResponseJson.length() > 500 ? aiResponseJson.substring(0, 500) + "..." : aiResponseJson;
+            log.debug("AI 原始响应内容预览（前500字符）：{}", preview);
+
+            // DEBUG：判断是否包含非法 Markdown、反引号
+            if (aiResponseJson.contains("```") || aiResponseJson.contains("`")) {
+                log.warn("⚠️ AI 响应中包含 Markdown 代码块标记或反引号字符");
+            }
+
+            // DEBUG：尝试格式修复 - 去除 Markdown 包裹内容（可选）
+            if (aiResponseJson.trim().startsWith("```")) {
+                int start = aiResponseJson.indexOf("{");
+                int end = aiResponseJson.lastIndexOf("}");
+                if (start >= 0 && end > start) {
+                    String trimmed = aiResponseJson.substring(start, end + 1);
+                    log.warn("⚠️ 检测到 Markdown 包裹，尝试修复并解析 JSON");
+                    aiResponseJson = trimmed;
+                }
+            }
+
+            // 正常解析
+            return objectMapper.readValue(aiResponseJson, AiAnalysisResponse.class);
+
+        } catch (Exception e) {
+            log.error("❌ JSON 解析失败，原始返回内容：{}", aiResponseJson, e);
+            throw e;
+        }
     }
 
     /**
@@ -228,7 +257,7 @@ public class AiAnalysisConsumer {
      * @param analysisResponse AI 分析响应
      * @param aiModel          AI 模型信息
      */
-    private void saveAnalysisResult(String answerId, AiAnalysisResponse analysisResponse, String aiModel,AiAnalysisRequest analysisRequest) {
+    private void saveAnalysisResult(String answerId, AiAnalysisResponse analysisResponse, String aiModel, AiAnalysisRequest analysisRequest) {
         UserAnswerAiAnalysis userAnswerAiAnalysis = new UserAnswerAiAnalysis();
         userAnswerAiAnalysis.setRecordId(Long.parseLong(answerId));
         userAnswerAiAnalysis.setAccuracyRate(analysisResponse.getAccuracy());

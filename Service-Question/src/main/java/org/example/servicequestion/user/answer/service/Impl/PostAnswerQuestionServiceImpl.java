@@ -10,27 +10,35 @@
 package org.example.servicequestion.user.answer.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import org.example.servicecommon.redisKey.AnswerAiKey;
 import org.example.servicequestion.entity.UserQuestionRecord;
 import org.example.servicequestion.user.answer.enums.PostAnswerQuestionEnum;
 import org.example.servicequestion.user.answer.mapper.AnswerUserQuestionRecordMapper;
 import org.example.servicequestion.user.answer.service.PostAnswerQuestionService;
 import org.example.servicequestion.user.commonService.IdConversionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class PostAnswerQuestionServiceImpl implements PostAnswerQuestionService {
 
     private final IdConversionService idConversionService;
     private final AnswerUserQuestionRecordMapper answerUserQuestionRecordMapper;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
     public PostAnswerQuestionServiceImpl(IdConversionService idConversionService,
-                                         AnswerUserQuestionRecordMapper answerUserQuestionRecordMapper) {
+                                         AnswerUserQuestionRecordMapper answerUserQuestionRecordMapper,
+                                         RedisTemplate<String, Object> redisTemplate) {
         this.idConversionService = idConversionService;
         this.answerUserQuestionRecordMapper = answerUserQuestionRecordMapper;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
@@ -116,10 +124,38 @@ public class PostAnswerQuestionServiceImpl implements PostAnswerQuestionService 
             record.setUpdateTime(LocalDateTime.now());
             int updateResult = answerUserQuestionRecordMapper.updateById(record);
 
+            // 5. 异步增加用户当日提交次数
+            if (updateResult > 0) {
+                incrementDailySubmitCount(userId);
+            }
+
             return updateResult > 0 ? PostAnswerQuestionEnum.SUCCESS : PostAnswerQuestionEnum.FAIL;
 
         } catch (Exception e) {
             return PostAnswerQuestionEnum.FAIL;
+        }
+    }
+
+    /**
+     * 异步增加用户当日提交次数
+     * @param userId 用户ID
+     */
+    @Async
+    private void incrementDailySubmitCount(Long userId) {
+        try {
+            // 生成当日的Redis键
+            String today = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            String redisKey = AnswerAiKey.DAILY_SUBMIT_COUNT_KEY + userId + ":" + today;
+            
+            // 使用Redis的INCR操作增加计数
+            redisTemplate.opsForValue().increment(redisKey, 1L);
+            
+            // 设置过期时间为3天，防止长期积压
+            redisTemplate.expire(redisKey, 3, TimeUnit.DAYS);
+            
+        } catch (Exception e) {
+            // 记录日志但不影响主流程
+            // 可以考虑添加日志记录
         }
     }
 }

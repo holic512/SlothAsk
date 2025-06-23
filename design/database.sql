@@ -22,6 +22,19 @@ CREATE TABLE `achievement`
   COLLATE = utf8mb4_general_ci COMMENT = '成就表'
   ROW_FORMAT = Dynamic;
 
+
+CREATE TABLE user_daily_submit_count
+(
+    id           BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
+    user_id      BIGINT NOT NULL COMMENT '用户唯一标识',
+    submit_count INT    NOT NULL DEFAULT 0 COMMENT '当天提交次数',
+    submit_date  DATE   NOT NULL COMMENT '日期，年月日格式，例如：2025-06-21',
+    update_time  DATETIME        DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录最后更新时间',
+    create_time  DATETIME        DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+    UNIQUE KEY uniq_user_date (user_id, submit_date)
+) COMMENT ='用户每日提交次数记录表-热力图';
+
+
 -- ----------------------------
 -- Table structure for admin_login_log
 -- ----------------------------

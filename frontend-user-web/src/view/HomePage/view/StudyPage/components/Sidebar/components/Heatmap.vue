@@ -25,41 +25,15 @@ const hoveredCell = ref<HeatmapData | null>(null);
 const hoverTimeout = ref<NodeJS.Timeout | null>(null);
 const today = new Date();
 
-// 生成从今天开始向前120天的数据
+// 生成热力图数据
 const generateHeatmapData = () => {
   const data: HeatmapData[] = [];
   
-  // 创建120天的基础数据结构
-  for (let i = 119; i >= 0; i--) {
-    const date = subDays(today, i);
-    data.push({ date, count: 0, level: 0 });
-  }
-  
-  // 如果有后端数据，则合并
+  // 如果有后端数据，直接使用后端数据（120天）
   if (props.backendData && props.backendData.length > 0) {
     props.backendData.forEach(backendItem => {
       const backendDate = new Date(backendItem.date);
-      const dataIndex = data.findIndex(d => 
-        format(d.date, 'yyyy-MM-dd') === format(backendDate, 'yyyy-MM-dd')
-      );
-      
-      if (dataIndex !== -1) {
-        const count = backendItem.answerTimes;
-        let level = 0;
-        
-        if (count === 0) level = 0;
-        else if (count <= 3) level = 1;
-        else if (count <= 7) level = 2;
-        else if (count <= 12) level = 3;
-        else level = 4;
-        
-        data[dataIndex] = { date: backendDate, count, level };
-      }
-    });
-  } else {
-    // 如果没有后端数据，生成模拟数据
-    data.forEach(item => {
-      const count = Math.floor(Math.random() * 20);
+      const count = backendItem.answerTimes;
       let level = 0;
       
       if (count === 0) level = 0;
@@ -68,23 +42,38 @@ const generateHeatmapData = () => {
       else if (count <= 12) level = 3;
       else level = 4;
       
-      item.count = count;
-      item.level = level;
+      data.push({ date: backendDate, count, level });
     });
+    
+    // 按日期排序（从最早到最新）
+    data.sort((a, b) => a.date.getTime() - b.date.getTime());
+  } else {
+    // 如果没有后端数据，生成120天的空数据（次数全为0）
+    for (let i = 119; i >= 0; i--) {
+      const date = subDays(today, i);
+      const count = 0;
+      const level = 0;
+      
+      data.push({ date, count, level });
+    }
   }
   
   return data;
 };
 
-// 将数据按周组织成网格 (20列6行)
+// 将数据按周组织成网格
 const heatmapGrid = computed(() => {
   const grid: HeatmapData[][] = [];
   const data = heatmapData.value;
   
   if (data.length === 0) return grid;
   
-  // 创建20列的网格
-  for (let week = 0; week < 20; week++) {
+  // 动态计算需要的列数（每列6天）
+  const totalDays = data.length;
+  const weeksNeeded = Math.ceil(totalDays / 6);
+  
+  // 创建网格
+  for (let week = 0; week < weeksNeeded; week++) {
     const weekData: HeatmapData[] = [];
     
     for (let day = 0; day < 6; day++) {
@@ -187,7 +176,7 @@ onMounted(() => {
             <svg class="stat-icon" height="12" viewBox="0 0 16 16" width="12">
               <path d="M8 0C3.58 0 0 3.58 0 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm3.707 5.293a1 1 0 0 1 0 1.414L8.414 10a1 1 0 0 1-1.414 0L4.293 7.293a1 1 0 1 1 1.414-1.414L7 7.172l2.293-2.293a1 1 0 0 1 1.414 0z" fill="#3b82f6"/>
             </svg>
-            <strong>{{ totalStats.activeDays }} / 120</strong> 活跃天
+            <strong>{{ totalStats.activeDays }} / {{ heatmapData.length }}</strong> 活跃天
           </span>
           <span class="stat-item">
             <svg class="stat-icon" height="12" viewBox="0 0 16 16" width="12">

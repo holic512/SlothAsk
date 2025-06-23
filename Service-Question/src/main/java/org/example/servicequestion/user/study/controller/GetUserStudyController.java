@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import org.example.servicequestion.config.ApiResponse.ApiResponse;
 import org.example.servicequestion.entity.QuestionCategory;
 import org.example.servicequestion.user.study.dto.CategoryIdAndNameDto;
+import org.example.servicequestion.user.study.dto.UserSubmitCountDto;
 import org.example.servicequestion.user.study.request.GetQuestionListRequest;
 import org.example.servicequestion.user.study.service.GetUserStudyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,7 +115,6 @@ public class GetUserStudyController {
     }
 
     /**
-     * 获取下一题的虚拟ID
      * 根据当前题目的虚拟ID，获取同一分类下的下一题虚拟ID
      *
      * @param currentVid 当前题目的虚拟ID
@@ -126,5 +126,20 @@ public class GetUserStudyController {
     ) {
         String nextVid = getUserStudyService.getNextQuestionVid(currentVid);
         return new ApiResponse(200, "获取下一题虚拟ID成功", nextVid);
+    }
+
+    /**
+     * 获取用户提交次数统计
+     * 查询Redis中当天的提交次数缓存数据，同时从数据库中查询最近119天的提交记录
+     *
+     * @param userId 用户ID,从请求头X-User-Id获取
+     * @return 包含用户提交次数统计的API响应
+     */
+    @GetMapping("/submitCountStats")
+    public ApiResponse getUserSubmitCountStats(
+            @RequestHeader("X-User-Id") Long userId
+    ) {
+        List<UserSubmitCountDto> stats = getUserStudyService.getUserSubmitCountStats(userId);
+        return new ApiResponse(200, "获取用户提交次数统计成功", stats);
     }
 }

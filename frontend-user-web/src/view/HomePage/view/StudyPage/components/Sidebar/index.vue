@@ -4,7 +4,7 @@
     <SignIn/>
 
     <!--  回答热力图   -->
-    <Heatmap/>
+    <Heatmap :backendData="heatmapData"/>
 
     <!--  热门题目   -->
     <HotQuestions/>
@@ -13,10 +13,37 @@
 </template>
 
 <script setup>
-
+import {onMounted, ref} from 'vue';
 import SignIn from "@/view/HomePage/view/StudyPage/components/Sidebar/components/SignIn.vue";
 import Heatmap from "@/view/HomePage/view/StudyPage/components/Sidebar/components/Heatmap.vue";
 import HotQuestions from "@/view/HomePage/view/StudyPage/components/Sidebar/components/HotQuestions.vue";
+import {apiGetUserSubmitCountStats} from "@/view/HomePage/view/StudyPage/service/ApiGetUserSubmitCountStats";
+
+// 热力图数据
+const heatmapData = ref([]);
+
+// 获取用户提交次数统计数据
+const fetchHeatmapData = async () => {
+  try {
+    const response = await apiGetUserSubmitCountStats();
+    if (response.status === 200) {
+      // 转换数据格式以匹配Heatmap组件的期望格式
+      heatmapData.value = response.data.map(item => ({
+        date: item.date,
+        answerTimes: item.count
+      }));
+    }
+  } catch (error) {
+    console.error('获取用户提交次数统计失败:', error);
+    // 如果获取失败，保持空数组，Heatmap组件会使用模拟数据
+    heatmapData.value = [];
+  }
+};
+
+// 组件挂载时获取数据
+onMounted(() => {
+  fetchHeatmapData();
+});
 </script>
 
 
