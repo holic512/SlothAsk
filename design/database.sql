@@ -734,4 +734,25 @@ CREATE TABLE `user_favorite_question`
   COLLATE = utf8mb4_general_ci COMMENT = '用户题目收藏表'
   ROW_FORMAT = Dynamic;
 
+-- ----------------------------
+-- Table structure for base_message
+-- ----------------------------
+DROP TABLE IF EXISTS `base_message`;
+CREATE TABLE `base_message`
+(
+    `id`            bigint       NOT NULL AUTO_INCREMENT COMMENT '消息记录ID（主键）',
+    `user_id`       bigint       NOT NULL COMMENT '接收消息的用户ID',
+    `type`          int          NOT NULL COMMENT '消息类型（枚举值）',
+    `read_status`   tinyint      NOT NULL DEFAULT 0 COMMENT '阅读状态：0未读，1已读',
+    `message_data`  text         NOT NULL COMMENT '消息内容，序列化后的JSON字符串',
+    `created_time`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_time`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    INDEX `idx_user_id` (`user_id`) USING BTREE COMMENT '用户维度消息查询',
+    INDEX `idx_created_time` (`created_time`) USING BTREE COMMENT '时间排序优化'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci COMMENT = '用户消息记录表'
+  ROW_FORMAT = Dynamic;
+
 SET FOREIGN_KEY_CHECKS = 1;

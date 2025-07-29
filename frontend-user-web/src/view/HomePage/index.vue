@@ -2,6 +2,7 @@
 <script lang="ts" setup>
 import TopMenu from "./view/TopMenu/TopMenu.vue";
 import FooterMenu from "./view/FootMenu/FootMenu.vue"
+import MessageNotificationContainer from "./components/Message/MessageNotificationContainer.vue";
 import {useRoute} from 'vue-router';
 import {computed, onMounted, ref, watch} from 'vue';
 import {useScrollbarStore} from "@/pinia/ScrollbarStore";
@@ -44,6 +45,9 @@ watch(() => route.path, () => {
       <!-- 返回顶部按钮 -->
       <el-backtop :bottom="100" :right="40" target=".el-scrollbar__wrap"/>
     </el-scrollbar>
+    
+    <!-- 消息通知容器 -->
+    <MessageNotificationContainer />
   </div>
 </template>
 

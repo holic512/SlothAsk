@@ -3,10 +3,10 @@ import {defineEmits, defineProps} from 'vue';
 import {CommentItemInterface} from "@/view/HomePage/view/UserProfile/interface/CommentItemInterface";
 import {useRoute, useRouter} from "vue-router";
 import {ElPagination} from 'element-plus';
-import {Star} from '@element-plus/icons-vue';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/zh-cn'
+import {Medal} from "@element-plus/icons-vue";
 
 dayjs.locale('zh-cn')
 
@@ -36,10 +36,20 @@ const handlePageChange = (page: number) => {
 const formatTime = (time: string) => {
   const now = dayjs();
   const target = dayjs(time);
-  if (now.diff(target, 'day') >= 1) {
-    return target.format('YYYY-MM-DD HH:mm:ss');
+  const diffDays = now.diff(target, 'day');
+  const diffHours = now.diff(target, 'hour');
+  const diffMinutes = now.diff(target, 'minute');
+
+  if (diffDays >= 7) {
+    return target.format('YYYY-MM-DD');
+  } else if (diffDays >= 1) {
+    return target.format('MM-DD HH:mm');
+  } else if (diffHours >= 1) {
+    return `${diffHours}小时前`;
+  } else if (diffMinutes >= 1) {
+    return `${diffMinutes}分钟前`;
   } else {
-    return target.fromNow();
+    return '刚刚';
   }
 }
 
@@ -71,15 +81,15 @@ const formatTime = (time: string) => {
             <el-text class="meta-time">{{ formatTime(answer.createdAt) }}</el-text>
           </div>
           <div class="meta-row meta-row-bottom">
-            <el-text class="meta-source">
-              来源:
+            <div class="meta-source">
+              <el-text>来源:</el-text>
               <el-link class="source-title" type="primary" @click="handleToQuestion(answer.questionTUid)">
                 {{ answer.questionTitle }}
               </el-link>
-            </el-text>
+            </div>
             <div class="answer-like">
               <el-icon :size="16" style="vertical-align: middle;">
-                <Star/>
+                <Medal/>
               </el-icon>
               <el-text class="like-num">{{ answer.likes }}</el-text>
             </div>
@@ -119,8 +129,6 @@ const formatTime = (time: string) => {
 <style scoped>
 .answers-module {
   min-height: 400px;
-  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Segoe UI', 'Microsoft YaHei', sans-serif;
-  background-color: #f9fafb;
 }
 
 .empty-state {
@@ -150,7 +158,6 @@ const formatTime = (time: string) => {
 .answers-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
 }
 
 .answer-item {
@@ -158,13 +165,26 @@ const formatTime = (time: string) => {
   padding: 18px 24px;
   background-color: #ffffff;
   border-radius: 8px;
-  transition: background-color 0.25s ease, border-color 0.25s ease;
-  border: 1px solid transparent;
+  transition: background-color 0.1s ease;
+}
+
+.answer-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 4px;
+  right: 4px;
+  height: 1px;
+  background-color: #e0e0e0;
+  transition: opacity 0.1s ease;
 }
 
 .answer-item:hover {
   background-color: #f1f3f4;
-  border-color: #dfe3e8;
+}
+
+.answer-item:hover::after {
+  opacity: 0;
 }
 
 .answer-main {
@@ -218,11 +238,18 @@ const formatTime = (time: string) => {
   font-size: 13px;
 }
 
+.meta-source {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #757575;
+  font-size: 13px;
+}
+
 .source-title {
   color: #2962ff;
   cursor: pointer;
   font-weight: 500;
-  margin-left: 2px;
   transition: color 0.2s;
 }
 

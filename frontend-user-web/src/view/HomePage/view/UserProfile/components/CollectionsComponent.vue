@@ -38,10 +38,20 @@ const handleToQuestion = (questionId: string) => {
 const formatTime = (time: string) => {
   const now = dayjs();
   const target = dayjs(time);
-  if (now.diff(target, 'day') >= 1) {
-    return target.format('YYYY-MM-DD HH:mm:ss');
+  const diffDays = now.diff(target, 'day');
+  const diffHours = now.diff(target, 'hour');
+  const diffMinutes = now.diff(target, 'minute');
+  
+  if (diffDays >= 7) {
+    return target.format('YYYY-MM-DD');
+  } else if (diffDays >= 1) {
+    return target.format('MM-DD HH:mm');
+  } else if (diffHours >= 1) {
+    return `${diffHours}小时前`;
+  } else if (diffMinutes >= 1) {
+    return `${diffMinutes}分钟前`;
   } else {
-    return target.fromNow();
+    return '刚刚';
   }
 };
 </script>
@@ -56,24 +66,39 @@ const formatTime = (time: string) => {
     <div v-else-if="collections.length === 0" class="empty-state">
       <div class="empty-icon">
         <svg fill="none" height="64" viewBox="0 0 24 24" width="64" xmlns="http://www.w3.org/2000/svg">
-          <path d="M17 3H7C5.9 3 5 3.9 5 5V21L12 18L19 21V5C19 3.9 18.1 3 17 3ZM17 19L12 16.82L7 19V5H17V19Z" fill="#CCCCCC"/>
+          <path d="M17 3H7C5.9 3 5 3.9 5 5V21L12 18L19 21V5C19 3.9 18.1 3 17 3ZM17 19L12 16.82L7 19V5H17V19Z" fill="#90a4ae"/>
         </svg>
       </div>
       <p>暂无收藏内容</p>
-      <button class="create-btn">添加收藏</button>
     </div>
 
     <div v-else class="collections-list">
       <div v-for="collection in collections" :key="collection.questionId" class="collection-item">
-        <div class="collection-header">
-          <h3 class="collection-title" @click="handleToQuestion(collection.questionId)">{{ collection.questionTitle }}</h3>
+        <div class="collection-main">
+          <div class="collection-title-row">
+            <el-text class="collection-title" @click="handleToQuestion(collection.questionId)">{{ collection.questionTitle }}</el-text>
+            <el-text class="meta-time">{{ formatTime(collection.savedAt) }}</el-text>
+          </div>
+          <div class="meta-row">
+            <div v-if="collection.tags && collection.tags.length > 0" class="collection-tags">
+              <span v-for="tag in collection.tags" :key="tag" class="tag">{{ tag }}</span>
+            </div>
+            <el-text class="meta-views">访问量：{{ collection.views }}</el-text>
+          </div>
         </div>
-        <div class="collection-tags">
-          <span v-for="tag in collection.tags" :key="tag" class="tag">{{ tag }}</span>
-        </div>
-        <div class="collection-meta">
-          <span class="views">访问量：{{ collection.views }}</span>
-          <span class="saved-date">收藏于 {{ formatTime(collection.savedAt) }}</span>
+      </div>
+    </div>
+    
+    <div v-if="isLoading" class="collections-list">
+      <div v-for="i in pageSize" :key="i" class="collection-item skeleton">
+        <div class="collection-main">
+          <div class="collection-title-row">
+            <el-text class="collection-title skeleton-block"></el-text>
+            <el-text class="meta-time skeleton-block" style="width: 60px;"></el-text>
+          </div>
+          <div class="meta-row">
+            <el-text class="meta-views skeleton-block" style="width: 80px;"></el-text>
+          </div>
         </div>
       </div>
     </div>
@@ -104,26 +129,28 @@ const formatTime = (time: string) => {
   align-items: center;
   justify-content: center;
   height: 300px;
-  color: #999;
-  background-color: #fafafa;
+  color: #90a4ae;
   border-radius: 8px;
   padding: 20px;
   text-align: center;
+  border: 1px dashed #cfd8dc;
+  background: #ffffff;
 }
 
 .loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #007bff;
+  width: 36px;
+  height: 36px;
+  border: 3px solid #eceff1;
+  border-top: 3px solid #607d8b;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 16px;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 12px;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .empty-icon {
@@ -131,81 +158,130 @@ const formatTime = (time: string) => {
   opacity: 0.5;
 }
 
-.create-btn {
-  margin-top: 16px;
-  padding: 8px 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
-}
-
-.create-btn:hover {
-  background-color: #0056b3;
-}
-
 .collections-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
 }
 
 .collection-item {
-  padding: 20px;
-  background-color: white;
+  position: relative;
+  padding: 18px 24px;
+  background-color: #ffffff;
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: background-color 0.1s ease;
+}
+
+.collection-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 4px;
+  right: 4px;
+  height: 1px;
+  background-color: #e0e0e0;
+  transition: opacity 0.1s ease;
 }
 
 .collection-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #f1f3f4;
 }
 
-.collection-header {
+.collection-item:hover::after {
+  opacity: 0;
+}
+
+.collection-main {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.collection-title-row {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
+  gap: 16px;
 }
 
 .collection-title {
-  margin: 0;
-  font-size: 18px;
-  color: #333;
+  color: #212121;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.7;
+  flex: 1;
+  word-break: break-word;
   cursor: pointer;
   transition: color 0.2s;
+  max-width: 80%;
 }
 
 .collection-title:hover {
-  color: #007bff;
+  color: #2962ff;
+}
+
+.meta-time {
+  color: #757575;
+  font-size: 13px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .collection-tags {
-  margin-bottom: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
 }
 
 .tag {
   display: inline-block;
-  background: #e3f2fd;
-  color: #1976d2;
-  border-radius: 4px;
-  padding: 2px 8px;
+  background: #e8f5e8;
+  color: #2e7d32;
+  border-radius: 12px;
+  padding: 4px 12px;
   font-size: 12px;
-  margin-right: 6px;
+  font-weight: 500;
+  transition: background-color 0.2s;
 }
 
-.views {
-  margin-right: 16px;
+.tag:hover {
+  background: #c8e6c9;
 }
 
-.collection-meta {
-  color: #999;
-  font-size: 14px;
+.meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 24px;
+}
+
+.meta-views {
+  color: #757575;
+  font-size: 13px;
+}
+
+.collection-item.skeleton {
+  pointer-events: none;
+  box-shadow: none;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+}
+
+.skeleton-block {
+  background: linear-gradient(90deg, #eeeeee 25%, #e0e0e0 50%, #eeeeee 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: skeleton-loading 1.2s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* 分页样式 */
@@ -217,13 +293,12 @@ const formatTime = (time: string) => {
 
 /* 响应式调整 */
 @media (max-width: 768px) {
-  .collection-header {
-    flex-direction: column;
+  .collection-item {
+    padding: 16px;
   }
 
-  .views {
-    margin-top: 4px;
-    margin-bottom: 8px;
+  .collection-title {
+    font-size: 15px;
   }
 }
 </style>

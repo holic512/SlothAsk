@@ -6,7 +6,7 @@ import {getUserBasicInfo} from "@/view/HomePage/view/TopMenu/Api/ApiUserInfo";
 import {useSessionStore} from "@/pinia/Session";
 import {useUserProfileStore} from "@/pinia/UserProfile";
 import UserUtil from "@/view/HomePage/view/TopMenu/components/UserUtil/UserUtil.vue";
-import SearchBox from "@/view/HomePage/view/TopMenu/components/SearchBox/SearchBox.vue";
+import BellUtil from "@/view/HomePage/view/TopMenu/components/BellUtil/index.vue";
 import {ArrowRight, Bell, Menu, QuestionFilled, Reading, User} from '@element-plus/icons-vue';
 
 const router = useRouter();
@@ -17,6 +17,7 @@ const isPopoverVisible = ref(false);
 
 // 菜单配置项
 const menuItems = ref([
+  {path: '/intro', name: '主页', icon: Reading},
   {path: '/study', name: '学习', icon: Reading},
   {path: '/questionbank/questionbank', name: '题库', icon: QuestionFilled},
   // { path: '/contest', name: '竞赛' },
@@ -125,88 +126,142 @@ const toggleMobileMenu = () => {
 
 <template>
   <header class="navbar">
-    <!-- 顶部导航栏 -->
-    <div class="navbar-container">
-      <!-- 移动端菜单按钮 -->
-      <button v-if="isMobile" class="mobile-menu-button" @click="toggleMobileMenu">
-        <el-icon :size="20">
-          <Menu/>
-        </el-icon>
-      </button>
-
-      <!-- Logo -->
-      <div class="logo-container" @click="handleLogoClick">
-        <img src="/HomePage/logo.jpg" alt="Logo" class="logo-img">
-      </div>
-
-      <!-- 桌面导航菜单 -->
-      <nav v-if="!isMobile" class="desktop-nav">
-        <ul class="nav-list">
-          <li
-              v-for="item in menuItems"
-              :key="item.path"
-              :class="{ 'nav-item': true, 'active': route.path === item.path }"
-              @click="handleSelect(item.path)"
-          >
-            {{ item.name }}
-          </li>
-        </ul>
-      </nav>
-
-      <!-- 右侧功能区 -->
-      <div class="navbar-right">
-        <!-- 搜索框 - 桌面端显示 -->
-        <SearchBox v-if="!isMobile" @search="handleSearch"/>
-
-        <!-- 用户操作区 -->
-        <div v-if="topMenuStore.isLogin" class="user-section">
-          <!-- 消息通知 -->
-          <button class="icon-button">
-            <el-icon :size="isMobile ? 20 : 18">
-              <Bell/>
-            </el-icon>
-          </button>
-
-          <!-- 头像个人信息 -->
-          <el-popover
-              placement="bottom"
-              trigger="click"
-              popper-class="custom-avatar-popover"
-              :width="isMobile ? 280 : 300"
-              v-model:visible="isPopoverVisible"
-              :hide-after="0"
-          >
-            <UserUtil :userInfo="userInfo" @closePopover="isPopoverVisible = false"/>
-            <template #reference>
-              <div class="avatar-container">
-                <el-avatar
-                    size="small"
-                    style="display: flex; align-items: center; justify-content: center;margin-right: 12px"
-                    :src="userInfo.avatar"
-                    v-if="userInfo.avatar"
-                />
-                <el-avatar
-                    size="small"
-                    style="display: flex; align-items: center; justify-content: center;margin-right: 12px"
-                    v-else
-                >{{ getAvatarText(userInfo.nickname) }}
-                </el-avatar>
-              </div>
-            </template>
-          </el-popover>
-
-          <button class="vip-button">
-            <span v-if="!isMobile">Sloth会员</span>
-            <span v-else>会员</span>
-          </button>
+    <!-- 桌面端导航栏 -->
+    <div v-if="!isMobile" class="desktop-navbar">
+      <div class="desktop-navbar-container">
+        <!-- 第一部分：Logo和导航菜单 -->
+        <div class="navbar-left-section">
+          <div class="logo-container" @click="handleLogoClick">
+            <img alt="Logo" class="logo-img" src="/HomePage/logo.jpg">
+          </div>
+          
+          <nav class="desktop-nav">
+            <ul class="nav-list">
+              <li
+                  v-for="item in menuItems"
+                  :key="item.path"
+                  :class="{ 'nav-item': true, 'active': route.path === item.path }"
+                  @click="handleSelect(item.path)"
+              >
+                {{ item.name }}
+              </li>
+            </ul>
+          </nav>
         </div>
 
-        <div v-else class="user-actions">
-          <button v-if="!isMobile" class="login-button" @click="handleLogin">登录</button>
-          <button class="vip-button">
-            <span v-if="!isMobile">Sloth会员</span>
-            <span v-else>会员</span>
-          </button>
+        <!-- 第二部分：留白区域（自动伸缩） -->
+        <div class="navbar-spacer"></div>
+
+        <!-- 第三部分：用户功能区域 -->
+        <div class="navbar-right-section">
+          <!-- 用户已登录状态 -->
+          <div v-if="topMenuStore.isLogin" class="user-section">
+            <!-- 消息服务 -->
+            <BellUtil/>
+
+            <!-- 头像个人信息 -->
+            <el-popover
+                v-model:visible="isPopoverVisible"
+                :hide-after="50"
+                :width="300"
+                placement="bottom"
+                popper-class="custom-avatar-popover"
+                trigger="click"
+            >
+              <UserUtil :userInfo="userInfo" @closePopover="isPopoverVisible = false"/>
+              <template #reference>
+                <div class="avatar-container">
+                  <el-avatar
+                      v-if="userInfo.avatar"
+                      :src="userInfo.avatar"
+                      size="small"
+                      style="display: flex; align-items: center; justify-content: center;"
+                  />
+                  <el-avatar
+                      v-else
+                      size="small"
+                      style="display: flex; align-items: center; justify-content: center;"
+                  >{{ getAvatarText(userInfo.nickname) }}
+                  </el-avatar>
+                </div>
+              </template>
+            </el-popover>
+
+            <button class="vip-button">
+              <span>Sloth会员</span>
+            </button>
+          </div>
+
+          <!-- 用户未登录状态 -->
+          <div v-else class="user-actions">
+            <button class="login-button" @click="handleLogin">登录</button>
+            <button class="vip-button">
+              <span>Sloth会员</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 移动端导航栏 -->
+    <div v-else class="mobile-navbar">
+      <div class="mobile-navbar-container">
+        <!-- 移动端菜单按钮 -->
+        <button class="mobile-menu-button" @click="toggleMobileMenu">
+          <el-icon :size="20">
+            <Menu/>
+          </el-icon>
+        </button>
+
+        <!-- Logo -->
+        <div class="logo-container" @click="handleLogoClick">
+          <img alt="Logo" class="logo-img" src="/HomePage/logo.jpg">
+        </div>
+
+        <!-- 移动端右侧功能区 -->
+        <div class="mobile-navbar-right">
+          <!-- 用户已登录状态 -->
+          <div v-if="topMenuStore.isLogin" class="mobile-user-section">
+            <BellUtil/>
+            
+            <el-popover
+                v-model:visible="isPopoverVisible"
+                :hide-after="50"
+                :width="280"
+                placement="bottom"
+                popper-class="custom-avatar-popover"
+                trigger="click"
+            >
+              <UserUtil :userInfo="userInfo" @closePopover="isPopoverVisible = false"/>
+              <template #reference>
+                <div class="avatar-container">
+                  <el-avatar
+                      v-if="userInfo.avatar"
+                      :src="userInfo.avatar"
+                      size="small"
+                      style="display: flex; align-items: center; justify-content: center;"
+                  />
+                  <el-avatar
+                      v-else
+                      size="small"
+                      style="display: flex; align-items: center; justify-content: center;"
+                  >{{ getAvatarText(userInfo.nickname) }}
+                  </el-avatar>
+                </div>
+              </template>
+            </el-popover>
+
+            <button class="vip-button">
+              <span>会员</span>
+            </button>
+          </div>
+
+          <!-- 用户未登录状态 -->
+          <div v-else class="mobile-user-actions">
+            <button class="vip-button">
+              <span>会员</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -237,11 +292,6 @@ const toggleMobileMenu = () => {
             </li>
           </ul>
 
-          <!-- 搜索框 -->
-          <div class="mobile-search-container">
-            <SearchBox @search="handleSearch"/>
-          </div>
-
           <!-- 登录按钮 -->
           <div v-if="!topMenuStore.isLogin" class="mobile-login-section">
             <button class="mobile-login-button" @click="handleLogin">
@@ -267,28 +317,43 @@ const toggleMobileMenu = () => {
 </template>
 
 <style scoped>
-/* 基础样式 */
+/* ==================== 基础样式 ==================== */
 .navbar {
   width: 100%;
   border-bottom: 1px solid #e0e0e0;
   position: relative;
+  background: white;
 }
 
-.navbar-container {
+/* ==================== 桌面端导航样式 ==================== */
+.desktop-navbar {
+  width: 100%;
+}
+
+.desktop-navbar-container {
   display: flex;
   align-items: center;
   height: 52px;
-  padding: 0 48px; /* 添加左右内边距保持间距 */
+  max-width: 1400px; /* 最大宽度限制 */
+  margin: 0 auto; /* 居中显示 */
+  padding: 0 12px;
   width: 100%;
   box-sizing: border-box;
 }
 
-/* Logo 样式 */
+/* 第一部分：Logo和导航菜单 */
+.navbar-left-section {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0; /* 防止压缩 */
+}
+
 .logo-container {
   display: flex;
   align-items: center;
   cursor: pointer;
   margin-right: 48px;
+  flex-shrink: 0;
 }
 
 .logo-img {
@@ -296,17 +361,17 @@ const toggleMobileMenu = () => {
   object-fit: contain;
 }
 
-/* 桌面导航菜单 */
 .desktop-nav {
-  flex-grow: 1;
+  display: flex;
+  align-items: center;
 }
 
 .nav-list {
   display: flex;
   list-style: none;
   margin: 0;
+  padding: 0;
   gap: 12px;
-  padding: 4px 0 0;
 }
 
 .nav-item {
@@ -318,6 +383,7 @@ const toggleMobileMenu = () => {
   font-weight: 500;
   position: relative;
   border-bottom: 2px solid transparent;
+  white-space: nowrap;
 }
 
 .nav-item:hover {
@@ -330,38 +396,71 @@ const toggleMobileMenu = () => {
   border-bottom-color: #1a1a1a;
 }
 
-/* 右侧功能区 */
-.navbar-right {
+/* 第二部分：留白区域（自动伸缩） */
+.navbar-spacer {
+  flex: 1; /* 占据剩余空间 */
+  min-width: 20px; /* 最小宽度确保不会完全消失 */
+}
+
+/* 第三部分：用户功能区域 */
+.navbar-right-section {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-left: auto;
+  flex-shrink: 0; /* 防止压缩 */
 }
 
 .user-section, .user-actions {
   display: flex;
   align-items: center;
+  gap: 18px;
+}
+
+/* ==================== 移动端导航样式 ==================== */
+.mobile-navbar {
+  width: 100%;
+}
+
+.mobile-navbar-container {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  padding: 0 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mobile-navbar-right {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.mobile-user-section, .mobile-user-actions {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
 
-/* 按钮样式 */
-.icon-button {
+/* 移动端菜单按钮 */
+.mobile-menu-button {
   background: none;
   border: none;
   cursor: pointer;
   padding: 8px;
+  margin-right: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #333;
-  border-radius: 50%;
-  transition: background-color 0.2s;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
 }
 
-.icon-button:hover {
-  background-color: #f5f5f5;
+.mobile-menu-button:active {
+  transform: scale(0.92);
 }
 
+/* ==================== 通用组件样式 ==================== */
 .login-button {
   background: none;
   border: none;
@@ -372,6 +471,7 @@ const toggleMobileMenu = () => {
   font-weight: 500;
   border-radius: 4px;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .login-button:hover {
@@ -390,6 +490,7 @@ const toggleMobileMenu = () => {
   border-radius: 4px;
   transition: all 0.2s;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .vip-button:hover {
@@ -400,31 +501,42 @@ const toggleMobileMenu = () => {
 .avatar-container {
   cursor: pointer;
   transition: transform 0.2s;
+  flex-shrink: 0;
 }
 
 .avatar-container:hover {
   transform: scale(1.05);
 }
 
-/* 移动端菜单按钮 */
-.mobile-menu-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-  margin-right: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #333;
-  transition: transform 0.2s ease;
+/* ==================== 响应式调整 ==================== */
+
+@media (max-width: 1200px) {
+
+  
+  .logo-container {
+    margin-right: 32px;
+  }
+  
+  .nav-item {
+    padding: 12px 8px;
+  }
 }
 
-.mobile-menu-button:active {
-  transform: scale(0.92);
+@media (max-width: 900px) {
+  .logo-container {
+    margin-right: 24px;
+  }
+  
+  .nav-list {
+    gap: 8px;
+  }
+  
+  .user-section, .user-actions {
+    gap: 12px;
+  }
 }
 
-/* 移动端菜单 */
+/* ==================== 移动端下拉菜单样式 ==================== */
 .mobile-menu {
   position: absolute;
   top: 52px;
@@ -508,13 +620,6 @@ const toggleMobileMenu = () => {
   color: #333;
 }
 
-.mobile-search-container {
-  padding: 16px 20px;
-  margin: 8px 0;
-  border-top: 1px solid #f0f0f0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
 .mobile-login-section {
   padding: 8px 16px;
 }
@@ -571,31 +676,24 @@ const toggleMobileMenu = () => {
   background-color: #333;
 }
 
-/* 动画效果 */
+/* ==================== 动画效果 ==================== */
 .slide-down-enter-active,
 .slide-down-leave-active {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  max-height: 800px;
+  transition: all 0.3s ease;
 }
 
-.slide-down-enter-from,
-.slide-down-leave-to {
-  max-height: 0;
+.slide-down-enter-from {
   opacity: 0;
-  transform: translateY(-8px);
-}
-</style>
-
-<style>
-/* 全局样式 */
-.custom-avatar-popover {
-  border-radius: 12px !important;
-  padding: 16px !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
-  border: 1px solid #f0f0f0 !important;
+  transform: translateY(-10px);
 }
 
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* ==================== 自定义Popover样式 ==================== */
 .custom-avatar-popover .el-popper__arrow {
-  display: none !important;
+  display: none;
 }
 </style>

@@ -15,6 +15,7 @@ import {
 import {ElMessage} from "element-plus";
 import {Opportunity} from "@element-plus/icons-vue";
 import {FavQuestionItemInterface} from "./interface/FavQuestionItemInterface";
+import router from "@/router/router";
 
 
 // 模块类型
@@ -73,8 +74,7 @@ const switchModule = (module: ModuleType) => {
 
 // 编辑资料按钮点击事件
 const handleEditProfile = () => {
-  // 编辑资料逻辑，待实现
-  console.log('编辑资料');
+  router.push('/account/profile');
 };
 
 // 获取用户信息
@@ -186,61 +186,64 @@ onMounted(() => {
     </div>
 
     <div class="container">
-      <!-- 用户信息组件 -->
-      <UserInfoComponent
-          :user-info="userInfo"
-          @edit-profile="handleEditProfile"
-      />
-
-      <!-- 内容模块切换 -->
-      <div class="module-tabs-container">
-
-        <button
-            :class="{ active: activeModule === 'answers' }"
-            class="tab-btn"
-            @click="switchModule('answers')"
-        >
-          回答
-        </button>
-        <button
-            :class="{ active: activeModule === 'collections' }"
-            class="tab-btn"
-            @click="switchModule('collections')"
-        >
-          收藏
-        </button>
-        <el-tooltip
-            :show-after="500"
-            content="该内容由缓存机制处理,更新可能会存在延迟"
-            placement="bottom"
-        >
-          <el-icon class="tip-icon" size="small">
-            <Opportunity/>
-          </el-icon>
-        </el-tooltip>
-
-      </div>
-
-      <!-- 模块内容区域 -->
-      <div class="module-content">
-        <AnswersComponent
-            v-if="activeModule === 'answers'"
-            :answers="answers"
-            :current-page="currentPage"
-            :is-loading="isLoading"
-            :page-size="pageSize"
-            :total="total"
-            @page-change="handlePageChange"
+      <!-- 主要内容卡片 -->
+      <div class="main-card">
+        <!-- 用户信息组件 -->
+        <UserInfoComponent
+            :user-info="userInfo"
+            @edit-profile="handleEditProfile"
         />
-        <CollectionsComponent
-            v-else
-            :collections="collections"
-            :current-page="collectionsCurrentPage"
-            :is-loading="isCollectionsLoading"
-            :page-size="collectionsPageSize"
-            :total="collectionsTotal"
-            @page-change="handleCollectionsPageChange"
-        />
+
+        <!-- 内容模块切换 -->
+        <div class="module-tabs-container">
+          <div class="tabs-wrapper">
+            <button
+                :class="{ active: activeModule === 'answers' }"
+                class="tab-btn"
+                @click="switchModule('answers')"
+            >
+              回答
+            </button>
+            <button
+                :class="{ active: activeModule === 'collections' }"
+                class="tab-btn"
+                @click="switchModule('collections')"
+            >
+              收藏
+            </button>
+          </div>
+          <el-tooltip
+              :show-after="500"
+              content="该内容由缓存机制处理,更新可能会存在延迟"
+              placement="bottom"
+          >
+            <el-icon class="tip-icon" size="small">
+              <Opportunity/>
+            </el-icon>
+          </el-tooltip>
+        </div>
+
+        <!-- 模块内容区域 -->
+        <div class="module-content">
+          <AnswersComponent
+              v-if="activeModule === 'answers'"
+              :answers="answers"
+              :current-page="currentPage"
+              :is-loading="isLoading"
+              :page-size="pageSize"
+              :total="total"
+              @page-change="handlePageChange"
+          />
+          <CollectionsComponent
+              v-else
+              :collections="collections"
+              :current-page="collectionsCurrentPage"
+              :is-loading="isCollectionsLoading"
+              :page-size="collectionsPageSize"
+              :total="collectionsTotal"
+              @page-change="handleCollectionsPageChange"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -250,72 +253,97 @@ onMounted(() => {
 .user-profile-page {
   background-color: #f9f9f9;
   min-height: 100vh;
-  padding: 40px 0;
+  padding: 24px 0;
 }
 
 .container {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 16px;
+}
+
+.main-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  padding: 20px;
 }
 
 .module-tabs-container {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
+  justify-content: space-between;
+  margin: 24px 0 16px 0;
+  padding: 0;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.module-tabs {
+.tabs-wrapper {
   display: flex;
-  border-bottom: 1px solid #eee;
-  background-color: white;
-  border-radius: 8px 8px 0 0;
-  overflow: hidden;
-  flex: 1;
+  gap: 0;
+  position: relative;
 }
 
 .tab-btn {
-  padding: 12px 24px;
-  background: none;
+  padding: 16px 24px;
+  background: transparent;
   border: none;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
-  color: #666;
+  color: #6b7280;
   cursor: pointer;
+  transition: all 0.2s ease;
   position: relative;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  border-bottom: 2px solid transparent;
 }
 
-.tip-icon {
-  color: #999;
-}
-
-.tab-btn.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background-color: #007bff;
+.tab-btn.active {
+  color: #111827;
+  border-bottom-color: #2563eb;
+  font-weight: 600;
 }
 
 .tab-btn:hover:not(.active) {
-  color: #333;
-  background-color: rgba(0, 0, 0, 0.02);
+  color: #374151;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #2563eb;
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+
+.tab-btn.active::after {
+  transform: scaleX(1);
+}
+
+.tip-icon {
+  color: #b8a082;
+  transition: color 0.2s;
+}
+
+.tip-icon:hover {
+  color: #8b7355;
 }
 
 .module-content {
   overflow: hidden;
+  margin-top: 8px;
 }
 
 .tab-badge {
-  background-color: #e9ecef;
-  color: #495057;
+  background: rgba(245, 242, 239, 0.8);
+  color: #8b7355;
   border-radius: 10px;
   padding: 0 6px;
   font-size: 12px;

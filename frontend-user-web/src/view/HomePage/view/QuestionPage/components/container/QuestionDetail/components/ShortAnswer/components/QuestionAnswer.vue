@@ -46,7 +46,7 @@ const isLoggedIn = computed(() => {
 // 防抖函数
 const debounce = (fn: Function, delay: number) => {
   let timer: ReturnType<typeof setTimeout> | null = null
-  return function(this: any, ...args: any[]) {
+  return function (this: any, ...args: any[]) {
     if (timer) clearTimeout(timer)
     timer = setTimeout(() => {
       fn.apply(this, args)
@@ -120,18 +120,18 @@ onMounted(() => {
 })
 
 watch(
-  () => props.question,
-  () => {
-    showAnswer.value = false
-    isLoading.value = false
-    isToggling.value = false
-    
-    // 当问题变化时，检查缓存中是否有答案
-    const cachedAnswer = getAnswerFromCache(props.question.virtualId)
-    if (cachedAnswer && !props.question.answer) {
-      props.question.answer = cachedAnswer
+    () => props.question,
+    () => {
+      showAnswer.value = false
+      isLoading.value = false
+      isToggling.value = false
+
+      // 当问题变化时，检查缓存中是否有答案
+      const cachedAnswer = getAnswerFromCache(props.question.virtualId)
+      if (cachedAnswer && !props.question.answer) {
+        props.question.answer = cachedAnswer
+      }
     }
-  }
 )
 
 const sanitizedAnswer = computed(() => DOMPurify.sanitize(props.question.answer || ''))
@@ -140,10 +140,10 @@ const sanitizedAnswer = computed(() => DOMPurify.sanitize(props.question.answer 
 const toggleAnswerWithoutDebounce = async () => {
   // 如果正在处理中，直接返回
   if (isToggling.value) return
-  
+
   // 设置处理标志
   isToggling.value = true
-  
+
   if (!showAnswer.value) {
     // 如果未登录，不执行后续操作
     if (!isLoggedIn.value) {
@@ -151,17 +151,17 @@ const toggleAnswerWithoutDebounce = async () => {
       isToggling.value = false
       return
     }
-    
+
     // 先检查缓存
     const cachedAnswer = getAnswerFromCache(props.question.virtualId)
     if (cachedAnswer && !props.question.answer) {
       props.question.answer = cachedAnswer
     }
-    
+
     // 如果缓存没有，则请求API
     if (!props.question.answer) {
       isLoading.value = true
-      
+
       try {
         const res = await ApiGetQuestionAnswerByVirtualId(props.question.virtualId)
         if (res.status === 200) {
@@ -173,15 +173,15 @@ const toggleAnswerWithoutDebounce = async () => {
         console.error('加载答案失败', error)
         ElMessage.error('加载答案失败，请稍后重试')
       }
-      
+
       isLoading.value = false
     }
-    
+
     showAnswer.value = true
   } else {
     showAnswer.value = false
   }
-  
+
   // 重置处理标志
   isToggling.value = false
 }
@@ -200,6 +200,14 @@ const toggleAnswer = debounce(toggleAnswerWithoutDebounce, 100)
   display: flex;
   justify-content: space-between; /* 左右对齐 */
   align-items: center; /* 垂直居中 */
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e4e7ed;
+}
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
 }
 
 .toggle-link {
@@ -214,25 +222,111 @@ const toggleAnswer = debounce(toggleAnswerWithoutDebounce, 100)
 }
 
 :deep(.answer-text) {
-  font-size: 1.05rem;
-  line-height: 1.8;
+  font-size: 1rem;
+  line-height: 1.75;
   color: #2c3e50;
-  /* 代码块样式 */
 
+  /* 代码块样式 */
   pre, code {
-    background-color: #f5f7fa;
-    border-radius: 4px;
-    font-family: 'Fira Code', 'Consolas', monospace;
-    padding: 0.2em 0.4em;
-    font-size: 0.9em;
+    background-color: #f9fafb;
+    border-radius: 6px;
+    padding: 0.4em 0.8em;
+    font-size: 0.92em;
+    color: #1f2937;
+    font-family: Consolas, "Courier New", SFMono-Regular, Menlo, Monaco, monospace;
+
   }
 
   pre {
-    padding: 1em;
+    padding: 0.8em 1.2em;
     overflow-x: auto;
+    margin: 1em 0;
+    box-shadow: inset 0 0 0 1px #e5e7eb;
+  }
+
+  /* 图片样式 */
+  img {
+    max-width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    display: block;
+    margin: 1.5em auto;
+  }
+
+  /* 引用样式 */
+  blockquote {
+    border-left: 4px solid #60a5fa;
+    padding-left: 1em;
     margin: 1.2em 0;
+    color: #4b5563;
+    font-style: italic;
+    background-color: #f8fafc;
+    border-radius: 4px;
+  }
+
+  /* 标题样式 */
+  h1, h2, h3, h4 {
+    margin-top: 2em;
+    margin-bottom: 1em;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #111827;
+  }
+
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  h4 { font-size: 1.1rem; }
+
+  /* 列表样式 */
+  ul, ol {
+    padding-left: 1.5em;
+    margin: 1em 0;
+  }
+
+  li {
+    margin-bottom: 0.5em;
+  }
+
+  /* 表格样式 */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5em 0;
+    font-size: 0.95rem;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  th, td {
+    padding: 0.75em 1em;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  th {
+    background-color: #f9fafb;
+    color: #374151;
+    font-weight: 600;
+  }
+
+  tr:nth-child(even) td {
+    background-color: #fefefe;
+  }
+
+  tr:hover td {
+    background-color: #f3f4f6;
+  }
+
+  /* 其他基础 */
+  p {
+    margin: 1em 0;
   }
 }
+
 
 /* 占位毛玻璃效果 */
 .answer-placeholder {

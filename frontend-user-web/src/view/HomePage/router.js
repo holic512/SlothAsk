@@ -224,6 +224,26 @@ export default [
                         /* webpackChunkName: "privacy" */ './view/UserProfile/index.vue'
                         )
             },
+
+            // 消息页面
+            {
+                path: 'messages',
+                name: 'MessagePage',
+                component: () =>
+                    import(
+                        /* webpackChunkName: "messages" */ './view/MessagePage/index.vue'
+                        )
+            },
+
+            // AI解析消息组件演示
+            {
+                path: 'test',
+                name: 'test',
+                component: () =>
+                    import(
+                        './components/Test/Test.vue'
+                        )
+            },
         ]
     }
 ];

@@ -100,17 +100,17 @@ const handleEditProfile = () => {
         </div>
       </div>
 
-      <!-- 统计数据 -->
-      <div class="stats-row">
-        <div class="stat">
-          <div class="value">{{ userInfo.followingCount }}</div>
-          <div class="name">关注</div>
-        </div>
-        <div class="stat">
-          <div class="value">{{ userInfo.followersCount }}</div>
-          <div class="name">粉丝</div>
-        </div>
-      </div>
+<!--      &lt;!&ndash; 统计数据 &ndash;&gt;-->
+<!--      <div class="stats-row">-->
+<!--        <div class="stat">-->
+<!--          <div class="value">{{ userInfo.followingCount }}</div>-->
+<!--          <div class="name">关注</div>-->
+<!--        </div>-->
+<!--        <div class="stat">-->
+<!--          <div class="value">{{ userInfo.followersCount }}</div>-->
+<!--          <div class="name">粉丝</div>-->
+<!--        </div>-->
+<!--      </div>-->
 
       <!-- 个人简介 -->
       <div class="bio-row">
@@ -124,25 +124,26 @@ const handleEditProfile = () => {
 <style lang="scss" scoped>
 .profile {
   display: flex;
-  gap: 24px;
-  padding: 24px;
-  border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.02);
- 
-  margin-bottom: 12px;
+  gap: 20px;
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
 }
 
 .avatar {
   flex-shrink: 0;
 
   .img {
-    width: 140px;
-    height: 140px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid rgba(0, 0, 0, 0.1);
+    border: 3px solid rgba(184, 160, 130, 0.3);
+    transition: border-color 0.3s ease;
+  }
+
+  .img:hover {
+    border-color: rgba(184, 160, 130, 0.5);
   }
 }
 
@@ -167,41 +168,52 @@ const handleEditProfile = () => {
 }
 
 .name {
-  font-size: 28px;
+  font-size: 26px;
   margin: 0;
+  color: #6b5b73;
+  font-weight: 600;
 }
 
 .action-block .btn {
-  padding: 6px 16px;
-  border-radius: 6px;
+  padding: 8px 18px;
+  border-radius: 8px;
   font-weight: 500;
   cursor: pointer;
-  transition: transform .2s;
+  border: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 14px;
 }
 
 .btn.edit {
-  background: #4096ff;
+  background: #888;
   color: #fff;
 }
 
 .btn.follow {
-  background: #4096ff;
+  background: #666;
   color: #fff;
 }
 
 .btn.follow.followed {
-  background: #52c41a;
+  background: #777;
+  color: #fff;
 }
 
 .btn:hover {
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0);
 }
 
 /* 基本信息行 */
 .info-row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  margin: 12px 0;
 }
 
 .info-item {
@@ -212,7 +224,8 @@ const handleEditProfile = () => {
 
 .info-item .label {
   font-weight: 500;
-  color: var(--text-secondary);
+  color: #8b7355;
+  font-size: 14px;
 }
 
 /* 统计行 */

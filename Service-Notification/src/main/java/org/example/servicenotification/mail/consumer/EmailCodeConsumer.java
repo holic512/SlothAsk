@@ -11,7 +11,8 @@ package org.example.servicenotification.mail.consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
-import org.example.servicenotification.mail.dto.MailCodeMessage;
+import org.example.servicecommon.mail.MailCodeMessage;
+import org.example.servicenotification.mail.config.MailMQConfig;
 import org.example.servicenotification.mail.service.MQCMailService;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -33,7 +34,8 @@ public class EmailCodeConsumer {
     }
 
     // 监听邮件队列
-    @RabbitListener(queues = "email_verification_queue",containerFactory = "mailMonitorRabbitListenerContainerFactory")
+    // @RabbitListener(queues = "email_verification_queue",containerFactory = "mailMonitorRabbitListenerContainerFactory")
+    @RabbitListener(queues = MailMQConfig.EMAIL_VERIFICATION_QUEUE)
     public void listenToEmailQueue(Channel channel, Message message) throws IOException {
         try {
             // 逆序列化
@@ -59,7 +61,11 @@ public class EmailCodeConsumer {
         } catch (Exception e) {
             // 捕获异常，拒绝消息并重新入队
             System.out.println("出现异常" + e.getMessage());
-            channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, true);
+
+            // 先确认 消费一下
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+
+            // channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, true);
         }
     }
 }

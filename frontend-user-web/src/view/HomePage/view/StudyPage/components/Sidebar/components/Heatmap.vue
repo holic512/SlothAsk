@@ -2,6 +2,7 @@
 import {computed, onMounted, ref, watch} from 'vue';
 import {format, subDays} from 'date-fns';
 import {zhCN} from 'date-fns/locale';
+import {Calendar, TrendCharts, Clock} from '@element-plus/icons-vue';
 
 interface HeatmapData {
   date: Date;
@@ -42,7 +43,7 @@ const generateHeatmapData = () => {
       else if (count <= 12) level = 3;
       else level = 4;
 
-      data.push({ date: backendDate, count, level });
+      data.push({date: backendDate, count, level});
     });
 
     // 按日期排序（从最早到最新）
@@ -54,7 +55,7 @@ const generateHeatmapData = () => {
       const count = 0;
       const level = 0;
 
-      data.push({ date, count, level });
+      data.push({date, count, level});
     }
   }
 
@@ -65,17 +66,17 @@ const generateHeatmapData = () => {
 const heatmapGrid = computed(() => {
   const grid: HeatmapData[][] = [];
   const data = heatmapData.value;
-  
+
   if (data.length === 0) return grid;
-  
+
   // 动态计算需要的列数（每列6天）
   const totalDays = data.length;
   const weeksNeeded = Math.ceil(totalDays / 6);
-  
+
   // 创建网格
   for (let week = 0; week < weeksNeeded; week++) {
     const weekData: HeatmapData[] = [];
-    
+
     for (let day = 0; day < 6; day++) {
       const dataIndex = week * 6 + day;
       if (dataIndex < data.length) {
@@ -83,13 +84,13 @@ const heatmapGrid = computed(() => {
       }
       // 移除填充未来日期的逻辑，只显示实际的数据
     }
-    
+
     // 只有当这一周有数据时才添加到网格中
     if (weekData.length > 0) {
       grid.push(weekData);
     }
   }
-  
+
   return grid;
 });
 
@@ -104,7 +105,7 @@ const handleCellHover = (data: HeatmapData) => {
   if (hoverTimeout.value) {
     clearTimeout(hoverTimeout.value);
   }
-  
+
   // 设置延迟显示
   hoverTimeout.value = setTimeout(() => {
     hoveredCell.value = data;
@@ -117,7 +118,7 @@ const handleCellLeave = () => {
     clearTimeout(hoverTimeout.value);
     hoverTimeout.value = null;
   }
-  
+
   // 延迟隐藏提示
   setTimeout(() => {
     hoveredCell.value = null;
@@ -126,7 +127,7 @@ const handleCellLeave = () => {
 
 // 格式化悬停提示文本
 const getTooltipText = (data: HeatmapData) => {
-  const dateStr = format(data.date, 'yyyy年MM月dd日', { locale: zhCN });
+  const dateStr = format(data.date, 'yyyy年MM月dd日', {locale: zhCN});
   return `${dateStr}: ${data.count} 次答题`;
 };
 
@@ -134,29 +135,67 @@ const getTooltipText = (data: HeatmapData) => {
 const totalStats = computed(() => {
   const activeDays = heatmapData.value.filter(d => d.count > 0).length;
   const totalCount = heatmapData.value.reduce((sum, d) => sum + d.count, 0);
-  return { activeDays, totalCount };
+  return {activeDays, totalCount};
+});
+
+// 计算连续提交天数
+const consecutiveDays = computed(() => {
+  const data = heatmapData.value;
+  if (data.length === 0) return 0;
+
+  let maxConsecutive = 0;
+  let currentConsecutive = 0;
+
+  // 从最新日期开始计算连续天数
+  for (let i = data.length - 1; i >= 0; i--) {
+    if (data[i].count > 0) {
+      currentConsecutive++;
+      maxConsecutive = Math.max(maxConsecutive, currentConsecutive);
+    } else {
+      currentConsecutive = 0;
+    }
+  }
+
+  return maxConsecutive;
+});
+
+// 计算本月提交次数
+const monthlyCount = computed(() => {
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+
+  return heatmapData.value
+      .filter(d => d.date.getMonth() === currentMonth && d.date.getFullYear() === currentYear)
+      .reduce((sum, d) => sum + d.count, 0);
+});
+
+// 计算今天提交次数
+const todayCount = computed(() => {
+  const todayStr = format(today, 'yyyy-MM-dd');
+  const todayData = heatmapData.value.find(d => format(d.date, 'yyyy-MM-dd') === todayStr);
+  return todayData ? todayData.count : 0;
 });
 
 // 计算时间范围
 const timeRange = computed(() => {
-  if (heatmapData.value.length === 0) return { start: '', end: '' };
-  
+  if (heatmapData.value.length === 0) return {start: '', end: ''};
+
   const startDate = heatmapData.value[0].date;
   const endDate = heatmapData.value[heatmapData.value.length - 1].date;
-  
+
   return {
-    start: format(startDate, 'yyyy年MM月dd日', { locale: zhCN }),
-    end: format(endDate, 'yyyy年MM月dd日', { locale: zhCN })
+    start: format(startDate, 'yyyy年MM月dd日', {locale: zhCN}),
+    end: format(endDate, 'yyyy年MM月dd日', {locale: zhCN})
   };
 });
 
 // 监听后端数据变化
 watch(
-  () => props.backendData,
-  () => {
-    heatmapData.value = generateHeatmapData();
-  },
-  { deep: true, immediate: false }
+    () => props.backendData,
+    () => {
+      heatmapData.value = generateHeatmapData();
+    },
+    {deep: true, immediate: false}
 );
 
 onMounted(() => {
@@ -167,64 +206,66 @@ onMounted(() => {
 <template>
   <div class="heatmap-card">
     <div class="heatmap-header">
-      <div class="header-top">
-        <h3 class="title">学习活跃度</h3>
-
-      </div>
-              <div class="stats">
-          <span class="stat-item">
-            <svg class="stat-icon" height="12" viewBox="0 0 16 16" width="12">
-              <path d="M8 0C3.58 0 0 3.58 0 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm3.707 5.293a1 1 0 0 1 0 1.414L8.414 10a1 1 0 0 1-1.414 0L4.293 7.293a1 1 0 1 1 1.414-1.414L7 7.172l2.293-2.293a1 1 0 0 1 1.414 0z" fill="#3b82f6"/>
-            </svg>
-            <strong>{{ totalStats.activeDays }} / {{ heatmapData.length }}</strong> 活跃天
-          </span>
-          <span class="stat-item">
-            <svg class="stat-icon" height="12" viewBox="0 0 16 16" width="12">
-              <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0zm7-3.25v2.992l2.028.812a.75.75 0 0 1-.557 1.392l-2.5-1A.751.751 0 0 1 7 8.25v-3.5a.75.75 0 0 1 1.5 0z" fill="#3b82f6"/>
-            </svg>
-            <strong>{{ totalStats.totalCount }}</strong> 次答题
-          </span>
+      <div class="stats-container">
+        <div class="stats-item">
+          <div class="stat-desc">
+            <el-icon class="stat-icon">
+              <Calendar/>
+            </el-icon>
+            连续提交
+          </div>
+          <div class="stat-number">{{ consecutiveDays }}<span class="stat-unit">天</span></div>
         </div>
+        <el-divider class="divider" direction="vertical"></el-divider>
+        <div class="stats-item">
+          <div class="stat-desc">
+            <el-icon class="stat-icon">
+              <TrendCharts/>
+            </el-icon>
+            本月提交
+          </div>
+          <div class="stat-number">{{ monthlyCount }}<span class="stat-unit">次</span></div>
+        </div>
+        <el-divider class="divider" direction="vertical"></el-divider>
+        <div class="stats-item">
+          <div class="stat-desc">
+            <el-icon class="stat-icon">
+              <Clock/>
+            </el-icon>
+            今日提交
+          </div>
+          <div class="stat-number">{{ todayCount }}<span class="stat-unit">次</span></div>
+        </div>
+      </div>
     </div>
-    
+
     <div class="heatmap-container">
       <div class="heatmap-grid">
-        <div 
-          v-for="(week, weekIndex) in heatmapGrid" 
-          :key="weekIndex" 
-          class="week-column"
+        <div
+            v-for="(week, weekIndex) in heatmapGrid"
+            :key="weekIndex"
+            class="week-column"
         >
-          <div 
-            v-for="(day, dayIndex) in week" 
-            :key="dayIndex"
-            :class="getLevelClass(day.level)"
-            class="day-cell"
-            @mouseenter="handleCellHover(day)"
-            @mouseleave="handleCellLeave"
+          <div
+              v-for="(day, dayIndex) in week"
+              :key="dayIndex"
+              :class="getLevelClass(day.level)"
+              class="day-cell"
+              @mouseenter="handleCellHover(day)"
+              @mouseleave="handleCellLeave"
           >
           </div>
         </div>
       </div>
 
-            <div class="time-range">
+      <div class="time-range">
         <span class="time-text">{{ timeRange.start }} - {{ timeRange.end }}</span>
       </div>
-      
-      <div class="legend">
-        <span class="legend-text">少</span>
-        <div class="legend-levels">
-          <div class="legend-cell level-0"></div>
-          <div class="legend-cell level-1"></div>
-          <div class="legend-cell level-2"></div>
-          <div class="legend-cell level-3"></div>
-          <div class="legend-cell level-4"></div>
-        </div>
-        <span class="legend-text">多</span>
-      </div>
+
+
     </div>
 
-    
-    
+
     <!-- 悬停提示 -->
     <div v-if="hoveredCell" class="tooltip">
       {{ getTooltipText(hoveredCell) }}
@@ -273,38 +314,45 @@ onMounted(() => {
   letter-spacing: 0.5px;
 }
 
-.title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0;
-}
-
-.stats {
-  display: flex;
-  gap: 12px;
-}
-
-.stat-item {
-  font-size: 0.85rem;
-  color: #6c757d;
-  background-color: #f8f9fa;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: all 0.3s ease;
+.stats-container {
+  margin-top: 4px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+}
+
+.stats-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: 4px;
+  flex: 1;
 }
 
-.stat-icon {
-  flex-shrink: 0;
-  opacity: 0.8;
+.stat-desc {
+  font-size: 12px;
+  color: #B5B5B5;
+  line-height: 1;
+  margin-bottom: 4px;
 }
 
-.stat-item:hover {
-  background-color: #e9ecef;
-  color: #495057;
+.stat-number {
+  font-size: 16px;
+  font-weight: normal;
+  color: #000000;
+  line-height: 1;
+}
+
+.stat-unit {
+  margin-left: 2px;
+  color: #B5B5B5;
+}
+
+.divider {
+  height: 30px;
+  margin: 0 8px;
 }
 
 .heatmap-container {
@@ -365,30 +413,6 @@ onMounted(() => {
   background-color: #196127;
 }
 
-.legend {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 8px;
-}
-
-.legend-text {
-  font-size: 0.75rem;
-  color: #6c757d;
-}
-
-.legend-levels {
-  display: flex;
-  gap: 2px;
-}
-
-.legend-cell {
-    width: 10px;
-    height: 10px;
-    border-radius: 2px;
-    border: 1px solid rgba(27, 31, 35, 0.06);
-  }
 
 .tooltip {
   position: absolute;
@@ -428,62 +452,5 @@ onMounted(() => {
   }
 }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .heatmap-grid {
-    gap: 1px;
-  }
-  
-  .day-cell {
-    width: 7px;
-    height: 7px;
-  }
-  
-  .week-column {
-    gap: 1px;
-  }
-  
-  .title {
-    font-size: 1.1rem;
-  }
-  
-  .stats {
-    flex-direction: column;
-    gap: 4px;
-  }
-  
-  .time-text {
-    font-size: 0.7rem;
-  }
-  
-  .header-top {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-}
 
-@media (max-width: 480px) {
-  .day-cell {
-    width: 5px;
-    height: 5px;
-  }
-  
-  .heatmap-grid {
-    gap: 1px;
-  }
-  
-  .legend-cell {
-    width: 6px;
-    height: 6px;
-  }
-  
-  .time-text {
-    font-size: 0.65rem;
-  }
-  
-  .title {
-    font-size: 1rem;
-  }
-}
 </style>

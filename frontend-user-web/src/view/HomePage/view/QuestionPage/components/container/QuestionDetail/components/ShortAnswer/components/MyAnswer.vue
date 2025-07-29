@@ -21,7 +21,7 @@
       </div>
 
       <!-- AI 分析组件 -->
-      <AiAnalysisSection :answer-id="userAnswer.id" />
+      <AiAnalysisSection ref="aiAnalysisRef" :answer-id="userAnswer.id" />
 
       <div class="answer-content" v-html="sanitizedUserAnswer"></div>
     </div>
@@ -85,6 +85,7 @@ import {type AnswerRecordResponse, ApiGetAnswerRecord} from '../../../../../../s
 import {ApiSaveAnswer, type SaveAnswerRequest} from '../../../../../../service/ApiSaveAnswer'
 import {ApiSubmitAnswer, type SubmitAnswerRequest} from '../../../../../../service/ApiSubmitAnswer'
 import {ApiRetryAnswer, type RetryAnswerRequest} from '../../../../../../service/ApiRetryAnswer'
+import {ApiSendAiAnalysis, type SendAiAnalysisRequest} from '../../../../../../service/ApiSendAiAnalysis'
 
 // TypeScript 接口定义
 interface UserAnswer {
@@ -116,6 +117,7 @@ const isSaving = ref(false)
 const isSubmitting = ref(false)
 const isReAnswering = ref(false)
 const currentAnswerId = ref<number | null>(null)
+const aiAnalysisRef = ref<InstanceType<typeof AiAnalysisSection> | null>(null)
 
 // 模拟数据
 const userAnswer = ref<UserAnswer | null>(null)
@@ -213,11 +215,46 @@ const submitAnswer = async () => {
         id: currentAnswerId.value!.toString()
       }
 
+      const submittedAnswerId = currentAnswerId.value!
       currentAnswer.value = ''
       hasUnsavedChanges.value = false
       currentAnswerId.value = null
 
       ElMessage.success('答案提交成功！')
+
+      // 自动发起AI分析请求
+      setTimeout(async () => {
+        try {
+          // 先设置AI分析状态为正在分析中
+          if (aiAnalysisRef.value) {
+            aiAnalysisRef.value.setAnalyzingStatus()
+          }
+
+          const aiRequest: SendAiAnalysisRequest = {
+            answerId: submittedAnswerId
+          }
+          const response = await ApiSendAiAnalysis(aiRequest)
+
+          if (response.status === 200) {
+            // 开始轮询检查状态
+            if (aiAnalysisRef.value) {
+              aiAnalysisRef.value.startPolling()
+            }
+          } else {
+            // 如果请求失败，重置状态为未分析
+            if (aiAnalysisRef.value) {
+              aiAnalysisRef.value.setNotAnalyzedStatus()
+            }
+          }
+        } catch (error) {
+          console.error('自动发起AI分析失败:', error)
+          // 如果请求失败，重置状态为未分析
+          if (aiAnalysisRef.value) {
+            aiAnalysisRef.value.setNotAnalyzedStatus()
+          }
+        }
+      }, 500)
+
     } else {
       ElMessage.error(submitResponse.message || '提交失败，请重试')
     }
@@ -262,7 +299,7 @@ const reAnswerQuestion = async () => {
     if (response.status === 200) {
       // 保存原答案内容
       const originalAnswer = userAnswer.value.content
-      
+
       // 重置到未提交状态，但保留答案内容
       userAnswer.value = null
       currentAnswer.value = originalAnswer

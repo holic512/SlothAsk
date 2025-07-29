@@ -17,7 +17,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.serviceai.aiService.siliconflow.AiResponse;
 import org.example.serviceai.aiService.siliconflow.SiliconflowAiService;
-import org.example.serviceai.userAnswer.config.AiAnalysisRabbitConfig;
+import org.example.serviceai.commonService.IdConversionService;
+import org.example.serviceai.config.rabbitMq.AiAnalysisRabbit.AiAnalysisRabbitConfig;
+import org.example.serviceai.config.rabbitMq.baseMessage.BaseMessageSender;
 import org.example.serviceai.userAnswer.dto.AiAnalysisMessage;
 import org.example.serviceai.userAnswer.dto.AiAnalysisRequest;
 import org.example.serviceai.userAnswer.dto.AiAnalysisResponse;
@@ -25,6 +27,9 @@ import org.example.serviceai.userAnswer.mapper.QuestionMapper;
 import org.example.serviceai.userAnswer.mapper.UAAiAnalysisMapper;
 import org.example.serviceai.userAnswer.mapper.UQRecordMapper;
 import org.example.serviceai.util.HtmlTextExtractor;
+import org.example.servicecommon.baseMessage.dto.AiBaseMessageDto;
+import org.example.servicecommon.baseMessage.message.BaseMessageMessage;
+import org.example.servicecommon.baseMessage.enums.BaseMessageType;
 import org.example.servicecommon.entity.Question;
 import org.example.servicecommon.entity.UserAnswerAiAnalysis;
 import org.example.servicecommon.entity.UserQuestionRecord;
@@ -51,6 +56,8 @@ public class AiAnalysisConsumer {
     private final QuestionMapper questionMapper;
     private final SiliconflowAiService siliconflowAiService;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final BaseMessageSender baseMessageSender;
+    private final IdConversionService idConversionService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
@@ -82,6 +89,7 @@ public class AiAnalysisConsumer {
             releaseAiAnalysisLock(answerId);
 
             log.info("AI 解析消息处理完成，回答ID: {}, 线程: {}", answerId, threadName);
+
             // 手动确认消息
             acknowledgeMessage(channel, deliveryTag);
 
@@ -115,8 +123,12 @@ public class AiAnalysisConsumer {
         AiResponse aiResponse = callAiService(analysisRequest);
 
         // 4. 解析 AI 响应并保存结果
+        // todo 插入数据库前 查看一下 这数据模拟删除没有
         AiAnalysisResponse analysisResponse = parseAiResponse(aiResponse.getAnswer());
         saveAnalysisResult(answerId, analysisResponse, aiResponse.getModelFull(), analysisRequest);
+
+        // 5. 发送消息通知用户AI解析完成
+        sendAiAnalysisCompletionMessage(record, question, analysisResponse);
     }
 
     /**
@@ -145,7 +157,7 @@ public class AiAnalysisConsumer {
 
         LambdaQueryWrapper<Question> queryWrapper = new LambdaQueryWrapper<Question>()
                 .eq(Question::getId, questionId)
-                .select(Question::getContent, Question::getAnswer);
+                .select(Question::getTitle, Question::getContent, Question::getAnswer);
         return questionMapper.selectOne(queryWrapper);
     }
 
@@ -175,39 +187,59 @@ public class AiAnalysisConsumer {
         return siliconflowAiService.askQuestionWithRandomModel(
                 systemPrompt,
                 analysisRequest.toString(),
-                true
+                false
         );
     }
 
     /**
-     * 构建系统提示词
+     * 构建系统提示词（优化版）
      *
      * @return 系统提示词
      */
     private String buildSystemPrompt() {
-        return "你是一个严谨且专业的教师 AI，擅长评估学生对知识点的掌握程度。\n" +
-                "你的任务是：根据学生提交的回答，分析其理解是否正确，并返回以下两项内容：\n" +
-                "1. 准确率（accuracy）：范围为 0～100，表示学生回答的正确程度。请从内容完整性、表达准确性、逻辑合理性等维度综合评估；\n" +
-                "2. 具体分析（analysis）：指出学生回答中的错误、遗漏或理解偏差，说明正确知识点，必要时可分点列出（每点用 <br/> 分隔）。\n" +
-                "你需要在评分前先认真比对正确答案与学生答案的异同，充分理解语义，再进行分析与评分。\n" +
-                "输入格式（标准 JSON）：\n" +
-                "{\n" +
-                "  \"question\": \"Java 是解释型语言还是编译型语言？请说明原因。\",\n" +
-                "  \"correctAnswer\": \"Java 同时具有编译型和解释型的特性。Java 源代码首先会被编译为字节码（.class 文件），然后由 Java 虚拟机（JVM）解释执行。\",\n" +
-                "  \"studentAnswer\": \"Java 是一种编译型语言，它会被编译成机器码后执行。\"\n" +
-                "}\n" +
-                "输出格式（标准 JSON）：\n" +
-                "{\n" +
-                "  \"accuracy\": 60,\n" +
-                "  \"analysis\": \"你提到 Java 是编译型语言，但这种说法并不准确。<br/><b>Java 的源代码会被编译为字节码，而不是机器码</b>，然后由 Java 虚拟机解释执行，因此它既具有编译型特性，也具有解释型特性。\"\n" +
-                "}\n" +
-                "输出要求(重点,一定要遵顼)：\n" +
-                "- 只返回标准 JSON 格式；\n" +
-                "- 不包含额外描述、解释或非 JSON 内容；\n" +
-                "- 必须使用双引号包裹字段名和字符串；\n" +
-                "- 分析部分可使用 <br/> 换行，<b> 标签加粗重点；\n" +
-                "- 严格保证 JSON 格式合法，避免语法错误。\n" +
-                "- 请只返回标准 JSON 格式，不要包含代码块、Markdown 标记（如 ```json）或任何额外说明文字。";
+        return """
+                [角色定位]：
+                你是一个严谨且专业的教师 AI，复制比对学生的答案与正确答案,并给出正确率和解析。
+                [输入格式]：
+                标准 JSON 对象，包含：
+                {
+                  "question": "...",
+                  "correctAnswer": "...",
+                  "studentAnswer": "..."
+                }
+
+                [输出格式-严格按照此要求]：
+                合法 JSON 对象，格式如下：
+                {
+                  "accuracy": 整数(0-100),
+                  "analysis": "评语文本，允许<b>加粗</b>与<br/>换行"
+                }
+
+                [评分维度]：
+                1. 内容完整性（0–33）
+                2. 表达准确性（0–33）
+                3. 逻辑合理性（0–34）
+
+                [评分流程]：
+                - 逐句对比学生答案与标准答案；
+                - 判断是否存在以下错误：
+                  - 概念混淆
+                  - 术语错误
+                  - 知识点遗漏
+                - 分维度打分并写出扣分原因
+
+                [分析输出建议]：
+                - 指出每个错误点
+                - 给出正确解释
+                - 使用<b>关键纠正</b>标记重点内容
+                - 每条分析用<br/>分点
+
+                [注意事项]：
+                1. 严禁输出 Markdown（如```）或 JSON 之外的内容；
+                2. 分数应符合正态分布；
+                3. 鼓励创新表述，反对死记硬背；
+                4. 输出前请确保 JSON 格式合法。
+                """;
     }
 
 
@@ -226,12 +258,12 @@ public class AiAnalysisConsumer {
             log.debug("AI 原始响应内容预览（前500字符）：{}", preview);
 
             // DEBUG：判断是否包含非法 Markdown、反引号
-            if (aiResponseJson.contains("```") || aiResponseJson.contains("`")) {
+            if (aiResponseJson != null && (aiResponseJson.contains("```") || aiResponseJson.contains("`"))) {
                 log.warn("⚠️ AI 响应中包含 Markdown 代码块标记或反引号字符");
             }
 
             // DEBUG：尝试格式修复 - 去除 Markdown 包裹内容（可选）
-            if (aiResponseJson.trim().startsWith("```")) {
+            if (aiResponseJson != null && aiResponseJson.trim().startsWith("```")) {
                 int start = aiResponseJson.indexOf("{");
                 int end = aiResponseJson.lastIndexOf("}");
                 if (start >= 0 && end > start) {
@@ -294,6 +326,43 @@ public class AiAnalysisConsumer {
             channel.basicNack(deliveryTag, false, true);
         } catch (IOException e) {
             log.error("拒绝消息失败", e);
+        }
+    }
+
+    /**
+     * 发送AI解析完成消息通知用户
+     *
+     * @param record           用户问题记录
+     * @param question         问题信息
+     * @param analysisResponse AI分析响应
+     */
+    private void sendAiAnalysisCompletionMessage(UserQuestionRecord record, Question question, AiAnalysisResponse analysisResponse) {
+        try {
+            // 获取虚拟ID
+            String virtualQuestionId = idConversionService.getVirtualIdFromOriginalId(record.getQuestionId());
+
+            // 构造AI消息数据
+            AiBaseMessageDto aiMessageData = new AiBaseMessageDto();
+            aiMessageData.setQuestionId(virtualQuestionId);
+            aiMessageData.setQuestionTitle(question.getTitle());
+            aiMessageData.setAccuracy(analysisResponse.getAccuracy());
+
+            // 构造基础消息
+            BaseMessageMessage<AiBaseMessageDto> baseMessage = new BaseMessageMessage<>();
+            baseMessage.setUserId(record.getUserId());
+            baseMessage.setType(BaseMessageType.AI_RECOGNITION);
+            baseMessage.setReadStatus(0); // 0表示未读
+            baseMessage.setMessageData(aiMessageData);
+
+            // 发送消息
+            baseMessageSender.sendMessage(baseMessage);
+            log.info("成功发送AI解析完成消息，用户ID: {}, 问题ID: {}, 问题虚拟ID: {}, 准确率: {}%",
+                    record.getUserId(), record.getQuestionId(), virtualQuestionId, analysisResponse.getAccuracy());
+
+        } catch (Exception e) {
+            log.error("发送AI解析完成消息失败，用户ID: {}, 问题ID: {}",
+                    record.getUserId(), record.getQuestionId(), e);
+            // 消息发送失败不影响主流程，只记录日志
         }
     }
 

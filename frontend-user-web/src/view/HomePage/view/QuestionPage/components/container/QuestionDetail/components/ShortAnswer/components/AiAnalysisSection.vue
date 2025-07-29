@@ -3,7 +3,9 @@
     <!-- AI 未分析状态 -->
     <div v-if="analysisStatus === 'not-analyzed'" class="ai-not-analyzed">
       <div class="not-analyzed-info">
-        <el-icon class="analysis-icon"><Document /></el-icon>
+        <el-icon class="analysis-icon">
+          <Document/>
+        </el-icon>
         <span class="not-analyzed-text">该回答尚未进行 AI 分析</span>
       </div>
       <div class="analysis-actions">
@@ -13,7 +15,7 @@
             type="primary"
             @click="requestAiReview"
         >
-          开始 AI 分析
+          开始分析
         </el-button>
       </div>
     </div>
@@ -21,17 +23,10 @@
     <!-- AI 分析中状态 -->
     <div v-else-if="analysisStatus === 'analyzing'" class="ai-analyzing">
       <div class="analyzing-info">
-        <el-icon class="analyzing-icon"><Loading /></el-icon>
+        <el-icon class="analyzing-icon">
+          <Loading/>
+        </el-icon>
         <span class="analyzing-text">AI 正在分析中，请稍候...</span>
-      </div>
-      <div class="analysis-actions">
-        <el-button
-            :disabled="isRefreshDisabled"
-            size="small"
-            @click="refreshAnalysisStatus"
-        >
-          刷新结果 {{ refreshCountdown > 0 ? `(${refreshCountdown}s)` : '' }}
-        </el-button>
       </div>
     </div>
 
@@ -45,13 +40,13 @@
         </div>
       </div>
       <div class="analysis-actions">
-<!--        <el-button-->
-<!--            :loading="isRequestingReview"-->
-<!--            size="small"-->
-<!--            @click="requestAiReview"-->
-<!--        >-->
-<!--          重新评估-->
-<!--        </el-button>-->
+        <!--        <el-button-->
+        <!--            :loading="isRequestingReview"-->
+        <!--            size="small"-->
+        <!--            @click="requestAiReview"-->
+        <!--        >-->
+        <!--          重新评估-->
+        <!--        </el-button>-->
         <el-button
             size="small"
             type="primary"
@@ -103,10 +98,7 @@ type AnalysisStatus = 'not-analyzed' | 'analyzing' | 'completed'
 const isRequestingReview = ref(false)
 const showAiAnalysisDialog = ref(false)
 const analysisStatus = ref<AnalysisStatus>('not-analyzed')
-const refreshCountdown = ref(0)
-const isRefreshDisabled = ref(false)
-const lastRequestTime = ref(0)
-const refreshTimer = ref<NodeJS.Timeout | null>(null)
+const pollingTimer = ref<NodeJS.Timeout | null>(null)
 
 // AI分析数据
 const aiAnalysis = ref<AiAnalysis>({
@@ -138,18 +130,17 @@ const requestAiReview = async () => {
     }
 
     isRequestingReview.value = true
-    lastRequestTime.value = Date.now()
 
     // 调用后端API进行AI评估
     const request: SendAiAnalysisRequest = {
       answerId: Number(props.answerId)
     }
-    
+
     const response = await ApiSendAiAnalysis(request)
-    
+
     if (response.status === 200) {
       analysisStatus.value = 'analyzing'
-      startRefreshDebounce()
+      startPolling()
       ElMessage.success('AI 分析请求已发送，正在处理中...')
     } else {
       // 处理不同的错误状态
@@ -166,7 +157,7 @@ const requestAiReview = async () => {
         case 409:
           ElMessage.warning('该回答正在进行AI分析中，请稍后再试')
           analysisStatus.value = 'analyzing'
-          startRefreshDebounce()
+          startPolling()
           break
         case 410:
           ElMessage.error('该回答尚未提交，无法进行AI分析')
@@ -186,20 +177,18 @@ const requestAiReview = async () => {
       ElMessage.error('AI 分析失败，请重试')
       analysisStatus.value = 'not-analyzed'
     }
-    clearRefreshDebounce()
+    stopPolling()
   } finally {
     isRequestingReview.value = false
   }
 }
 
-// 刷新分析状态
-const refreshAnalysisStatus = async () => {
-  if (isRefreshDisabled.value) return
-  
+// 检查分析状态
+const checkAnalysisStatus = async () => {
   try {
     // 调用后端API检查分析状态
     const response = await ApiCheckAiAnalysisStatus(Number(props.answerId))
-    
+
     if (response.status === 200 && response.data) {
       // 分析完成，更新数据
       const analysisRecord: AiAnalysisRecord = response.data
@@ -210,46 +199,38 @@ const refreshAnalysisStatus = async () => {
         aiSource: analysisRecord.aiSource
       }
       analysisStatus.value = 'completed'
-      clearRefreshDebounce()
-      ElMessage.success('AI 分析完成')
-    } else if (response.status === 408) {
-      // 正在解析中
-      ElMessage.info('AI 仍在分析中，请稍后再试')
-      startRefreshDebounce()
-    } else if (response.status === 409) {
-      // 无解析记录，但可能刚开始解析
-      ElMessage.info('AI 仍在分析中，请稍后再试')
+      stopPolling()
+    } else if (response.status === 408 || response.status === 409) {
+      // 正在解析中或无解析记录，继续轮询
+      // 不显示消息，静默轮询
     } else {
-      // 其他错误状态
-      ElMessage.error(response.message || '刷新失败，请重试')
+      // 其他错误状态，停止轮询
+      stopPolling()
+      console.error('检查分析状态失败:', response.message)
     }
   } catch (error) {
-    console.error('刷新分析状态失败:', error)
-    ElMessage.error('刷新失败，请重试')
+    console.error('检查分析状态失败:', error)
+    // 网络错误等，继续轮询
   }
 }
 
-// 开始刷新防抖
-const startRefreshDebounce = () => {
-  isRefreshDisabled.value = true
-  refreshCountdown.value = 3
-  
-  refreshTimer.value = setInterval(() => {
-    refreshCountdown.value--
-    if (refreshCountdown.value <= 0) {
-      clearRefreshDebounce()
-    }
-  }, 1000)
+// 开始轮询 - 轮询检查 ai是否解析完成
+const startPolling = () => {
+  if (pollingTimer.value) {
+    clearInterval(pollingTimer.value)
+  }
+
+  pollingTimer.value = setInterval(() => {
+    checkAnalysisStatus()
+  }, 4000) // 每4秒轮询一次
 }
 
-// 清除刷新防抖
-const clearRefreshDebounce = () => {
-  if (refreshTimer.value) {
-    clearInterval(refreshTimer.value)
-    refreshTimer.value = null
+// 停止轮询
+const stopPolling = () => {
+  if (pollingTimer.value) {
+    clearInterval(pollingTimer.value)
+    pollingTimer.value = null
   }
-  isRefreshDisabled.value = false
-  refreshCountdown.value = 0
 }
 
 // 加载AI分析数据
@@ -259,9 +240,9 @@ const loadAiAnalysis = async () => {
     const request: GetAiAnalysisRequest = {
       answerId: Number(props.answerId)
     }
-    
+
     const response = await ApiGetAiAnalysis(request)
-    
+
     if (response.status === 200 && response.data) {
       // 已有分析结果
       const analysisRecord: AiAnalysisRecord = response.data
@@ -275,8 +256,7 @@ const loadAiAnalysis = async () => {
     } else if (response.status === 408) {
       // 正在解析中
       analysisStatus.value = 'analyzing'
-      lastRequestTime.value = Date.now()
-      startRefreshDebounce()
+      startPolling()
     } else if (response.status === 409) {
       // 无解析记录
       analysisStatus.value = 'not-analyzed'
@@ -304,27 +284,44 @@ onMounted(() => {
 
 // 监听answerId变化
 watch(
-  () => props.answerId,
-  (newAnswerId) => {
-    if (newAnswerId) {
-      // 重置状态
-      analysisStatus.value = 'not-analyzed'
-      aiAnalysis.value = {
-        accuracy: 0,
-        analysis: '',
-        reviewTime: '',
-        aiSource: ''
+    () => props.answerId,
+    (newAnswerId) => {
+      if (newAnswerId) {
+        // 重置状态
+        analysisStatus.value = 'not-analyzed'
+        aiAnalysis.value = {
+          accuracy: 0,
+          analysis: '',
+          reviewTime: '',
+          aiSource: ''
+        }
+        stopPolling()
+
+        // 重新加载分析数据
+        loadAiAnalysis()
       }
-      clearRefreshDebounce()
-      
-      // 重新加载分析数据
-      loadAiAnalysis()
     }
-  }
 )
 
+// 对外暴露的方法
+const setAnalyzingStatus = () => {
+  analysisStatus.value = 'analyzing'
+}
+
+const setNotAnalyzedStatus = () => {
+  analysisStatus.value = 'not-analyzed'
+  stopPolling()
+}
+
+// 暴露方法给父组件
+defineExpose({
+  setAnalyzingStatus,
+  setNotAnalyzedStatus,
+  startPolling
+})
+
 onUnmounted(() => {
-  clearRefreshDebounce()
+  stopPolling()
 })
 </script>
 
@@ -342,7 +339,6 @@ onUnmounted(() => {
   align-items: flex-start;
 }
 
-.ai-not-analyzed,
 .ai-analyzing {
   align-items: center;
 }

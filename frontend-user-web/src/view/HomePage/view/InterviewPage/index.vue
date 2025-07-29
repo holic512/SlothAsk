@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { setTitle } from '../../../../utils/title'
+import { setTitle } from '@/utils/title.js'
 
 onMounted(() => {
   setTitle('面试分享')

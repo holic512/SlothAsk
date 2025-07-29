@@ -85,6 +85,8 @@ public class PostUserSignServiceImpl implements PostUserSignService {
     @Override
     public boolean sendSignVerificationCode(String mail) {
         try {
+            // todo 验证邮箱是否存在  重大bug
+
             // 生成验证码
             String VerCode = UuidUtil.generate6DigitNumericId();
 

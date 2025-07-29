@@ -9,16 +9,13 @@
  */
 package org.example.servicenotification.mail.service.impl;
 
-import org.example.servicenotification.mail.config.MailMQQueueName;
-import org.example.servicenotification.mail.config.MailMQRoutingKey;
-import org.example.servicenotification.mail.dto.MailCodeMessage;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.servicecommon.mail.MailCodeMessage;
+import org.example.servicenotification.mail.config.MailMQConfig;
 import org.example.servicenotification.mail.service.MQSMailService;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class MQSMailServiceImpl implements MQSMailService {
@@ -37,18 +34,14 @@ public class MQSMailServiceImpl implements MQSMailService {
         // 构造邮件消息对象
         MailCodeMessage mailCodeMessage = new MailCodeMessage(email, username, purpose, verificationCode);
 
-        try {
-            // 序列化为 JSON
-            String message = objectMapper.writeValueAsString(mailCodeMessage);
+        // // 序列化为 JSON
+        // String message = objectMapper.writeValueAsString(mailCodeMessage);
 
-            // 发送消息到 RabbitMQ
-            rabbitTemplate.convertAndSend(
-                    "direct.exchange",
-                    MailMQRoutingKey.EMAIL_VERIFICATION_ROUTING_KEY.getKey(),
-                    message);
-        } catch (JsonProcessingException e) {
-            System.err.println("邮件消息序列化失败：" + e.getMessage());
-        }
+        // 发送消息到 RabbitMQ 采用 rabbit的 自动序列化
+        rabbitTemplate.convertAndSend(
+                "direct.exchange",
+                MailMQConfig.EMAIL_VERIFICATION_ROUTING_KEY,
+                mailCodeMessage);
     }
 }
 

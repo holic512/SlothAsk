@@ -4,7 +4,7 @@ import Question from './components/LeftBox/Question.vue'
 import Sidebar from './components/Sidebar/index.vue'
 import {onMounted} from 'vue';
 import {setTitle} from '@/utils/title';
-import RightBox from "@/view/HomePage/components/RightBox.vue";
+import RightBox from "@/view/HomePage/components/StudyPage/FloatingInfoCard.vue";
 
 onMounted(() => {
   setTitle('学习');
