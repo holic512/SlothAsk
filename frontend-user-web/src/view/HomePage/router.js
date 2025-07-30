@@ -235,6 +235,16 @@ export default [
                         )
             },
 
+            // 搜索页面
+            {
+                path: 'search',
+                name: 'SearchPage',
+                component: () =>
+                    import(
+                        /* webpackChunkName: "search" */ './view/SearchPage/index.vue'
+                        )
+            },
+
             // AI解析消息组件演示
             {
                 path: 'test',

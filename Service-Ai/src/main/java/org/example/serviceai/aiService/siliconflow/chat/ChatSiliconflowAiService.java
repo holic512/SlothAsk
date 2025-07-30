@@ -8,7 +8,7 @@
  * AnalysisAnswer.askQuestion(SiliconflowModelEnum.QWEN3_8B, "你是一个AI助手", "你好", false)
  * AnalysisAnswer.askQuestionWithRandomModel("你是一个AI助手", "你好", true)
  */
-package org.example.serviceai.aiService.siliconflow;
+package org.example.serviceai.aiService.siliconflow.chat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Random;
 
 @Service
-public class SiliconflowAiService {
+public class ChatSiliconflowAiService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Random random = new Random();
@@ -44,7 +44,7 @@ public class SiliconflowAiService {
      * @param think  是否开启思考模式
      * @return 完整的AI响应对象
      */
-    public AiResponse askQuestion(SiliconflowModelEnum model, String prompt, String input, boolean think) {
+    public ChatAiResponse askQuestion(ChatSiliconflowModelEnum model, String prompt, String input, boolean think) {
         return performAiRequestWithResponse(model, prompt, input, think, false);
     }
 
@@ -56,8 +56,8 @@ public class SiliconflowAiService {
      * @param think  是否开启思考模式
      * @return 完整的AI响应对象
      */
-    public AiResponse askQuestionWithRandomModel(String prompt, String input, boolean think) {
-        SiliconflowModelEnum randomModel = getRandomModel();
+    public ChatAiResponse askQuestionWithRandomModel(String prompt, String input, boolean think) {
+        ChatSiliconflowModelEnum randomModel = getRandomModel();
         return performAiRequestWithResponse(randomModel, prompt, input, think, true);
     }
 
@@ -71,7 +71,7 @@ public class SiliconflowAiService {
      * @param isRandom 是否为随机选择的模型
      * @return 完整的AI响应对象
      */
-    private AiResponse performAiRequestWithResponse(SiliconflowModelEnum model, String prompt, String input, boolean think, boolean isRandom) {
+    private ChatAiResponse performAiRequestWithResponse(ChatSiliconflowModelEnum model, String prompt, String input, boolean think, boolean isRandom) {
         long startTime = System.currentTimeMillis();
 
         try {
@@ -119,13 +119,13 @@ public class SiliconflowAiService {
 
                 if (!response.isSuccessful()) {
                     String errorMsg = "API请求失败: " + response.code() + " - " + response.message();
-                    return AiResponse.failure(errorMsg, model, prompt, input, isRandom, duration, think);
+                    return ChatAiResponse.failure(errorMsg, model, prompt, input, isRandom, duration, think);
                 }
 
                 String responseBody = response.body().string();
                 String answer = parseResponse(responseBody);
 
-                return AiResponse.success(answer, model, prompt, input, isRandom, duration, think);
+                return ChatAiResponse.success(answer, model, prompt, input, isRandom, duration, think);
             }
 
         } catch (Exception e) {
@@ -133,7 +133,7 @@ public class SiliconflowAiService {
             long duration = endTime - startTime;
 
             String errorMsg = "请求处理异常: " + e.getMessage();
-            return AiResponse.failure(errorMsg, model, prompt, input, isRandom, duration, think);
+            return ChatAiResponse.failure(errorMsg, model, prompt, input, isRandom, duration, think);
         }
     }
 
@@ -142,8 +142,8 @@ public class SiliconflowAiService {
      *
      * @return 随机选择的模型枚举
      */
-    private SiliconflowModelEnum getRandomModel() {
-        SiliconflowModelEnum[] models = SiliconflowModelEnum.values();
+    private ChatSiliconflowModelEnum getRandomModel() {
+        ChatSiliconflowModelEnum[] models = ChatSiliconflowModelEnum.values();
         int randomIndex = random.nextInt(models.length);
         return models[randomIndex];
     }

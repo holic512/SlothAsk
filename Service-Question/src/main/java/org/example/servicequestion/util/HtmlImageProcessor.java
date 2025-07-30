@@ -1,12 +1,37 @@
 /**
- * File Name: HtmlImageProcessor.java
- * Description: Todo
- * Author: holic512
- * Created Date: 2025-03-07
- * Version: 1.0
- * Usage:
- * Todo
+ * HtmlImageProcessor 是一个用于处理 HTML 内容中图片标签的工具类。
+ * <p>
+ * 它的主要功能是扫描 HTML 字符串中所有的 <img> 标签，查找其中 alt 属性以 # 开头的值，
+ * 将该值（例如 "#image123"）视为图片标识符，从而通过远程 Feign 服务 {@link ServiceImageFeign}
+ * 获取实际的图片访问 URL，并自动插入或替换为 <img> 标签中的 src 属性。
+ * <p>
+ * 该功能主要用于支持富文本编辑器输出中使用 alt="#xxx" 占位标记的场景，在页面展示前替换为真实图片地址。
+ *
+ * <p>例如输入：
+ * <pre>{@code
+ * <p>题目插图如下：</p>
+ * <img alt="#math001">
+ * }</pre>
+ *
+ * 处理后自动补全为：
+ * <pre>{@code
+ * <p>题目插图如下：</p>
+ * <img src="https://cdn.example.com/image/math001.png" alt="#math001">
+ * }</pre>
+ *
+ * <p><strong>注意事项：</strong>
+ * <ul>
+ *   <li>仅处理 alt 属性以 # 开头的 img 标签</li>
+ *   <li>如果已存在 src 属性，则进行替换</li>
+ *   <li>如果通过 Feign 服务未能获取到有效 URL，则跳过该标签</li>
+ * </ul>
+ *
+ * @author holic512
+ * @since 2025-03-07
+ * @version 1.0
+ * @see ServiceImageFeign
  */
+
 package org.example.servicequestion.util;
 
 import org.example.servicequestion.feign.ServiceImageFeign;

@@ -1,15 +1,15 @@
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
-import { View, Check } from '@element-plus/icons-vue'
-import { useRouter } from 'vue-router'
+import {onMounted, ref} from 'vue'
+import {ElMessage} from 'element-plus'
+import {Check, View} from '@element-plus/icons-vue'
+import {useRouter} from 'vue-router'
 import DynamicMessageComponent from '@/view/HomePage/components/Message/DynamicMessageComponent.vue'
-import { MessageDisplayMode } from '@/view/HomePage/components/Message/MessageInterface'
-import type { BaseMessage } from '@/view/HomePage/components/Message/MessageInterface'
-import { 
-  getLatestTenMessages, 
-  markLatestTenMessagesAsRead,
-  checkUnreadMessagesInLatestTen 
+import type {BaseMessage} from '@/view/HomePage/components/Message/MessageInterface'
+import {MessageDisplayMode} from '@/view/HomePage/components/Message/MessageInterface'
+import {
+  checkUnreadMessagesInLatestTen,
+  getLatestTenMessages,
+  markLatestTenMessagesAsRead
 } from '@/view/HomePage/view/TopMenu/Api/ApiBaseMessage'
 
 const router = useRouter()
@@ -72,6 +72,17 @@ const markAllAsRead = async () => {
 const viewAll = () => {
   router.push('/messages')
 }
+
+// 刷新消息方法（供父组件调用）
+const refreshMessages = async () => {
+  await fetchLatestMessages()
+  await checkUnreadMessages()
+}
+
+// 暴露方法给父组件
+defineExpose({
+  refreshMessages
+})
 
 // 组件挂载时获取数据
 onMounted(async () => {

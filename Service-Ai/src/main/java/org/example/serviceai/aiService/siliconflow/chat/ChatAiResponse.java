@@ -7,7 +7,7 @@
  * Usage:
  * AiResponse response = new AiResponse(true, "答案内容", SiliconflowModelEnum.QWEN3_8B, "prompt内容", "input内容", true, 1500L, true);
  */
-package org.example.serviceai.aiService.siliconflow;
+package org.example.serviceai.aiService.siliconflow.chat;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AiResponse {
+public class ChatAiResponse {
 
     /**
      * 操作是否成功
@@ -35,7 +35,7 @@ public class AiResponse {
     /**
      * 随机选择的模型枚举名称（如QWEN3_8B）
      */
-    private SiliconflowModelEnum model;
+    private ChatSiliconflowModelEnum model;
 
     /**
      * 完整模型路径（如Qwen/Qwen3-8B）
@@ -79,8 +79,8 @@ public class AiResponse {
      * @param durationMs 执行时间（毫秒）
      * @param enableThinking 是否开启AI思考过程
      */
-    public AiResponse(boolean success, String answer, SiliconflowModelEnum model,
-                      String prompt, String input, boolean isRandom, long durationMs, boolean enableThinking) {
+    public ChatAiResponse(boolean success, String answer, ChatSiliconflowModelEnum model,
+                          String prompt, String input, boolean isRandom, long durationMs, boolean enableThinking) {
         this.success = success;
         this.answer = answer;
         this.model = model;
@@ -104,9 +104,9 @@ public class AiResponse {
      * @param enableThinking 是否开启AI思考过程
      * @return 成功的AiResponse实例
      */
-    public static AiResponse success(String answer, SiliconflowModelEnum model,
-                                     String prompt, String input, boolean isRandom, long durationMs, boolean enableThinking) {
-        return new AiResponse(true, answer, model, prompt, input, isRandom, durationMs, enableThinking);
+    public static ChatAiResponse success(String answer, ChatSiliconflowModelEnum model,
+                                         String prompt, String input, boolean isRandom, long durationMs, boolean enableThinking) {
+        return new ChatAiResponse(true, answer, model, prompt, input, isRandom, durationMs, enableThinking);
     }
 
     /**
@@ -121,8 +121,8 @@ public class AiResponse {
      * @param enableThinking 是否开启AI思考过程
      * @return 失败的AiResponse实例
      */
-    public static AiResponse failure(String errorMessage, SiliconflowModelEnum model,
-                                     String prompt, String input, boolean isRandom, long durationMs, boolean enableThinking) {
-        return new AiResponse(false, errorMessage, model, prompt, input, isRandom, durationMs, enableThinking);
+    public static ChatAiResponse failure(String errorMessage, ChatSiliconflowModelEnum model,
+                                         String prompt, String input, boolean isRandom, long durationMs, boolean enableThinking) {
+        return new ChatAiResponse(false, errorMessage, model, prompt, input, isRandom, durationMs, enableThinking);
     }
 }

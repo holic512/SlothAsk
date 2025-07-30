@@ -15,8 +15,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.serviceai.aiService.siliconflow.AiResponse;
-import org.example.serviceai.aiService.siliconflow.SiliconflowAiService;
+import org.example.serviceai.aiService.siliconflow.chat.ChatAiResponse;
+import org.example.serviceai.aiService.siliconflow.chat.ChatSiliconflowAiService;
 import org.example.serviceai.commonService.IdConversionService;
 import org.example.serviceai.config.rabbitMq.AiAnalysisRabbit.AiAnalysisRabbitConfig;
 import org.example.serviceai.config.rabbitMq.baseMessage.BaseMessageSender;
@@ -28,8 +28,8 @@ import org.example.serviceai.userAnswer.mapper.UAAiAnalysisMapper;
 import org.example.serviceai.userAnswer.mapper.UQRecordMapper;
 import org.example.serviceai.util.HtmlTextExtractor;
 import org.example.servicecommon.baseMessage.dto.AiBaseMessageDto;
-import org.example.servicecommon.baseMessage.message.BaseMessageMessage;
 import org.example.servicecommon.baseMessage.enums.BaseMessageType;
+import org.example.servicecommon.baseMessage.message.BaseMessageMessage;
 import org.example.servicecommon.entity.Question;
 import org.example.servicecommon.entity.UserAnswerAiAnalysis;
 import org.example.servicecommon.entity.UserQuestionRecord;
@@ -54,7 +54,7 @@ public class AiAnalysisConsumer {
     private final UAAiAnalysisMapper uaAiAnalysisMapper;
     private final UQRecordMapper uqRecordMapper;
     private final QuestionMapper questionMapper;
-    private final SiliconflowAiService siliconflowAiService;
+    private final ChatSiliconflowAiService chatSiliconflowAiService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final BaseMessageSender baseMessageSender;
     private final IdConversionService idConversionService;
@@ -120,12 +120,12 @@ public class AiAnalysisConsumer {
         AiAnalysisRequest analysisRequest = buildAnalysisRequest(question, record.getUserAnswer());
 
         // 3. 调用 AI 服务进行分析
-        AiResponse aiResponse = callAiService(analysisRequest);
+        ChatAiResponse chatAiResponse = callAiService(analysisRequest);
 
         // 4. 解析 AI 响应并保存结果
         // todo 插入数据库前 查看一下 这数据模拟删除没有
-        AiAnalysisResponse analysisResponse = parseAiResponse(aiResponse.getAnswer());
-        saveAnalysisResult(answerId, analysisResponse, aiResponse.getModelFull(), analysisRequest);
+        AiAnalysisResponse analysisResponse = parseAiResponse(chatAiResponse.getAnswer());
+        saveAnalysisResult(answerId, analysisResponse, chatAiResponse.getModelFull(), analysisRequest);
 
         // 5. 发送消息通知用户AI解析完成
         sendAiAnalysisCompletionMessage(record, question, analysisResponse);
@@ -182,9 +182,9 @@ public class AiAnalysisConsumer {
      * @param analysisRequest AI 分析请求
      * @return AI 响应
      */
-    private AiResponse callAiService(AiAnalysisRequest analysisRequest) {
+    private ChatAiResponse callAiService(AiAnalysisRequest analysisRequest) {
         String systemPrompt = buildSystemPrompt();
-        return siliconflowAiService.askQuestionWithRandomModel(
+        return chatSiliconflowAiService.askQuestionWithRandomModel(
                 systemPrompt,
                 analysisRequest.toString(),
                 false

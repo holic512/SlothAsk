@@ -1,8 +1,18 @@
 <!-- 消息通知 -->
 <script lang="ts" setup>
-
+import {ref} from 'vue'
 import BButton from "@/view/HomePage/view/TopMenu/components/BellUtil/BButton.vue";
 import TopBaseBox from "@/view/HomePage/view/TopMenu/components/BellUtil/TopBaseBox.vue";
+
+// 获取TopBaseBox组件的引用
+const topBaseBoxRef = ref<InstanceType<typeof TopBaseBox>>()
+
+// 当弹窗显示时重新获取消息
+const handlePopoverShow = () => {
+  if (topBaseBoxRef.value && topBaseBoxRef.value.refreshMessages) {
+    topBaseBoxRef.value.refreshMessages()
+  }
+}
 </script>
 
 <template>
@@ -14,12 +24,13 @@ import TopBaseBox from "@/view/HomePage/view/TopMenu/components/BellUtil/TopBase
       placement="bottom"
       popper-class="custom-avatar-popover"
       trigger="click"
+      @show="handlePopoverShow"
   >
     <template #reference>
       <BButton/>
     </template>
     <div>
-      <TopBaseBox/>
+      <TopBaseBox ref="topBaseBoxRef"/>
     </div>
 
 

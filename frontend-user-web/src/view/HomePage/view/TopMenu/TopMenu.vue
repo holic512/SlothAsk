@@ -7,7 +7,8 @@ import {useSessionStore} from "@/pinia/Session";
 import {useUserProfileStore} from "@/pinia/UserProfile";
 import UserUtil from "@/view/HomePage/view/TopMenu/components/UserUtil/UserUtil.vue";
 import BellUtil from "@/view/HomePage/view/TopMenu/components/BellUtil/index.vue";
-import {ArrowRight, Bell, Menu, QuestionFilled, Reading, User} from '@element-plus/icons-vue';
+import SearchUtil from "@/view/HomePage/view/TopMenu/components/SearchUtil/index.vue";
+import {ArrowRight, Menu, QuestionFilled, Reading, User} from '@element-plus/icons-vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -68,7 +69,8 @@ const handleSelect = (key) => {
   showMobileMenu.value = false;
 }
 
-const handleSearch = (searchText) => {
+// 这个方法保留用于兼容性，实际搜索功能已移到新的handleSearch方法中
+const handleSearchLegacy = (searchText) => {
   console.log('搜索:', searchText)
 }
 
@@ -122,6 +124,8 @@ const getAvatarText = (nickname) => {
 const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value;
 };
+
+
 </script>
 
 <template>
@@ -154,6 +158,8 @@ const toggleMobileMenu = () => {
 
         <!-- 第三部分：用户功能区域 -->
         <div class="navbar-right-section">
+          <!-- 搜索组件 -->
+          <SearchUtil />
           <!-- 用户已登录状态 -->
           <div v-if="topMenuStore.isLogin" class="user-section">
             <!-- 消息服务 -->
@@ -216,6 +222,11 @@ const toggleMobileMenu = () => {
         <!-- Logo -->
         <div class="logo-container" @click="handleLogoClick">
           <img alt="Logo" class="logo-img" src="/HomePage/logo.jpg">
+        </div>
+
+        <!-- 移动端搜索组件 -->
+        <div class="mobile-search-section">
+          <SearchUtil />
         </div>
 
         <!-- 移动端右侧功能区 -->
@@ -407,6 +418,7 @@ const toggleMobileMenu = () => {
   display: flex;
   align-items: center;
   flex-shrink: 0; /* 防止压缩 */
+  gap: 16px;
 }
 
 .user-section, .user-actions {
@@ -674,6 +686,15 @@ const toggleMobileMenu = () => {
 
 .mobile-vip-button:hover {
   background-color: #333;
+}
+
+/* ==================== 搜索组件样式 ==================== */
+/* 移动端搜索区域 */
+.mobile-search-section {
+  flex: 1;
+  margin: 0 12px;
+  display: flex;
+  justify-content: center;
 }
 
 /* ==================== 动画效果 ==================== */

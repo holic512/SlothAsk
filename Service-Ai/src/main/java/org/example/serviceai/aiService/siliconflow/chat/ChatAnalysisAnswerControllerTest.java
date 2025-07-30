@@ -8,7 +8,7 @@
  * POST /ai/test/ask-question - 指定模型的AI问答测试
  * POST /ai/test/ask-question-random - 随机模型的AI问答测试
  */
-package org.example.serviceai.aiService.siliconflow;
+package org.example.serviceai.aiService.siliconflow.chat;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +22,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/ai/test")
 @CrossOrigin(origins = "*")
-public class AnalysisAnswerControllerTest {
+public class ChatAnalysisAnswerControllerTest {
 
     @Autowired
-    private SiliconflowAiService siliconflowAiService;
+    private ChatSiliconflowAiService chatSiliconflowAiService;
 
     /**
      * 指定模型的AI问答测试接口
@@ -34,25 +34,25 @@ public class AnalysisAnswerControllerTest {
      * @return AI响应结果
      */
     @PostMapping("/ask-question")
-    public ResponseEntity<AiResponse> askQuestion(@RequestBody AskQuestionRequest request) {
+    public ResponseEntity<ChatAiResponse> askQuestion(@RequestBody AskQuestionRequest request) {
         try {
 
             if (request.getInput() == null || request.getInput().trim().isEmpty()) {
                 return ResponseEntity.badRequest().body(
-                        AiResponse.failure("input参数不能为空", request.getModel(),
+                        ChatAiResponse.failure("input参数不能为空", request.getModel(),
                                 request.getPrompt(), request.getInput(), false, 0L, request.isThink())
                 );
             }
 
             if (request.getModel() == null) {
                 return ResponseEntity.badRequest().body(
-                        AiResponse.failure("model参数不能为空", null,
+                        ChatAiResponse.failure("model参数不能为空", null,
                                 request.getPrompt(), request.getInput(), false, 0L, request.isThink())
                 );
             }
 
             // 调用AI服务
-            AiResponse response = siliconflowAiService.askQuestion(
+            ChatAiResponse response = chatSiliconflowAiService.askQuestion(
                     request.getModel(),
                     request.getPrompt(),
                     request.getInput(),
@@ -63,7 +63,7 @@ public class AnalysisAnswerControllerTest {
 
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    AiResponse.failure("服务器内部错误: " + e.getMessage(),
+                    ChatAiResponse.failure("服务器内部错误: " + e.getMessage(),
                             request.getModel(), request.getPrompt(),
                             request.getInput(), false, 0L, request.isThink())
             );
@@ -77,18 +77,18 @@ public class AnalysisAnswerControllerTest {
      * @return AI响应结果
      */
     @PostMapping("/ask-question-random")
-    public ResponseEntity<AiResponse> askQuestionWithRandomModel(@RequestBody AskQuestionRandomRequest request) {
+    public ResponseEntity<ChatAiResponse> askQuestionWithRandomModel(@RequestBody AskQuestionRandomRequest request) {
         try {
 
             if (request.getInput() == null || request.getInput().trim().isEmpty()) {
                 return ResponseEntity.badRequest().body(
-                        AiResponse.failure("input参数不能为空", null,
+                        ChatAiResponse.failure("input参数不能为空", null,
                                 request.getPrompt(), request.getInput(), true, 0L, request.isThink())
                 );
             }
 
             // 调用AI服务（随机模型）
-            AiResponse response = siliconflowAiService.askQuestionWithRandomModel(
+            ChatAiResponse response = chatSiliconflowAiService.askQuestionWithRandomModel(
                     request.getPrompt(),
                     request.getInput(),
                     request.isThink()
@@ -98,7 +98,7 @@ public class AnalysisAnswerControllerTest {
 
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    AiResponse.failure("服务器内部错误: " + e.getMessage(),
+                    ChatAiResponse.failure("服务器内部错误: " + e.getMessage(),
                             null, request.getPrompt(),
                             request.getInput(), true, 0L, request.isThink())
             );
@@ -111,8 +111,8 @@ public class AnalysisAnswerControllerTest {
      * @return 模型列表
      */
     @GetMapping("/models")
-    public ResponseEntity<SiliconflowModelEnum[]> getAvailableModels() {
-        return ResponseEntity.ok(SiliconflowModelEnum.values());
+    public ResponseEntity<ChatSiliconflowModelEnum[]> getAvailableModels() {
+        return ResponseEntity.ok(ChatSiliconflowModelEnum.values());
     }
 
     /**
@@ -130,7 +130,7 @@ public class AnalysisAnswerControllerTest {
      */
     @Data
     public static class AskQuestionRequest {
-        private SiliconflowModelEnum model;
+        private ChatSiliconflowModelEnum model;
         private String prompt;
         private String input;
         private boolean think = false;

@@ -21,6 +21,10 @@ public class ApiResponse {
     String message;
     Object data;
 
+    public ApiResponse() {
+        // 必须要有，不然反序列化失败
+    }
+
     /**
      * 构造函数，用于创建 ApiResponse 实例，仅传入状态码和消息
      *

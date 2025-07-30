@@ -54,6 +54,14 @@
         </div>
         <div class="action-right">
           <el-button
+              :disabled="!currentAnswer.trim()"
+              plain
+              type="danger"
+              @click="clearAnswer"
+          >
+            清空回答
+          </el-button>
+          <el-button
               :disabled="!hasUnsavedChanges"
               :loading="isSaving"
               @click="saveToLocal"
@@ -135,6 +143,24 @@ const sanitizedUserAnswer = computed(() => {
 // 方法
 const onAnswerChange = () => {
   hasUnsavedChanges.value = true
+}
+
+const clearAnswer = async () => {
+  try {
+    await ElMessageBox.confirm('确定要清空当前回答吗？', '确认清空', {
+      confirmButtonText: '确定清空',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    
+    currentAnswer.value = ''
+    hasUnsavedChanges.value = false
+    ElMessage.success('回答已清空')
+  } catch (error: any) {
+    if (error !== 'cancel') {
+      console.error('清空回答失败:', error)
+    }
+  }
 }
 
 const saveToLocal = async () => {

@@ -7,12 +7,12 @@
  * Usage:
  * SiliconflowModelEnum.QWEN_32B.getModelName()
  */
-package org.example.serviceai.aiService.siliconflow;
+package org.example.serviceai.aiService.siliconflow.chat;
 
 import lombok.Getter;
 
 @Getter
-public enum SiliconflowModelEnum {
+public enum ChatSiliconflowModelEnum {
 
     /**
      * 通义千问 Qwen3-32B 模型
@@ -47,7 +47,7 @@ public enum SiliconflowModelEnum {
 
     private final String modelName;
 
-    SiliconflowModelEnum(String modelName) {
+    ChatSiliconflowModelEnum(String modelName) {
         this.modelName = modelName;
     }
 
