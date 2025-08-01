@@ -21,4 +21,5 @@ public class MinioConfig {
     private String accessKey;
     private String secretKey;
     private String bucketName;
+    private String proxyUrl; // 代理地址，用于外部访问图片URL
 }

@@ -109,9 +109,14 @@ public class MinioService {
      */
     @Cacheable(value = "previewUrls", key = "#fileName", unless = "#result == null")
     public String getPreviewUrl(String fileName) {
+        // 优先使用代理地址，如果没有配置则使用默认endpoint
+        String baseUrl = (minioConfig.getProxyUrl() != null && !minioConfig.getProxyUrl().isEmpty()) 
+                ? minioConfig.getProxyUrl() 
+                : minioConfig.getEndpoint();
+        
         // 构建永久公共访问URL
         return String.format("%s/%s/%s",
-                minioConfig.getEndpoint().replaceAll("/$", ""),  // 移除末尾的斜杠
+                baseUrl.replaceAll("/$", ""),  // 移除末尾的斜杠
                 minioConfig.getBucketName(),
                 fileName
         );
@@ -175,15 +180,20 @@ public class MinioService {
             return Collections.emptyMap();
         }
 
-        String baseUrl = minioConfig.getEndpoint().replaceAll("/$", "");
+        // 优先使用代理地址，如果没有配置则使用默认endpoint
+        String baseUrl = (minioConfig.getProxyUrl() != null && !minioConfig.getProxyUrl().isEmpty()) 
+                ? minioConfig.getProxyUrl() 
+                : minioConfig.getEndpoint();
+        baseUrl = baseUrl.replaceAll("/$", "");
         String bucket = minioConfig.getBucketName();
 
+        String finalBaseUrl = baseUrl;
         return fileNames.stream()
                 .filter(Objects::nonNull)
                 .distinct()
                 .collect(Collectors.toMap(
                         fileName -> fileName,
-                        fileName -> String.format("%s/%s/%s", baseUrl, bucket, fileName)
+                        fileName -> String.format("%s/%s/%s", finalBaseUrl, bucket, fileName)
                 ));
     }
 

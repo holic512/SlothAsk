@@ -5,6 +5,7 @@ import {visualizer} from "rollup-plugin-visualizer";
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import {ElementPlusResolver} from 'unplugin-vue-components/resolvers'
+import viteCompression from "vite-plugin-compression";
 import path from 'path';
 
 export default defineConfig({
@@ -22,6 +23,13 @@ export default defineConfig({
         }),
         Components({
             resolvers: [ElementPlusResolver()],
+        }),
+        viteCompression({
+            verbose: true,
+            disable: false,
+            threshold: 10240, // 超过 10kb 的文件才压缩
+            algorithm: "gzip",
+            ext: ".gz",
         }),
     ],
     build: {

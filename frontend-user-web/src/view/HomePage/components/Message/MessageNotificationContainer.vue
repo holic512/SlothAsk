@@ -1,12 +1,13 @@
 <script lang="ts" setup>
-import {ref, onMounted, onUnmounted} from 'vue'
+import {computed, onMounted, onUnmounted, ref} from 'vue'
 import {Close} from '@element-plus/icons-vue'
 import DynamicMessageComponent from './DynamicMessageComponent.vue'
 import type {BaseMessage} from './MessageInterface'
-import {MessageType, MessageDisplayMode, ReadStatus} from './MessageInterface'
-import type {AiRecognitionMessage, AiRecognitionMessageData} from './AiRecognitionMessage/index'
+import {MessageDisplayMode, MessageType} from './MessageInterface'
+import type {AiRecognitionMessageData} from './AiRecognitionMessage/index'
 import sseClient from "@/axios/sseClient"
 import {SSEMessageType} from './SSEMessageType'
+import {useSessionStore} from "@/pinia/Session";
 
 // 消息列表
 const messages = ref<BaseMessage[]>([])
@@ -142,9 +143,20 @@ let connection
 let heartbeatTimer: NodeJS.Timeout | null = null
 const HEARTBEAT_TIMEOUT = 60000 // 30秒心跳超时
 
+// 获取用户session pinia实例
+const userSession = useSessionStore();
+
+// 判断用户是否登录
+const isLoggedIn = computed(() => {
+  return userSession.userSession && userSession.userSession.tokenValue;
+});
+
 // 建立SSE连接
 const establishConnection = () => {
   try {
+
+    if (!isLoggedIn.value) return
+
     connection = sseClient.connect('service-notification/baseMessage/sse/connect')
 
     // 监听心跳消息
@@ -266,10 +278,6 @@ onUnmounted(() => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   border: 1px solid #e4e7ed;
-}
-
-.message-content {
-  /* 移除右侧padding，让关闭按钮完全独立定位 */
 }
 
 .close-btn {

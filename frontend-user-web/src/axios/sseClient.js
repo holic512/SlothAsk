@@ -72,7 +72,7 @@ class SSEClient {
             headers['SlothAsk'] = token
         }
 
-        const fullUrl = `${baseUrl}${path}`
+        const fullUrl = `${baseUrl.replace(/\/$/, '')}/${path.replace(/^\//, '')}`
 
         const eventSourceOptions = {
             headers,
