@@ -65,6 +65,7 @@ import {ApiGetQuestionByVirtualId} from "@/view/HomePage/view/QuestionPage/servi
 import ActionButtons
   from "@/view/HomePage/view/QuestionPage/components/container/QuestionDetail/components/ActionButtons.vue";
 import {ArrowRight, View} from "@element-plus/icons-vue";
+import {isUserLoggedIn} from "@/utils/useIsLoggedIn";
 
 // 使用异步组件动态导入，只在需要时加载
 const SingleChoice = defineAsyncComponent(() =>
@@ -93,6 +94,11 @@ const loadingNext = ref(false);
 
 // 检查题目是否已收藏
 const checkFavoriteStatus = async (virtualId: string) => {
+  if (!isUserLoggedIn()) {
+    // console.log('未登录，不查询');
+    return;
+  }
+
   try {
     // 这里需要调用检查收藏状态的API
     const response = await axios.get('service-question/user/favQuestion/checkFav', {

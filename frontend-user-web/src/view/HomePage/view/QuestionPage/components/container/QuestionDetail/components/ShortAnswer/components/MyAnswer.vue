@@ -1,86 +1,97 @@
 <template>
   <div class="my-answer">
-    <!-- 已提交答案状态 -->
-    <div v-if="hasSubmittedAnswer" class="submitted-answer">
-      <div class="answer-header">
-        <h3 class="section-title">我的回答</h3>
-
-
-        <div class="submit-time">
-          <span>提交时间：{{ formatTime(userAnswer.submitTime) }}</span>
-        </div>
-
-        <el-button
-            :loading="isReAnswering"
-            size="small"
-            type="warning"
-            @click="reAnswerQuestion"
-        >
-          重新回答
-        </el-button>
+    <!-- 未登录状态 -->
+    <div v-if="!isLoggedIn" class="answer-placeholder">
+      <div class="placeholder-content">
+        <div v-for="n in 5" :key="n" class="line"></div>
       </div>
-
-      <!-- AI 分析组件 -->
-      <AiAnalysisSection ref="aiAnalysisRef" :answer-id="userAnswer.id" />
-
-      <div class="answer-content" v-html="sanitizedUserAnswer"></div>
+      <a class="view-link" @click.prevent="showLoginTip">
+        <span>登录后回答问题</span>
+      </a>
     </div>
 
-    <!-- 未提交答案状态 -->
-    <div v-else class="answer-editor">
-      <div class="editor-header">
-        <h3 class="section-title">我的回答</h3>
-        <div :class="{ 'unsaved': hasUnsavedChanges }" class="save-status">
+    <!-- 已登录状态 -->
+    <div v-else>
+      <!-- 已提交答案状态 -->
+      <div v-if="hasSubmittedAnswer" class="submitted-answer">
+        <div class="answer-header">
+          <h3 class="section-title">我的回答</h3>
 
-          <span>{{ hasUnsavedChanges ? '有未保存的更改' : '已保存' }}</span>
+
+          <div class="submit-time">
+            <span>提交时间：{{ formatTime(userAnswer.submitTime) }}</span>
+          </div>
+
+          <el-button
+              :loading="isReAnswering"
+              size="small"
+              type="warning"
+              @click="reAnswerQuestion"
+          >
+            重新回答
+          </el-button>
         </div>
+
+        <!-- AI 分析组件 -->
+        <AiAnalysisSection ref="aiAnalysisRef" :answer-id="userAnswer.id"/>
+
+        <div class="answer-content" v-html="sanitizedUserAnswer"></div>
       </div>
 
-      <div class="editor-container">
-        <el-input
-            v-model="currentAnswer"
-            :rows="12"
-            class="answer-textarea"
-            placeholder="请输入您的答案..."
-            resize="vertical"
-            type="textarea"
-            @input="onAnswerChange"
-        />
-      </div>
+      <!-- 未提交答案状态 -->
+      <div v-else class="answer-editor">
+        <div class="editor-header">
+          <h3 class="section-title">我的回答</h3>
+          <div :class="{ 'unsaved': hasUnsavedChanges }" class="save-status">
 
-      <div class="editor-actions">
-        <div class="action-left">
-          <span class="word-count">{{ currentAnswer.length }} 字</span>
+            <span>{{ hasUnsavedChanges ? '有未保存的更改' : '已保存' }}</span>
+          </div>
         </div>
-        <div class="action-right">
-          <el-button
-              :disabled="!currentAnswer.trim()"
-              plain
-              type="danger"
-              @click="clearAnswer"
-          >
-            清空回答
-          </el-button>
-          <el-button
-              :disabled="!hasUnsavedChanges"
-              :loading="isSaving"
-              @click="saveToLocal"
-          >
-            保存草稿
-          </el-button>
-          <el-button
-              :disabled="!currentAnswer.trim()"
-              :loading="isSubmitting"
-              type="primary"
-              @click="submitAnswer"
-          >
-            提交答案
-          </el-button>
+
+        <div class="editor-container">
+          <el-input
+              v-model="currentAnswer"
+              :rows="12"
+              class="answer-textarea"
+              placeholder="请输入您的答案..."
+              resize="vertical"
+              type="textarea"
+              @input="onAnswerChange"
+          />
+        </div>
+
+        <div class="editor-actions">
+          <div class="action-left">
+            <span class="word-count">{{ currentAnswer.length }} 字</span>
+          </div>
+          <div class="action-right">
+            <el-button
+                :disabled="!currentAnswer.trim()"
+                plain
+                type="danger"
+                @click="clearAnswer"
+            >
+              清空回答
+            </el-button>
+            <el-button
+                :disabled="!hasUnsavedChanges"
+                :loading="isSaving"
+                @click="saveToLocal"
+            >
+              保存草稿
+            </el-button>
+            <el-button
+                :disabled="!currentAnswer.trim()"
+                :loading="isSubmitting"
+                type="primary"
+                @click="submitAnswer"
+            >
+              提交答案
+            </el-button>
+          </div>
         </div>
       </div>
     </div>
-
-
   </div>
 </template>
 
@@ -94,6 +105,8 @@ import {ApiSaveAnswer, type SaveAnswerRequest} from '../../../../../../service/A
 import {ApiSubmitAnswer, type SubmitAnswerRequest} from '../../../../../../service/ApiSubmitAnswer'
 import {ApiRetryAnswer, type RetryAnswerRequest} from '../../../../../../service/ApiRetryAnswer'
 import {ApiSendAiAnalysis, type SendAiAnalysisRequest} from '../../../../../../service/ApiSendAiAnalysis'
+import {isUserLoggedIn} from '@/utils/useIsLoggedIn'
+import {useRoute, useRouter} from 'vue-router'
 
 // TypeScript 接口定义
 interface UserAnswer {
@@ -101,7 +114,6 @@ interface UserAnswer {
   submitTime: string
   id: string
 }
-
 
 
 interface ApiResponse<T> {
@@ -126,6 +138,11 @@ const isSubmitting = ref(false)
 const isReAnswering = ref(false)
 const currentAnswerId = ref<number | null>(null)
 const aiAnalysisRef = ref<InstanceType<typeof AiAnalysisSection> | null>(null)
+const router = useRouter()
+const route = useRoute()
+
+// 判断用户是否登录
+const isLoggedIn = computed(() => isUserLoggedIn())
 
 // 模拟数据
 const userAnswer = ref<UserAnswer | null>(null)
@@ -152,7 +169,7 @@ const clearAnswer = async () => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    
+
     currentAnswer.value = ''
     hasUnsavedChanges.value = false
     ElMessage.success('回答已清空')
@@ -295,7 +312,6 @@ const submitAnswer = async () => {
 }
 
 
-
 const formatTime = (timeStr: string) => {
   return new Date(timeStr).toLocaleString('zh-CN')
 }
@@ -348,6 +364,11 @@ const reAnswerQuestion = async () => {
 
 // 加载答题记录
 const loadAnswerRecord = async () => {
+  if (!isUserLoggedIn()) {
+    // console.log('未登录，不查询');
+    return;
+  }
+
   try {
     const response = await ApiGetAnswerRecord(props.question.virtualId)
 
@@ -380,6 +401,29 @@ const loadAnswerRecord = async () => {
     hasUnsavedChanges.value = false
     currentAnswerId.value = null
   }
+}
+
+// 显示登录提示
+const showLoginTip = () => {
+  ElMessageBox.confirm('登录后才能回答问题，是否前往登录？', '提示', {
+    confirmButtonText: '去登录',
+    cancelButtonText: '取消',
+    type: 'info'
+  }).then(() => {
+    handleLogin()
+  }).catch(() => {
+    // 用户取消登录
+  })
+}
+
+// 处理登录跳转
+const handleLogin = () => {
+  router.push({
+    path: '/sign/email',
+    query: {
+      redirect: route.fullPath
+    }
+  })
 }
 
 // 生命周期
@@ -433,13 +477,10 @@ watch(
 }
 
 
-
 .submit-time {
   color: #909399;
   font-size: 0.9rem;
 }
-
-
 
 
 :deep(.answer-content) {
@@ -542,6 +583,47 @@ watch(
   gap: 0.75rem;
 }
 
+/* 未登录占位样式 */
+.answer-placeholder {
+  position: relative;
+  padding: 1rem 0;
+}
+
+.placeholder-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  filter: blur(6px);
+}
+
+.placeholder-content .line {
+  height: 1em;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.view-link {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 4px;
+  color: #3498db;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.view-link:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .answer-header,
@@ -550,7 +632,6 @@ watch(
     align-items: flex-start;
     gap: 0.5rem;
   }
-
 
 
   .editor-actions {

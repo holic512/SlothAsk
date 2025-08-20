@@ -11,6 +11,7 @@ import {
   getLatestTenMessages,
   markLatestTenMessagesAsRead
 } from '@/view/HomePage/view/TopMenu/Api/ApiBaseMessage'
+import {isUserLoggedIn} from "@/utils/useIsLoggedIn";
 
 const router = useRouter()
 
@@ -21,6 +22,12 @@ const hasUnreadMessages = ref(false)
 
 // 获取最新十条消息
 const fetchLatestMessages = async () => {
+
+  if (!isUserLoggedIn()) {
+    // console.log('未登录，不查询签到状态');
+    return;
+  }
+
   try {
     loading.value = true
     const response = await getLatestTenMessages()
@@ -29,7 +36,6 @@ const fetchLatestMessages = async () => {
     } else {
       ElMessage.error(response.message || '获取消息失败')
     }
-    console.log(messages)
   } catch (error) {
     console.error('获取消息失败:', error)
     ElMessage.error('获取消息失败')

@@ -1,4 +1,5 @@
 // usernameValidator.ts
+// 用于用户名 规则校验
 
 /**
  * 校验结果接口

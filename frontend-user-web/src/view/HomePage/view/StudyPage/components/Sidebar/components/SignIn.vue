@@ -5,6 +5,7 @@ import {zhCN} from 'date-fns/locale';
 import {apiGetSignInStatus} from '../../../service/ApiGetSignInStatus';
 import {apiPostSignIn} from '../../../service/ApiPostSignIn';
 import {ElMessage} from 'element-plus';
+import {isUserLoggedIn} from "@/utils/useIsLoggedIn";
 
 const signedIn = ref(false);
 const loading = ref(false);
@@ -19,11 +20,18 @@ const date = computed(() => {
 });
 
 const weekday = computed(() => {
-  return format(today, 'EEEE', { locale: zhCN });
+  return format(today, 'EEEE', {locale: zhCN});
 });
 
 // 查询签到状态
 const checkSignInStatus = async () => {
+
+
+  if (!isUserLoggedIn()) {
+    // console.log('未登录，不查询签到状态');
+    return;
+  }
+
   try {
     const response = await apiGetSignInStatus();
     if (response.status === 200) {
@@ -36,10 +44,17 @@ const checkSignInStatus = async () => {
 
 // 执行签到
 const handleSignIn = async () => {
+
+  if (!isUserLoggedIn()) {
+    ElMessage.warning("你还没登录捏")
+    return;
+  }
+
+
   if (signedIn.value || loading.value) {
     return;
   }
-  
+
   loading.value = true;
   try {
     const response = await apiPostSignIn();
@@ -81,8 +96,8 @@ onMounted(() => {
     </div>
     <div class="right-content">
       <div v-if="loading" class="loading-spinner"></div>
-      <img v-else-if="signedIn" alt="Signed In" class="status-gif" src="/HomePage/StudyPage/happy.gif" />
-      <img v-else alt="Not Signed In" class="status-gif" src="/HomePage/StudyPage/wait.gif" />
+      <img v-else-if="signedIn" alt="Signed In" class="status-gif" src="/HomePage/StudyPage/happy.gif"/>
+      <img v-else alt="Not Signed In" class="status-gif" src="/HomePage/StudyPage/wait.gif"/>
     </div>
   </div>
 </template>
@@ -245,7 +260,11 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

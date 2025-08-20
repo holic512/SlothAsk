@@ -18,12 +18,19 @@ import SignIn from "@/view/HomePage/view/StudyPage/components/Sidebar/components
 import Heatmap from "@/view/HomePage/view/StudyPage/components/Sidebar/components/Heatmap.vue";
 import HotQuestions from "@/view/HomePage/view/StudyPage/components/Sidebar/components/HotQuestions.vue";
 import {apiGetUserSubmitCountStats} from "@/view/HomePage/view/StudyPage/service/ApiGetUserSubmitCountStats";
+import {isUserLoggedIn} from "@/utils/useIsLoggedIn.js";
 
 // 热力图数据
 const heatmapData = ref([]);
 
 // 获取用户提交次数统计数据
 const fetchHeatmapData = async () => {
+
+  if (!isUserLoggedIn()) {
+    // console.log('未登录，不查询');
+    return;
+  }
+
   try {
     const response = await apiGetUserSubmitCountStats();
     if (response.status === 200) {

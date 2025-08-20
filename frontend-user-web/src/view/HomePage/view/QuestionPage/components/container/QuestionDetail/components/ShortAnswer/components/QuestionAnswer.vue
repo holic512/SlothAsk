@@ -33,15 +33,14 @@ import {
 import {useSessionStore} from '@/pinia/Session'
 import {useRoute, useRouter} from 'vue-router'
 import {ElMessage, ElMessageBox} from 'element-plus'
+import {isUserLoggedIn} from '@/utils/useIsLoggedIn'
 
 const router = useRouter()
 const route = useRoute()
 const userSession = useSessionStore()
 
 // 判断用户是否登录
-const isLoggedIn = computed(() => {
-  return userSession.userSession && userSession.userSession.tokenValue
-})
+const isLoggedIn = computed(() => isUserLoggedIn())
 
 // 防抖函数
 const debounce = (fn: Function, delay: number) => {
