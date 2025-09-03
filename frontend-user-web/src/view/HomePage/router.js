@@ -102,6 +102,16 @@ export default [
                         )
             },
 
+            // 招聘页面
+            {
+                path: 'jobrecruit',
+                name: 'JobRecruitPage',
+                component: () =>
+                    import(
+                        /* webpackChunkName: "jobrecruit" */ './view/JobRecruitPage/index.vue'
+                        )
+            },
+
             // 个人中心
             {
                 path: 'account',

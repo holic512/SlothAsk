@@ -21,6 +21,7 @@ const menuItems = ref([
   {path: '/intro', name: '主页', icon: Reading},
   {path: '/study', name: '学习', icon: Reading},
   {path: '/questionbank/questionbank', name: '题库', icon: QuestionFilled},
+  {path: '/jobrecruit', name: '招聘', icon: User},
   // { path: '/contest', name: '竞赛' },
   // { path: '/discussion', name: '讨论' },
   // { path: '/interview', name: '面试分享' }
