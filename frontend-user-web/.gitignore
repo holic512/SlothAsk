@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 
 stats.html
+
+dist.7z
