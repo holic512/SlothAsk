@@ -3,82 +3,103 @@
     <div class="container">
 
       <div class="table-container">
-        <el-table 
-          :data="paginatedJobs" 
-          style="width: 100%"
-          :header-cell-style="{ background: '#f8f9fa', color: '#333' }"
-          :row-class-name="getRowClassName"
-          stripe
-          border
-          v-loading="loading"
-          element-loading-text="加载中..."
+        <el-table
+            v-loading="loading"
+            :data="paginatedJobs"
+            :header-cell-style="{ background: '#f8f9fa', color: '#333' }"
+            :row-class-name="getRowClassName"
+            border
+            element-loading-text="加载中..."
+            stripe
+            style="width: 100%"
         >
-          <el-table-column 
-            prop="publishTime" 
-            label="发布时间" 
-            width="100"
-            :formatter="formatDateColumn"
+          <el-table-column
+              :formatter="formatDateColumn"
+              label="发布时间"
+              prop="publishTime"
+              width="110"
           />
-          
-          <el-table-column 
-            prop="companyName" 
-            label="公司名称"
-            show-overflow-tooltip
+
+          <el-table-column
+              label="公司名称"
+              prop="companyName"
+              show-overflow-tooltip
           >
             <template #default="{ row }">
               <div class="company-name clickable" @click="copyToClipboard(row.companyName, '公司名称')">
-                <el-icon class="company-icon"><OfficeBuilding /></el-icon>
+                <el-icon class="company-icon">
+                  <OfficeBuilding/>
+                </el-icon>
                 {{ row.companyName }}
-                <el-icon class="copy-icon"><DocumentCopy /></el-icon>
+                <el-icon class="copy-icon">
+                  <DocumentCopy/>
+                </el-icon>
               </div>
             </template>
           </el-table-column>
-          
-          <el-table-column 
-            prop="jobName" 
-            label="岗位" 
-            width="230"
-            show-overflow-tooltip
+
+          <el-table-column
+              label="岗位"
+              prop="jobName"
+              show-overflow-tooltip
+              width="200"
           >
             <template #default="{ row }">
               <span class="job-name-text">{{ row.jobName }}</span>
             </template>
           </el-table-column>
-          
-          <el-table-column 
-            prop="location" 
-            label="工作地点" 
-            width="120"
-            show-overflow-tooltip
+
+          <el-table-column
+              align="center"
+              label="岗位类型"
+              prop="jobType"
+              width="100"
+          >
+            <template #default="{ row }">
+              <div class="job-type-badge">
+                <span v-if="row.jobType && row.jobType.trim() !== ''" class="job-type-text">{{ row.jobType }}</span>
+                <span v-else class="job-type-empty">-</span>
+              </div>
+            </template>
+          </el-table-column>
+
+          <el-table-column
+              align="center"
+              label="工作地点"
+              prop="location"
+              show-overflow-tooltip
+              width="120"
           >
             <template #default="{ row }">
               <div v-if="row.location && row.location.trim() !== ''" class="location-with-icon">
-                <el-icon class="location-icon"><Location /></el-icon>
+                <el-icon class="location-icon">
+                  <Location/>
+                </el-icon>
                 <span class="location-badge">{{ row.location }}</span>
               </div>
             </template>
           </el-table-column>
-          
 
-          
-          <el-table-column 
-            prop="referralCode" 
-            label="内推码" 
-            width="100"
+
+          <el-table-column
+              label="内推码"
+              prop="referralCode"
+              width="100"
           >
             <template #default="{ row }">
-              <span v-if="row.referralCode && row.referralCode.trim() !== ''" class="referral-code clickable" @click="copyToClipboard(row.referralCode, '内推码')">
+              <span v-if="row.referralCode && row.referralCode.trim() !== ''" class="referral-code clickable"
+                    @click="copyToClipboard(row.referralCode, '内推码')">
                 <strong>{{ row.referralCode }}</strong>
-                <el-icon class="copy-icon"><DocumentCopy /></el-icon>
+                <el-icon class="copy-icon"><DocumentCopy/></el-icon>
               </span>
             </template>
           </el-table-column>
-          
-          <el-table-column 
-            prop="endTime" 
-            label="结束时间" 
-            width="120"
-            :formatter="formatDateColumn"
+
+          <el-table-column
+              :formatter="formatDateColumn"
+              label="结束时间"
+              prop="endTime"
+              width="120"
           >
             <template #default="{ row }">
               <span :class="['end-time', { 'expired': isExpired(row.endTime) }]">
@@ -86,51 +107,51 @@
               </span>
             </template>
           </el-table-column>
-          
-          <el-table-column 
-            prop="applicationStatus" 
-            label="求职进度" 
-            width="130"
+
+          <el-table-column
+              label="求职进度"
+              prop="applicationStatus"
+              width="130"
           >
             <template #default="{ row }">
-              <el-select 
-                v-model="row.applicationStatus" 
-                @change="handleUpdateApplicationStatus(row)"
-                class="status-select"
-                size="small"
-                :disabled="statusUpdating"
+              <el-select
+                  v-model="row.applicationStatus"
+                  :disabled="statusUpdating"
+                  class="status-select"
+                  size="small"
+                  @change="handleUpdateApplicationStatus(row)"
               >
-                <el-option label="待投递" value="待投递" />
-                <el-option label="投递中" value="投递中" />
-                <el-option label="待笔试" value="待笔试" />
-                <el-option label="笔试中" value="笔试中" />
-                <el-option label="一面" value="一面" />
-                <el-option label="二面" value="二面" />
-                <el-option label="三面" value="三面" />
+                <el-option label="待投递" value="待投递"/>
+                <el-option label="投递中" value="投递中"/>
+                <el-option label="待笔试" value="待笔试"/>
+                <el-option label="笔试中" value="笔试中"/>
+                <el-option label="一面" value="一面"/>
+                <el-option label="二面" value="二面"/>
+                <el-option label="三面" value="三面"/>
               </el-select>
             </template>
           </el-table-column>
-          
-          <el-table-column 
-            label="操作" 
-            width="200"
-            fixed="right"
+
+          <el-table-column
+              fixed="right"
+              label="操作"
+              width="140"
           >
             <template #default="{ row }">
               <div class="action-buttons">
-                <el-button 
-                  type="info" 
-                  size="small"
-                  @click="handleViewDetail(row)"
+                <el-button
+                    size="small"
+                    type="info"
+                    @click="handleViewDetail(row)"
                 >
-                  查看详情
+                  详情
                 </el-button>
-                <el-button 
-                  type="primary" 
-                  size="small"
-                  @click="handleApply(row.applyUrl)"
+                <el-button
+                    size="small"
+                    type="primary"
+                    @click="handleApply(row.applyUrl)"
                 >
-                  点击投递
+                  投递
                 </el-button>
               </div>
             </template>
@@ -138,26 +159,26 @@
         </el-table>
 
         <!-- 空状态 -->
-        <el-empty v-if="jobs.length === 0" description="暂无职位信息" />
+        <el-empty v-if="jobs.length === 0" description="暂无职位信息"/>
       </div>
 
       <!-- 岗位详情弹窗 -->
       <JobDetailDialog
-        v-model="showDetailDialog"
-        :job-data="selectedJob"
-        @apply="handleJobApply"
+          v-model="showDetailDialog"
+          :job-data="selectedJob"
+          @apply="handleJobApply"
       />
 
       <!-- 分页组件 -->
       <div v-if="totalJobs > 0" class="pagination-wrapper">
         <el-pagination
-          :current-page="currentPage"
-          :page-size="pageSize"
-          :page-sizes="[10, 20, 50]"
-          :total="totalJobs"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handlePageSizeChange"
-          @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-size="pageSize"
+            :page-sizes="[10, 20, 50]"
+            :total="totalJobs"
+            layout="total, sizes, prev, pager, next, jumper"
+            @size-change="handlePageSizeChange"
+            @current-change="handleCurrentChange"
         />
       </div>
     </div>
@@ -194,7 +215,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   jobs: () => [],
   loading: false,
-  pagination: () => ({ page: 1, pageSize: 10, total: 0, totalPages: 0 })
+  pagination: () => ({page: 1, pageSize: 10, total: 0, totalPages: 0})
 })
 
 // 定义 emits
@@ -251,10 +272,10 @@ const handleApply = (url: string) => {
 const handleUpdateApplicationStatus = async (job: JobItem) => {
   try {
     statusUpdating.value = true
-    
+
     // 调用service接口更新申请状态
     const success = await updateApplicationStatus(job.id, job.applicationStatus)
-    
+
     if (success) {
       ElMessage.success('申请状态更新成功')
       // 通知父组件状态已更新
@@ -301,14 +322,14 @@ const copyToClipboard = async (text: string, type: string) => {
 }
 
 // 根据求职状态设置行样式
-const getRowClassName = ({ row }: { row: JobItem }) => {
+const getRowClassName = ({row}: { row: JobItem }) => {
   // 检查是否过期
   if (isExpired(row.endTime)) {
     return 'row-expired' // 过期状态 - 红色删除线
   }
-  
+
   const status = row.applicationStatus
-  
+
   switch (status) {
     case '待投递':
       return 'row-status-info' // 待投递 - 信息状态
@@ -342,15 +363,6 @@ const getRowClassName = ({ row }: { row: JobItem }) => {
   padding: 20px;
 }
 
-.table-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
 .table-header h2 {
   margin: 0;
   color: #333;
@@ -358,34 +370,10 @@ const getRowClassName = ({ row }: { row: JobItem }) => {
   font-weight: 600;
 }
 
-.table-controls {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.sort-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
 
 .sort-controls label {
   font-weight: 500;
   color: #666;
-}
-
-.sort-select {
-  min-width: 140px;
-}
-
-.sort-order-btn {
-  margin-left: 8px;
-}
-
-.view-controls {
-  color: #666;
-  font-size: 14px;
 }
 
 .table-container {
@@ -407,7 +395,7 @@ const getRowClassName = ({ row }: { row: JobItem }) => {
 }
 
 :deep(.el-table td) {
-  padding: 12px 8px;
+  padding: 10px 6px;
 }
 
 :deep(.el-table--striped .el-table__body tr.el-table__row--striped td) {
@@ -422,17 +410,14 @@ const getRowClassName = ({ row }: { row: JobItem }) => {
 .company-name {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   font-weight: 600;
   color: #333;
   cursor: pointer;
   transition: all 0.2s ease;
-  padding: 4px;
-  border-radius: 4px;
 }
 
 .company-name:hover {
-  background-color: #f0f9ff;
   color: #1976d2;
 }
 
@@ -474,6 +459,34 @@ const getRowClassName = ({ row }: { row: JobItem }) => {
   line-height: 1.4;
 }
 
+/* 岗位类型样式 */
+.job-type-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+}
+
+.job-type-text {
+  background: #f0f2f5;
+  color: #666;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  border: 1px solid #d9d9d9;
+}
+
+.job-type-empty {
+  color: #ccc;
+  font-size: 12px;
+  font-style: italic;
+  text-align: center;
+  width: 100%;
+}
+
 /* 地点样式 */
 .location-with-icon {
   display: flex;
@@ -493,12 +506,6 @@ const getRowClassName = ({ row }: { row: JobItem }) => {
   border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
-}
-
-/* 薪资样式 */
-.salary {
-  color: #e91e63;
-  font-weight: 600;
 }
 
 /* 内推码样式 */
@@ -586,7 +593,6 @@ const getRowClassName = ({ row }: { row: JobItem }) => {
 }
 
 
-
 :deep(.el-table .row-status-primary) {
   background-color: #ecf5ff !important;
   border-left: 4px solid #409eff;
@@ -634,50 +640,49 @@ const getRowClassName = ({ row }: { row: JobItem }) => {
   .container {
     padding: 15px;
   }
-  
+
   .table-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
   }
-  
+
   .table-controls {
     width: 100%;
     justify-content: space-between;
   }
-  
+
   .sort-select {
     min-width: 120px;
   }
-  
+
   :deep(.el-table) {
     font-size: 12px;
   }
-  
+
   :deep(.el-table td) {
     padding: 8px 6px;
   }
-  
 
-  
+
   .company-name {
     gap: 4px;
   }
-  
+
   .company-icon,
   .location-icon {
     font-size: 12px;
   }
-  
+
   .pagination-wrapper {
     padding: 15px 0;
   }
-  
+
   :deep(.el-pagination) {
     flex-wrap: wrap;
     gap: 10px;
   }
-  
+
   :deep(.el-pagination .el-pagination__sizes),
   :deep(.el-pagination .el-pagination__jump) {
     margin-left: 0;
