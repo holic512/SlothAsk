@@ -755,4 +755,123 @@ CREATE TABLE `base_message`
   COLLATE = utf8mb4_general_ci COMMENT = '用户消息记录表'
   ROW_FORMAT = Dynamic;
 
+
+  -- 创建岗位招聘数据库表（移除申请状态字段）
+CREATE TABLE job_items (
+    -- 主键
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '岗位唯一标识符',
+    
+    -- 基本信息字段
+    company_name VARCHAR(200) NOT NULL COMMENT '公司名称',
+    job_name VARCHAR(200) NOT NULL COMMENT '岗位名称',
+    job_description TEXT COMMENT '岗位描述，详细的工作内容和职责说明',
+    job_type VARCHAR(50) NOT NULL COMMENT '岗位类型：校招、社招、暑期实习、寒假实习、春招、秋招、日常实习',
+    
+    -- 福利和地点
+    benefits JSON COMMENT '福利待遇列表，存储为JSON数组',
+    location VARCHAR(200) NOT NULL COMMENT '工作地点',
+    salary_range VARCHAR(100) NOT NULL COMMENT '薪资范围',
+    
+    -- 时间字段
+    publish_time DATETIME NOT NULL COMMENT '发布时间',
+    end_time DATETIME NOT NULL COMMENT '申请截止时间',
+    
+    -- 申请相关（移除 application_status 字段）
+    apply_url VARCHAR(500) NOT NULL COMMENT '申请链接',
+    referral_code VARCHAR(100) COMMENT '推荐码',
+    
+    -- 审计字段
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
+    
+    -- 软删除标记
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '是否删除：0-未删除，1-已删除'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='岗位招聘信息表';
+
+-- 创建用户申请状态表
+CREATE TABLE user_job_applications (
+    -- 主键
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '申请记录唯一标识符',
+    
+    -- 关联字段
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    job_id BIGINT NOT NULL COMMENT '岗位ID，关联job_items表',
+    
+    -- 申请状态
+    application_status VARCHAR(50) NOT NULL COMMENT '申请状态：待投递、投递中、待笔试、笔试中、一面、二面、三面',
+    
+    -- 申请相关信息
+    apply_time DATETIME COMMENT '申请时间',
+    status_update_time DATETIME COMMENT '状态最后更新时间',
+ 
+    -- 审计字段
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
+    
+    -- 软删除标记
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '是否删除：0-未删除，1-已删除',
+    
+    -- 唯一约束：一个用户对同一个岗位只能有一条申请记录
+    UNIQUE KEY uk_user_job (user_id, job_id),
+    
+    -- 外键约束
+    FOREIGN KEY (job_id) REFERENCES job_items(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户岗位申请状态表';
+
+-- ================================
+-- 岗位表索引优化
+-- ================================
+
+-- 1. 关键词搜索相关索引（支持岗位名称、公司名称、工作地点的模糊查询）
+CREATE INDEX idx_job_name ON job_items(job_name);
+CREATE INDEX idx_company_name ON job_items(company_name);
+CREATE INDEX idx_location ON job_items(location);
+
+-- 2. 筛选条件索引
+CREATE INDEX idx_job_type ON job_items(job_type);
+
+-- 3. 时间排序索引（支持按发布时间和截止时间排序）
+CREATE INDEX idx_publish_time ON job_items(publish_time DESC);
+CREATE INDEX idx_end_time ON job_items(end_time DESC);
+
+-- 4. 岗位类型和时间组合索引
+CREATE INDEX idx_type_publish ON job_items(job_type, publish_time DESC);
+CREATE INDEX idx_type_end ON job_items(job_type, end_time DESC);
+
+-- 5. 全文搜索索引（用于岗位描述的全文检索）
+CREATE FULLTEXT INDEX idx_fulltext_description ON job_items(job_description);
+
+-- 6. 软删除相关索引
+CREATE INDEX idx_deleted_type ON job_items(is_deleted, job_type);
+CREATE INDEX idx_deleted_publish ON job_items(is_deleted, publish_time DESC);
+
+-- 7. 时间范围查询优化索引
+CREATE INDEX idx_publish_end_time ON job_items(publish_time, end_time);
+
+-- 8. 有效岗位查询索引（未删除且未过期）
+CREATE INDEX idx_active_jobs ON job_items(is_deleted, end_time, publish_time DESC);
+
+-- ================================
+-- 用户申请状态表索引优化
+-- ================================
+
+-- 1. 用户维度查询索引
+CREATE INDEX idx_user_status ON user_job_applications(user_id, application_status);
+CREATE INDEX idx_user_apply_time ON user_job_applications(user_id, apply_time DESC);
+
+-- 2. 岗位维度查询索引
+CREATE INDEX idx_job_status ON user_job_applications(job_id, application_status);
+
+-- 3. 申请状态查询索引
+CREATE INDEX idx_application_status ON user_job_applications(application_status);
+CREATE INDEX idx_status_update_time ON user_job_applications(application_status, status_update_time DESC);
+
+-- 4. 软删除相关索引
+CREATE INDEX idx_deleted_user ON user_job_applications(is_deleted, user_id);
+CREATE INDEX idx_deleted_status ON user_job_applications(is_deleted, application_status);
+
+-- 5. 复合查询优化索引
+CREATE INDEX idx_user_job_status ON user_job_applications(user_id, job_id, application_status);
+CREATE INDEX idx_user_deleted_status ON user_job_applications(user_id, is_deleted, application_status);
+
 SET FOREIGN_KEY_CHECKS = 1;
