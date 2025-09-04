@@ -3,7 +3,7 @@
  * 对接后端 /job-recruit/list 接口
  */
 import axios from '@/axios/axios';
-import type { JobItem, JobListQuery } from '../type/JobItem';
+import type {JobItem, JobListQuery} from '../type/JobItem';
 
 /**
  * 岗位列表响应数据
@@ -14,11 +14,15 @@ interface JobListResponse {
     /** 总记录数 */
     total: number;
     /** 当前页码 */
-    page: number;
+    currentPage: number;
     /** 每页数量 */
     pageSize: number;
     /** 总页数 */
     totalPages: number;
+    /** 是否有下一页 */
+    hasNext: boolean;
+    /** 是否有上一页 */
+    hasPrevious: boolean;
 }
 
 /**

@@ -26,18 +26,18 @@
             <label>岗位类型：</label>
             <span class="job-type">{{ jobData.jobType }}</span>
           </div>
-          <div class="info-item">
+          <div v-if="jobData.location && jobData.location.trim() !== ''" class="info-item">
             <label>工作地点：</label>
             <span class="location">
               <el-icon class="location-icon"><Location /></el-icon>
               {{ jobData.location }}
             </span>
           </div>
-          <div class="info-item">
+          <div v-if="jobData.salaryRange && jobData.salaryRange.trim() !== ''" class="info-item">
             <label>薪资范围：</label>
             <span class="salary-range">{{ jobData.salaryRange }}</span>
           </div>
-          <div class="info-item">
+          <div v-if="jobData.referralCode && jobData.referralCode.trim() !== ''" class="info-item">
             <label>内推码：</label>
             <span class="referral-code">{{ jobData.referralCode }}</span>
           </div>
@@ -101,16 +101,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
-import {
-  ElDialog,
-  ElIcon,
-  ElTag,
-  ElButton
-} from 'element-plus'
-import { Location, OfficeBuilding } from '@element-plus/icons-vue'
-import type { JobItem } from './type/JobItem'
-import { ApplicationStatus } from './type/JobItem'
+import {computed} from 'vue'
+import {ElButton, ElDialog, ElIcon, ElTag} from 'element-plus'
+import {Location, OfficeBuilding} from '@element-plus/icons-vue'
+import type {JobItem} from './type/JobItem'
+import {ApplicationStatus} from './type/JobItem'
 
 // Props
 interface Props {

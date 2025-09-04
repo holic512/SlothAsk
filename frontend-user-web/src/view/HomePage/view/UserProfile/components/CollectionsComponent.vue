@@ -120,7 +120,11 @@ const formatTime = (time: string) => {
 
 <style scoped>
 .collections-module {
-  min-height: 300px;
+  min-height: 400px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .empty-state {
@@ -129,19 +133,20 @@ const formatTime = (time: string) => {
   align-items: center;
   justify-content: center;
   height: 300px;
-  color: #90a4ae;
-  border-radius: 8px;
+  color: #999;
   padding: 20px;
   text-align: center;
-  border: 1px dashed #cfd8dc;
-  background: #ffffff;
+  background: #fafafa;
+  margin: 20px;
+  border-radius: 8px;
+  border: 1px dashed #e0e0e0;
 }
 
 .loading-spinner {
   width: 36px;
   height: 36px;
-  border: 3px solid #eceff1;
-  border-top: 3px solid #607d8b;
+  border: 3px solid #f0f0f0;
+  border-top: 3px solid #409eff;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin-bottom: 12px;
@@ -165,29 +170,20 @@ const formatTime = (time: string) => {
 
 .collection-item {
   position: relative;
-  padding: 18px 24px;
+  padding: 20px 24px;
   background-color: #ffffff;
-  border-radius: 8px;
-  transition: background-color 0.1s ease;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.collection-item::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 4px;
-  right: 4px;
-  height: 1px;
-  background-color: #e0e0e0;
-  transition: opacity 0.1s ease;
+.collection-item:last-child {
+  border-bottom: none;
 }
 
 .collection-item:hover {
-  background-color: #f1f3f4;
-}
-
-.collection-item:hover::after {
-  opacity: 0;
+  background-color: #f8f9fa;
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .collection-main {
@@ -204,10 +200,10 @@ const formatTime = (time: string) => {
 }
 
 .collection-title {
-  color: #212121;
-  font-size: 16px;
+  color: #333;
+  font-size: 15px;
   font-weight: 500;
-  line-height: 1.7;
+  line-height: 1.6;
   flex: 1;
   word-break: break-word;
   cursor: pointer;
@@ -220,10 +216,14 @@ const formatTime = (time: string) => {
 }
 
 .meta-time {
-  color: #757575;
-  font-size: 13px;
+  color: #999;
+  font-size: 12px;
   white-space: nowrap;
   flex-shrink: 0;
+  background: #f0f9ff;
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid #e3f2fd;
 }
 
 .collection-tags {

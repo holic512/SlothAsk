@@ -7,6 +7,7 @@
           :data="paginatedJobs" 
           style="width: 100%"
           :header-cell-style="{ background: '#f8f9fa', color: '#333' }"
+          :row-class-name="getRowClassName"
           stripe
           border
           v-loading="loading"
@@ -51,7 +52,7 @@
             show-overflow-tooltip
           >
             <template #default="{ row }">
-              <div class="location-with-icon">
+              <div v-if="row.location && row.location.trim() !== ''" class="location-with-icon">
                 <el-icon class="location-icon"><Location /></el-icon>
                 <span class="location-badge">{{ row.location }}</span>
               </div>
@@ -66,7 +67,7 @@
             width="100"
           >
             <template #default="{ row }">
-              <span class="referral-code clickable" @click="copyToClipboard(row.referralCode, '内推码')">
+              <span v-if="row.referralCode && row.referralCode.trim() !== ''" class="referral-code clickable" @click="copyToClipboard(row.referralCode, '内推码')">
                 <strong>{{ row.referralCode }}</strong>
                 <el-icon class="copy-icon"><DocumentCopy /></el-icon>
               </span>
@@ -80,7 +81,9 @@
             :formatter="formatDateColumn"
           >
             <template #default="{ row }">
-              <span class="end-time">{{ formatDate(row.endTime) }}</span>
+              <span :class="['end-time', { 'expired': isExpired(row.endTime) }]">
+                {{ formatDate(row.endTime) }}
+              </span>
             </template>
           </el-table-column>
           
@@ -97,13 +100,13 @@
                 size="small"
                 :disabled="statusUpdating"
               >
-                <el-option :value="ApplicationStatus.PENDING_SUBMISSION" :label="ApplicationStatus.PENDING_SUBMISSION" />
-                <el-option :value="ApplicationStatus.SUBMITTED" :label="ApplicationStatus.SUBMITTED" />
-                <el-option :value="ApplicationStatus.PENDING_WRITTEN_TEST" :label="ApplicationStatus.PENDING_WRITTEN_TEST" />
-                <el-option :value="ApplicationStatus.WRITTEN_TEST_IN_PROGRESS" :label="ApplicationStatus.WRITTEN_TEST_IN_PROGRESS" />
-                <el-option :value="ApplicationStatus.FIRST_INTERVIEW" :label="ApplicationStatus.FIRST_INTERVIEW" />
-                <el-option :value="ApplicationStatus.SECOND_INTERVIEW" :label="ApplicationStatus.SECOND_INTERVIEW" />
-                <el-option :value="ApplicationStatus.THIRD_INTERVIEW" :label="ApplicationStatus.THIRD_INTERVIEW" />
+                <el-option label="待投递" value="待投递" />
+                <el-option label="投递中" value="投递中" />
+                <el-option label="待笔试" value="待笔试" />
+                <el-option label="笔试中" value="笔试中" />
+                <el-option label="一面" value="一面" />
+                <el-option label="二面" value="二面" />
+                <el-option label="三面" value="三面" />
               </el-select>
             </template>
           </el-table-column>
@@ -162,23 +165,21 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch } from 'vue'
-import { 
-  ElTable, 
-  ElTableColumn, 
-  ElSelect, 
-  ElOption, 
-  ElButton, 
-  ElIcon, 
-  ElPagination, 
+import {computed, ref} from 'vue'
+import {
+  ElButton,
   ElEmpty,
+  ElIcon,
   ElMessage,
-  ElLoading 
+  ElOption,
+  ElPagination,
+  ElSelect,
+  ElTable,
+  ElTableColumn
 } from 'element-plus'
-import { Location, OfficeBuilding, DocumentCopy } from '@element-plus/icons-vue'
-import type { JobItem } from './type/JobItem'
-import { ApplicationStatus } from './type/JobItem'
-import { updateApplicationStatus } from './service'
+import {DocumentCopy, Location, OfficeBuilding} from '@element-plus/icons-vue'
+import type {JobItem} from './type/JobItem'
+import {updateApplicationStatus} from './service'
 import JobDetailDialog from './JobDetailDialog.vue'
 
 const props = withDefaults(defineProps<{
@@ -236,6 +237,13 @@ const formatDateColumn = (row: JobItem, column: any, cellValue: string) => {
   return formatDate(cellValue)
 }
 
+const isExpired = (endTime: string) => {
+  if (!endTime) return false
+  const endDate = new Date(endTime)
+  const currentDate = new Date()
+  return currentDate > endDate
+}
+
 const handleApply = (url: string) => {
   window.open(url, '_blank')
 }
@@ -289,6 +297,32 @@ const copyToClipboard = async (text: string, type: string) => {
     } catch (fallbackErr) {
       ElMessage.error('复制失败，请手动复制')
     }
+  }
+}
+
+// 根据求职状态设置行样式
+const getRowClassName = ({ row }: { row: JobItem }) => {
+  // 检查是否过期
+  if (isExpired(row.endTime)) {
+    return 'row-expired' // 过期状态 - 红色删除线
+  }
+  
+  const status = row.applicationStatus
+  
+  switch (status) {
+    case '待投递':
+      return 'row-status-info' // 待投递 - 信息状态
+    case '投递中':
+      return 'row-status-warning' // 投递中 - 警告状态
+    case '待笔试':
+    case '笔试中':
+      return 'row-status-primary' // 笔试阶段 - 主要状态
+    case '一面':
+    case '二面':
+    case '三面':
+      return 'row-status-success' // 面试阶段 - 成功状态
+    default:
+      return ''
   }
 }
 
@@ -505,6 +539,12 @@ const copyToClipboard = async (text: string, type: string) => {
   font-size: 13px;
 }
 
+.end-time.expired {
+  color: #f56c6c;
+  text-decoration: line-through;
+  font-weight: 600;
+}
+
 /* 状态选择器样式 */
 .status-select {
   width: 100%;
@@ -525,6 +565,68 @@ const copyToClipboard = async (text: string, type: string) => {
 
 :deep(.el-pagination) {
   justify-content: center;
+}
+
+/* 求职状态行样式 */
+:deep(.el-table .row-status-success) {
+  background-color: #f0f9ff !important;
+  border-left: 4px solid #67c23a;
+}
+
+
+:deep(.el-table .row-status-info) {
+  background-color: #f4f4f5 !important;
+  border-left: 4px solid #909399;
+}
+
+
+:deep(.el-table .row-status-warning) {
+  background-color: #fdf6ec !important;
+  border-left: 4px solid #e6a23c;
+}
+
+
+
+:deep(.el-table .row-status-primary) {
+  background-color: #ecf5ff !important;
+  border-left: 4px solid #409eff;
+}
+
+/* 过期岗位行样式 */
+:deep(.el-table .row-expired) {
+  background-color: #fef0f0 !important;
+  border-left: 4px solid #f56c6c;
+  text-decoration: line-through;
+  color: #999 !important;
+}
+
+:deep(.el-table .row-expired td) {
+  text-decoration: line-through;
+  color: #999 !important;
+}
+
+
+/* 确保条纹样式不会覆盖状态样式 */
+:deep(.el-table--striped .el-table__body tr.el-table__row--striped.row-status-success td) {
+  background-color: #f0f9ff !important;
+}
+
+:deep(.el-table--striped .el-table__body tr.el-table__row--striped.row-status-info td) {
+  background-color: #f4f4f5 !important;
+}
+
+:deep(.el-table--striped .el-table__body tr.el-table__row--striped.row-status-warning td) {
+  background-color: #fdf6ec !important;
+}
+
+:deep(.el-table--striped .el-table__body tr.el-table__row--striped.row-status-primary td) {
+  background-color: #ecf5ff !important;
+}
+
+:deep(.el-table--striped .el-table__body tr.el-table__row--striped.row-expired td) {
+  background-color: #fef0f0 !important;
+  text-decoration: line-through;
+  color: #999 !important;
 }
 
 /* 响应式设计 */

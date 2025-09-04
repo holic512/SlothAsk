@@ -21,6 +21,7 @@ import org.example.servicejobrecruitpage.user.dto.JobListResponse;
 import org.example.servicejobrecruitpage.user.mapper.JobItemMapper;
 import org.example.servicejobrecruitpage.user.mapper.UserJobApplicationMapper;
 import org.example.servicejobrecruitpage.user.request.JobListQueryRequest;
+import org.example.servicejobrecruitpage.user.request.JobSearchFilter;
 import org.example.servicejobrecruitpage.user.request.UpdateApplicationStatusRequest;
 import org.example.servicejobrecruitpage.user.service.JobRecruitPageService;
 import org.springframework.beans.BeanUtils;
@@ -29,10 +30,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.Collections;
 
 @Slf4j
 @Service
@@ -54,18 +55,21 @@ public class JobRecruitPageServiceImpl implements JobRecruitPageService {
             // 构建查询条件
             QueryWrapper<JobItem> queryWrapper = new QueryWrapper<>();
         
+        // 获取过滤条件
+        JobSearchFilter filter = request.getFilter();
+        
         // 关键词搜索（岗位名称、公司名称、岗位描述）
-        if (StringUtils.hasText(request.getKeyword())) {
+        if (filter != null && StringUtils.hasText(filter.getKeyword())) {
             queryWrapper.and(wrapper -> wrapper
-                .like("job_title", request.getKeyword())
-                .or().like("company_name", request.getKeyword())
-                .or().like("job_description", request.getKeyword())
+                .like("job_name", filter.getKeyword())
+                .or().like("company_name", filter.getKeyword())
+                .or().like("job_description", filter.getKeyword())
             );
         }
         
         // 岗位类型筛选
-        if (request.getJobTypes() != null && !request.getJobTypes().isEmpty()) {
-            queryWrapper.in("job_type", request.getJobTypes());
+        if (filter != null && filter.getJobTypes() != null && !filter.getJobTypes().isEmpty()) {
+            queryWrapper.in("job_type", filter.getJobTypes());
         }
         
         // 排序处理
@@ -82,6 +86,8 @@ public class JobRecruitPageServiceImpl implements JobRecruitPageService {
                     queryWrapper.orderByDesc("end_time");
                     break;
                 case "最早结束":
+                    // 过滤掉已过期的岗位（结束时间小于当前时间）
+                    queryWrapper.ge("end_time", LocalDateTime.now());
                     queryWrapper.orderByAsc("end_time");
                     break;
                 default:
@@ -102,9 +108,9 @@ public class JobRecruitPageServiceImpl implements JobRecruitPageService {
                 .map(JobItem::getId)
                 .collect(Collectors.toList());
         
-            // 查询用户对这些岗位的申请状态
+            // 查询用户对这些岗位的申请状态（仅当userId不为空时）
             Map<Long, String> applicationStatusMap = Collections.emptyMap();
-            if (!jobIds.isEmpty()) {
+            if (!jobIds.isEmpty() && userId != null) {
                 log.debug("查询用户申请状态，用户ID: {}, 岗位数量: {}", userId, jobIds.size());
                 QueryWrapper<UserJobApplication> appQueryWrapper = new QueryWrapper<>();
                 appQueryWrapper.eq("user_id", userId)
@@ -117,6 +123,8 @@ public class JobRecruitPageServiceImpl implements JobRecruitPageService {
                         UserJobApplication::getApplicationStatus
                     ));
                 log.debug("用户申请状态查询完成，申请记录数: {}", applications.size());
+            } else if (userId == null) {
+                log.debug("用户ID为空，跳过申请状态查询");
             }
         
             // 转换为响应DTO
@@ -126,21 +134,31 @@ public class JobRecruitPageServiceImpl implements JobRecruitPageService {
                     JobItemResponse response = new JobItemResponse();
                     BeanUtils.copyProperties(job, response);
                     
-                    // 设置申请状态
-                    String status = finalApplicationStatusMap.get(job.getId());
-                    response.setApplicationStatus(status != null ? status : "未申请"); // 默认为"未申请"
+                    // 设置申请状态（当userId为空时，申请状态为null或默认值）
+                    if (userId != null) {
+                        String status = finalApplicationStatusMap.get(job.getId());
+                        response.setApplicationStatus(status != null ? status : "未申请");
+                    } else {
+                        // 用户未登录时，不显示申请状态
+                        response.setApplicationStatus(null);
+                    }
                     
                     return response;
                 })
                 .collect(Collectors.toList());
         
-            // 根据申请状态筛选
-            if (request.getApplicationStatuses() != null && !request.getApplicationStatuses().isEmpty()) {
+            // 根据申请状态筛选（仅当userId不为空且有申请状态筛选条件时）
+            if (userId != null && filter != null && filter.getApplicationStatuses() != null && !filter.getApplicationStatuses().isEmpty()) {
                 int beforeFilter = jobResponses.size();
                 jobResponses = jobResponses.stream()
-                    .filter(job -> request.getApplicationStatuses().contains(job.getApplicationStatus()))
+                    .filter(job -> {
+                        String applicationStatus = job.getApplicationStatus();
+                        return applicationStatus != null && filter.getApplicationStatuses().contains(applicationStatus);
+                    })
                     .collect(Collectors.toList());
                 log.debug("申请状态筛选完成，筛选前: {}, 筛选后: {}", beforeFilter, jobResponses.size());
+            } else if (userId == null && filter != null && filter.getApplicationStatuses() != null && !filter.getApplicationStatuses().isEmpty()) {
+                log.debug("用户ID为空，跳过申请状态筛选");
             }
             
             // 构建响应对象

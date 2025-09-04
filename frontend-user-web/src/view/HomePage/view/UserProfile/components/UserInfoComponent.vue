@@ -124,9 +124,11 @@ const handleEditProfile = () => {
 <style lang="scss" scoped>
 .profile {
   display: flex;
-  gap: 20px;
-  padding: 20px;
-  margin-bottom: 16px;
+  gap: 24px;
+  padding: 24px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 20px;
   transition: all 0.3s ease;
 }
 
@@ -134,16 +136,18 @@ const handleEditProfile = () => {
   flex-shrink: 0;
 
   .img {
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid rgba(184, 160, 130, 0.3);
-    transition: border-color 0.3s ease;
+    border: 3px solid #e0e0e0;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
   .img:hover {
-    border-color: rgba(184, 160, 130, 0.5);
+    border-color: #409eff;
+    transform: scale(1.05);
   }
 }
 
@@ -168,40 +172,41 @@ const handleEditProfile = () => {
 }
 
 .name {
-  font-size: 26px;
+  font-size: 24px;
   margin: 0;
-  color: #6b5b73;
+  color: #333;
   font-weight: 600;
 }
 
 .action-block .btn {
-  padding: 8px 18px;
-  border-radius: 8px;
+  padding: 8px 16px;
+  border-radius: 4px;
   font-weight: 500;
   cursor: pointer;
   border: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s ease;
   font-size: 14px;
 }
 
 .btn.edit {
-  background: #888;
+  background: #409eff;
   color: #fff;
 }
 
 .btn.follow {
-  background: #666;
+  background: #67c23a;
   color: #fff;
 }
 
 .btn.follow.followed {
-  background: #777;
+  background: #909399;
   color: #fff;
 }
 
 .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  opacity: 0.8;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .btn:active {
@@ -224,7 +229,7 @@ const handleEditProfile = () => {
 
 .info-item .label {
   font-weight: 500;
-  color: #8b7355;
+  color: #666;
   font-size: 14px;
 }
 
@@ -261,6 +266,7 @@ const handleEditProfile = () => {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
+  color: #333;
 }
 
 .bio-content {

@@ -129,6 +129,10 @@ const formatTime = (time: string) => {
 <style scoped>
 .answers-module {
   min-height: 400px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .empty-state {
@@ -137,19 +141,20 @@ const formatTime = (time: string) => {
   align-items: center;
   justify-content: center;
   height: 300px;
-  color: #90a4ae;
-  border-radius: 8px;
+  color: #999;
   padding: 20px;
   text-align: center;
-  border: 1px dashed #cfd8dc;
-  background: #ffffff;
+  background: #fafafa;
+  margin: 20px;
+  border-radius: 8px;
+  border: 1px dashed #e0e0e0;
 }
 
 .loading-spinner {
   width: 36px;
   height: 36px;
-  border: 3px solid #eceff1;
-  border-top: 3px solid #607d8b;
+  border: 3px solid #f0f0f0;
+  border-top: 3px solid #409eff;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin-bottom: 12px;
@@ -162,29 +167,20 @@ const formatTime = (time: string) => {
 
 .answer-item {
   position: relative;
-  padding: 18px 24px;
+  padding: 20px 24px;
   background-color: #ffffff;
-  border-radius: 8px;
-  transition: background-color 0.1s ease;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.answer-item::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 4px;
-  right: 4px;
-  height: 1px;
-  background-color: #e0e0e0;
-  transition: opacity 0.1s ease;
+.answer-item:last-child {
+  border-bottom: none;
 }
 
 .answer-item:hover {
-  background-color: #f1f3f4;
-}
-
-.answer-item:hover::after {
-  opacity: 0;
+  background-color: #f8f9fa;
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .answer-main {
@@ -201,10 +197,10 @@ const formatTime = (time: string) => {
 }
 
 .answer-content {
-  color: #212121;
-  font-size: 16px;
+  color: #333;
+  font-size: 15px;
   font-weight: 500;
-  line-height: 1.7;
+  line-height: 1.6;
   flex: 1;
   word-break: break-word;
   white-space: pre-line;
@@ -217,10 +213,14 @@ const formatTime = (time: string) => {
 }
 
 .meta-time {
-  color: #757575;
-  font-size: 13px;
+  color: #999;
+  font-size: 12px;
   white-space: nowrap;
   flex-shrink: 0;
+  background: #f0f9ff;
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid #e3f2fd;
 }
 
 .meta-row-bottom {
@@ -234,27 +234,33 @@ const formatTime = (time: string) => {
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #ff6f00;
+  color: #f56c6c;
   font-size: 13px;
+  background: #fef0f0;
+  padding: 4px 8px;
+  border-radius: 12px;
+  border: 1px solid #fde2e2;
 }
 
 .meta-source {
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #757575;
+  color: #666;
   font-size: 13px;
 }
 
 .source-title {
-  color: #2962ff;
+  color: #409eff;
   cursor: pointer;
   font-weight: 500;
-  transition: color 0.2s;
+  transition: all 0.2s;
+  text-decoration: none;
 }
 
 .source-title:hover {
-  color: #0039cb;
+  color: #66b1ff;
+  text-decoration: underline;
 }
 
 .meta-like {

@@ -13,8 +13,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 public class JobListQueryRequest {
     
@@ -39,17 +37,7 @@ public class JobListQueryRequest {
     private String sortBy;
     
     /**
-     * 关键词搜索，支持岗位名称、公司名称、岗位描述、工作地点的模糊匹配
+     * 搜索过滤条件
      */
-    private String keyword;
-    
-    /**
-     * 申请状态筛选，支持多个状态选择
-     */
-    private List<String> applicationStatuses;
-    
-    /**
-     * 岗位类型筛选，支持多个类型选择
-     */
-    private List<String> jobTypes;
+    private JobSearchFilter filter;
 }

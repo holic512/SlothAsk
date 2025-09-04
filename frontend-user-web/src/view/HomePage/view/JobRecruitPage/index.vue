@@ -1,12 +1,11 @@
 <script lang="ts" setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import {onMounted, reactive, ref} from 'vue'
+import {ElMessage} from 'element-plus'
 import IntroductionSection from './IntroductionSection.vue'
 import FilterSection from './FilterSection.vue'
 import JobTable from './JobTable.vue'
-import type { JobItem, JobSearchFilter, JobListQuery } from './type/JobItem'
-import { JobSortBy, JobType, ApplicationStatus } from './type/JobItem'
-import { getJobList } from './service'
+import type {JobItem, JobListQuery, JobSearchFilter} from './type/JobItem'
+import {getJobList} from './service'
 
 // 岗位数据
 const allJobs = ref<JobItem[]>([])
@@ -24,7 +23,7 @@ const filteredJobs = ref<JobItem[]>([...allJobs.value])
 // 当前搜索关键词
 // 当前筛选条件
 const currentSearchKeyword = ref('')
-const currentSortBy = ref<JobSortBy>(JobSortBy.LATEST_PUBLISHED)
+const currentSortBy = ref<string>('最晚发布')
 const currentFilters = reactive<JobSearchFilter>({
   keyword: '',
   applicationStatuses: [],
@@ -51,7 +50,7 @@ const fetchJobList = async () => {
     
     allJobs.value = response.jobs
     pagination.value = {
-      page: response.page,
+      page: response.currentPage,
       pageSize: response.pageSize,
       total: response.total,
       totalPages: response.totalPages
@@ -77,7 +76,7 @@ const handleSearch = (keyword: string) => {
 }
 
 // 筛选处理
-const handleFilter = (filters: JobSearchFilter & { sortBy?: JobSortBy }) => {
+const handleFilter = (filters: JobSearchFilter & { sortBy?: string }) => {
   // 更新筛选条件
   Object.assign(currentFilters, {
     keyword: filters.keyword,
@@ -97,7 +96,7 @@ const handleFilter = (filters: JobSearchFilter & { sortBy?: JobSortBy }) => {
 // 重置处理
 const handleReset = () => {
   currentSearchKeyword.value = ''
-  currentSortBy.value = JobSortBy.LATEST_PUBLISHED
+  currentSortBy.value = '最晚发布'
   Object.assign(currentFilters, {
     keyword: '',
     applicationStatuses: [],

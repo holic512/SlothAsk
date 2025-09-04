@@ -32,13 +32,13 @@
               class="filter-select"
               size="default"
             >
-              <el-option :label="ApplicationStatus.PENDING_SUBMISSION" :value="ApplicationStatus.PENDING_SUBMISSION" />
-              <el-option :label="ApplicationStatus.SUBMITTED" :value="ApplicationStatus.SUBMITTED" />
-              <el-option :label="ApplicationStatus.PENDING_WRITTEN_TEST" :value="ApplicationStatus.PENDING_WRITTEN_TEST" />
-              <el-option :label="ApplicationStatus.WRITTEN_TEST_IN_PROGRESS" :value="ApplicationStatus.WRITTEN_TEST_IN_PROGRESS" />
-              <el-option :label="ApplicationStatus.FIRST_INTERVIEW" :value="ApplicationStatus.FIRST_INTERVIEW" />
-              <el-option :label="ApplicationStatus.SECOND_INTERVIEW" :value="ApplicationStatus.SECOND_INTERVIEW" />
-              <el-option :label="ApplicationStatus.THIRD_INTERVIEW" :value="ApplicationStatus.THIRD_INTERVIEW" />
+              <el-option label="待投递" value="待投递" />
+              <el-option label="投递中" value="投递中" />
+              <el-option label="待笔试" value="待笔试" />
+              <el-option label="笔试中" value="笔试中" />
+              <el-option label="一面" value="一面" />
+              <el-option label="二面" value="二面" />
+              <el-option label="三面" value="三面" />
             </el-select>
           </div>
 
@@ -53,13 +53,13 @@
               class="filter-select"
               size="default"
             >
-              <el-option :label="JobType.CAMPUS_RECRUITMENT" :value="JobType.CAMPUS_RECRUITMENT" />
-              <el-option :label="JobType.SOCIAL_RECRUITMENT" :value="JobType.SOCIAL_RECRUITMENT" />
-              <el-option :label="JobType.SUMMER_INTERNSHIP" :value="JobType.SUMMER_INTERNSHIP" />
-              <el-option :label="JobType.WINTER_INTERNSHIP" :value="JobType.WINTER_INTERNSHIP" />
-              <el-option :label="JobType.SPRING_RECRUITMENT" :value="JobType.SPRING_RECRUITMENT" />
-              <el-option :label="JobType.AUTUMN_RECRUITMENT" :value="JobType.AUTUMN_RECRUITMENT" />
-              <el-option :label="JobType.DAILY_INTERNSHIP" :value="JobType.DAILY_INTERNSHIP" />
+              <el-option label="校招" value="校招" />
+              <el-option label="社招" value="社招" />
+              <el-option label="暑期实习" value="暑期实习" />
+              <el-option label="寒假实习" value="寒假实习" />
+              <el-option label="春招" value="春招" />
+              <el-option label="秋招" value="秋招" />
+              <el-option label="日常实习" value="日常实习" />
             </el-select>
           </div>
 
@@ -71,10 +71,10 @@
               class="sort-select"
               size="default"
             >
-              <el-option label="最晚发布" :value="JobSortBy.LATEST_PUBLISHED" />
-              <el-option label="最早发布" :value="JobSortBy.EARLIEST_PUBLISHED" />
-              <el-option label="最晚结束" :value="JobSortBy.LATEST_END" />
-              <el-option label="最早结束" :value="JobSortBy.EARLIEST_END" />
+              <el-option label="最晚发布" value="最晚发布" />
+              <el-option label="最早发布" value="最早发布" />
+              <el-option label="最晚结束" value="最晚结束" />
+              <el-option label="最早结束" value="最早结束" />
             </el-select>
           </div>
 
@@ -103,28 +103,22 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive } from 'vue'
-import { 
-  ElInput, 
-  ElSelect, 
-  ElOption, 
-  ElButton, 
-  ElIcon 
-} from 'element-plus'
-import { Search, RefreshLeft } from '@element-plus/icons-vue'
-import type { JobSearchFilter } from './type/JobItem'
-import { JobSortBy, JobType, ApplicationStatus } from './type/JobItem'
+import {reactive, ref} from 'vue'
+import {ElButton, ElIcon, ElInput, ElOption, ElSelect} from 'element-plus'
+import {RefreshLeft, Search} from '@element-plus/icons-vue'
+import type {JobSearchFilter} from './type/JobItem'
+import {JobSortBy} from './type/JobItem'
 
 // 定义 emits
 const emit = defineEmits<{
   search: [keyword: string]
-  filter: [filters: JobSearchFilter & { sortBy?: JobSortBy }]
+  filter: [filters: JobSearchFilter & { sortBy?: string }]
   reset: []
 }>()
 
 // 响应式数据
 const searchKeyword = ref('')
-const sortBy = ref<JobSortBy>(JobSortBy.LATEST_PUBLISHED)
+const sortBy = ref<string>('最晚发布')
 const filters = reactive<JobSearchFilter>({
   keyword: '',
   applicationStatuses: [],

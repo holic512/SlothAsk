@@ -251,34 +251,33 @@ onMounted(() => {
 
 <style scoped>
 .user-profile-page {
-  background-color: #f9f9f9;
+  background: #f5f5f5;
   min-height: 100vh;
-  padding: 24px 0;
+  padding: 20px 0;
 }
 
 .container {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 20px;
 }
 
 .main-card {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  padding: 20px;
+  margin-bottom: 20px;
 }
 
 .module-tabs-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 24px 0 16px 0;
-  padding: 0;
-  border-bottom: 1px solid #e5e7eb;
+  margin: 0;
+  padding: 20px 20px 0 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background: white;
 }
 
 .tabs-wrapper {
@@ -288,27 +287,29 @@ onMounted(() => {
 }
 
 .tab-btn {
-  padding: 16px 24px;
+  padding: 12px 20px;
   background: transparent;
   border: none;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
-  color: #6b7280;
+  color: #666;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   position: relative;
   border-bottom: 2px solid transparent;
+  border-radius: 4px 4px 0 0;
 }
 
 .tab-btn.active {
-  color: #111827;
-  border-bottom-color: #2563eb;
+  color: #333;
+  border-bottom-color: #409eff;
   font-weight: 600;
+  background: #f8f9fa;
 }
 
 .tab-btn:hover:not(.active) {
-  color: #374151;
-  background: rgba(0, 0, 0, 0.02);
+  color: #333;
+  background: #f0f9ff;
 }
 
 .tab-btn::after {
@@ -318,7 +319,7 @@ onMounted(() => {
   left: 0;
   right: 0;
   height: 2px;
-  background: #2563eb;
+  background: #409eff;
   transform: scaleX(0);
   transition: transform 0.2s ease;
 }
@@ -337,8 +338,8 @@ onMounted(() => {
 }
 
 .module-content {
+  background: white;
   overflow: hidden;
-  margin-top: 8px;
 }
 
 .tab-badge {

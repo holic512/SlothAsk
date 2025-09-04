@@ -61,7 +61,7 @@ enum ApplicationStatus {
  */
 interface JobItem {
     /** 岗位唯一标识符，用于区分不同的招聘岗位 */
-    id: string
+    id: number
     
     /** 公司名称，发布该岗位的企业名称 */
     companyName: string
@@ -73,7 +73,7 @@ interface JobItem {
     jobDescription?: string
     
     /** 岗位类型，如：校招、社招、暑期实习等 */
-    jobType: JobType
+    jobType: string
     
     /** 福利待遇，公司提供的各项福利和待遇列表（可选） */
     benefits?: string[]
@@ -88,7 +88,7 @@ interface JobItem {
     publishTime: string
     
     /** 申请状态，当前用户对该岗位的申请状态（如：未申请、已申请、已面试等） */
-    applicationStatus: ApplicationStatus
+    applicationStatus: string
     
     /** 申请链接，用户点击申请时跳转的URL地址 */
     applyUrl: string
@@ -108,11 +108,11 @@ interface JobSearchFilter {
     /** 关键词搜索，支持岗位名称、公司名称、岗位描述、工作地点的模糊匹配 */
     keyword?: string
     
-    /** 申请状态筛选，支持多个状态选择 */
-    applicationStatuses?: ApplicationStatus[]
+    /** 申请状态筛选，可选择多个申请状态进行过滤 */
+    applicationStatuses?: string[]
     
-    /** 岗位类型筛选，支持多个类型选择 */
-    jobTypes?: JobType[]
+    /** 岗位类型筛选，可选择多个岗位类型进行过滤 */
+    jobTypes?: string[]
 }
 
 /**
