@@ -9,7 +9,6 @@
  */
 package org.example.servicenotification.mail.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.servicecommon.mail.MailCodeMessage;
 import org.example.servicenotification.mail.config.MailMQConfig;
 import org.example.servicenotification.mail.service.MQSMailService;
@@ -20,12 +19,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class MQSMailServiceImpl implements MQSMailService {
 
-    private final ObjectMapper objectMapper;
     private final RabbitTemplate rabbitTemplate;
 
     @Autowired
-    public MQSMailServiceImpl(ObjectMapper objectMapper, RabbitTemplate rabbitTemplate) {
-        this.objectMapper = objectMapper;
+    public MQSMailServiceImpl(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
     }
 
@@ -39,7 +36,7 @@ public class MQSMailServiceImpl implements MQSMailService {
 
         // 发送消息到 RabbitMQ 采用 rabbit的 自动序列化
         rabbitTemplate.convertAndSend(
-                "direct.exchange",
+                MailMQConfig.EMAIL_VERIFICATION_EXCHANGE,
                 MailMQConfig.EMAIL_VERIFICATION_ROUTING_KEY,
                 mailCodeMessage);
     }

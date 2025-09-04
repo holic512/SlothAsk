@@ -21,10 +21,11 @@ public class MailMQConfig {
 
     public static final String EMAIL_VERIFICATION_QUEUE = "email_verification_queue";
     public static final String EMAIL_VERIFICATION_ROUTING_KEY = "email.verification";
-
+    // 邮件验证交换机名
+    public static final String EMAIL_VERIFICATION_EXCHANGE = "mail.exchange";
     @Bean
     public DirectExchange mailExchange() {
-        return new DirectExchange("mail.exchange", true, false);
+        return new DirectExchange(EMAIL_VERIFICATION_EXCHANGE, true, false);
     }
 
     // 验证码邮件队列
