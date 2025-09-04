@@ -40,3 +40,11 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka # 指向 Eureka Server 的地址
+
+qdrant:
+  url: localhost
+  port: 6334
+  collection:
+    name: SlothAsk
+  vector:
+    dimension: 4096
