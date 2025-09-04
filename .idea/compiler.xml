@@ -15,7 +15,6 @@
         <module name="Service-Eureka" />
         <module name="Service-Common" />
         <module name="Service-Question" />
-        <module name="Service-JobRecruitPage" />
       </profile>
       <profile name="Annotation profile for Service-Admin" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -41,7 +40,6 @@
       <module name="Service-Eureka" options="-parameters" />
       <module name="Service-Gateway" options="-parameters" />
       <module name="Service-Image" options="-parameters" />
-      <module name="Service-JobRecruitPage" options="-parameters" />
       <module name="Service-Notification" options="-parameters" />
       <module name="Service-Question" options="-parameters" />
       <module name="Service-User" options="-parameters" />
