@@ -8,6 +8,7 @@ import {useUserProfileStore} from "@/pinia/UserProfile";
 import UserUtil from "@/view/HomePage/view/TopMenu/components/UserUtil/UserUtil.vue";
 import BellUtil from "@/view/HomePage/view/TopMenu/components/BellUtil/index.vue";
 import SearchUtil from "@/view/HomePage/view/TopMenu/components/SearchUtil/index.vue";
+import VipModal from "@/view/HomePage/view/TopMenu/components/VipModal/VipModal.vue";
 import {ArrowRight, Menu, QuestionFilled, Reading, User} from '@element-plus/icons-vue';
 
 const router = useRouter();
@@ -15,6 +16,12 @@ const route = useRoute();
 
 // 控制用户工具弹出窗口的可见性
 const isPopoverVisible = ref(false);
+
+// 控制VIP弹窗的可见性
+const isVipModalVisible = ref(false);
+
+// 当前用户的VIP等级 (0: 免费, 1: 月付, 2: 永久)
+const currentVipLevel = ref(0);
 
 // 菜单配置项
 const menuItems = ref([
@@ -126,6 +133,24 @@ const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value;
 };
 
+// 处理VIP按钮点击
+const handleVipClick = () => {
+  isVipModalVisible.value = true;
+};
+
+// 关闭VIP弹窗
+const handleCloseVipModal = () => {
+  isVipModalVisible.value = false;
+};
+
+// 处理套餐选择
+const handleSelectPlan = (planId) => {
+  console.log('选择套餐:', planId);
+  // 这里可以添加实际的套餐购买逻辑
+  // 暂时关闭弹窗
+  isVipModalVisible.value = false;
+};
+
 
 </script>
 
@@ -194,7 +219,7 @@ const toggleMobileMenu = () => {
               </template>
             </el-popover>
 
-            <button class="vip-button">
+            <button class="vip-button" @click="handleVipClick">
               <span>Sloth会员</span>
             </button>
           </div>
@@ -202,7 +227,7 @@ const toggleMobileMenu = () => {
           <!-- 用户未登录状态 -->
           <div v-else class="user-actions">
             <button class="login-button" @click="handleLogin">登录</button>
-            <button class="vip-button">
+            <button class="vip-button" @click="handleVipClick">
               <span>Sloth会员</span>
             </button>
           </div>
@@ -263,14 +288,14 @@ const toggleMobileMenu = () => {
               </template>
             </el-popover>
 
-            <button class="vip-button">
+            <button class="vip-button" @click="handleVipClick">
               <span>会员</span>
             </button>
           </div>
 
           <!-- 用户未登录状态 -->
           <div v-else class="mobile-user-actions">
-            <button class="vip-button">
+            <button class="vip-button" @click="handleVipClick">
               <span>会员</span>
             </button>
           </div>
@@ -318,13 +343,21 @@ const toggleMobileMenu = () => {
 
           <!-- 会员按钮 -->
           <div class="mobile-vip-section">
-            <button class="mobile-vip-button">
+            <button class="mobile-vip-button" @click="handleVipClick">
               <span>开通Sloth会员，解锁全部功能</span>
             </button>
           </div>
         </div>
       </div>
     </transition>
+
+    <!-- VIP会员弹窗 -->
+    <VipModal 
+      v-if="isVipModalVisible"
+      :currentVipLevel="currentVipLevel"
+      @close="handleCloseVipModal"
+      @selectPlan="handleSelectPlan"
+    />
   </header>
 </template>
 

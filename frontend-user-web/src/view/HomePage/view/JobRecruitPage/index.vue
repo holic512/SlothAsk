@@ -7,6 +7,14 @@ import JobTable from './JobTable.vue'
 import type {JobItem, JobListQuery, JobSearchFilter} from './type/JobItem'
 import {getJobList} from './service'
 
+// 设置标题位置
+import {setTitle} from '@/utils/title.js'
+
+onMounted(() => {
+  setTitle('招聘信息')
+})
+
+
 // 岗位数据
 const allJobs = ref<JobItem[]>([])
 const loading = ref(false)

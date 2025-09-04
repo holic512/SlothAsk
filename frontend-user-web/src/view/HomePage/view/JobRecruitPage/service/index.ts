@@ -6,6 +6,9 @@
 // 导出获取岗位列表相关接口
 export { getJobList } from './ApiGetJobList';
 
+// 导出获取岗位URL相关接口
+export { getJobUrl } from './ApiGetJobUrl';
+
 // 导出更新申请状态相关接口
 export { 
     updateApplicationStatus, 
@@ -15,6 +18,7 @@ export {
 // 默认导出所有接口
 export default {
     getJobList: () => import('./ApiGetJobList').then(m => m.getJobList),
+    getJobUrl: () => import('./ApiGetJobUrl').then(m => m.getJobUrl),
     updateApplicationStatus: () => import('./ApiUpdateApplicationStatus').then(m => m.updateApplicationStatus),
     batchUpdateApplicationStatus: () => import('./ApiUpdateApplicationStatus').then(m => m.batchUpdateApplicationStatus)
 };

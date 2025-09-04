@@ -119,7 +119,7 @@
                   :disabled="statusUpdating"
                   class="status-select"
                   size="small"
-                  @change="handleUpdateApplicationStatus(row)"
+                  @change="(newValue) => handleStatusChange(row, newValue)"
               >
                 <el-option label="待投递" value="待投递"/>
                 <el-option label="投递中" value="投递中"/>
@@ -149,7 +149,7 @@
                 <el-button
                     size="small"
                     type="primary"
-                    @click="handleApply(row.applyUrl)"
+                    @click="handleApply(row)"
                 >
                   投递
                 </el-button>
@@ -168,6 +168,9 @@
           :job-data="selectedJob"
           @apply="handleJobApply"
       />
+      
+      <!-- 登录提示弹窗 -->
+      <LoginPromptDialog v-model="showLoginPrompt" />
 
       <!-- 分页组件 -->
       <div v-if="totalJobs > 0" class="pagination-wrapper">
@@ -200,8 +203,10 @@ import {
 } from 'element-plus'
 import {DocumentCopy, Location, OfficeBuilding} from '@element-plus/icons-vue'
 import type {JobItem} from './type/JobItem'
-import {updateApplicationStatus} from './service'
+import {getJobUrl, updateApplicationStatus} from './service'
 import JobDetailDialog from './JobDetailDialog.vue'
+import LoginPromptDialog from './LoginPromptDialog.vue'
+import {isUserLoggedIn} from '@/utils/useIsLoggedIn'
 
 const props = withDefaults(defineProps<{
   jobs: JobItem[]
@@ -229,6 +234,7 @@ const emit = defineEmits<{
 const showDetailDialog = ref(false)
 const selectedJob = ref<JobItem | null>(null)
 const statusUpdating = ref(false)
+const showLoginPrompt = ref(false)
 
 // 计算属性
 const currentPage = computed(() => props.pagination?.page || 1)
@@ -265,8 +271,42 @@ const isExpired = (endTime: string) => {
   return currentDate > endDate
 }
 
-const handleApply = (url: string) => {
-  window.open(url, '_blank')
+const handleApply = async (job: JobItem) => {
+  try {
+    // 检查用户是否已登录
+    if (!isUserLoggedIn()) {
+      showLoginPrompt.value = true
+      return
+    }
+
+    // 调用getJobUrl接口获取申请URL
+    const response = await getJobUrl({ jobId: job.id })
+    
+    // 如果成功获取到URL，则打开新窗口
+    if (response.applyUrl) {
+      window.open(response.applyUrl, '_blank')
+    }
+  } catch (error: any) {
+    ElMessage.warning(error.message)
+  }
+}
+
+const handleStatusChange = (job: JobItem, newValue: string) => {
+  // 保存原始状态（在值改变之前）
+  const originalStatus = job.applicationStatus
+  
+  // 检查用户是否已登录
+  if (!isUserLoggedIn()) {
+    // 恢复原始状态
+    job.applicationStatus = originalStatus
+    // 显示登录提示弹窗
+    showLoginPrompt.value = true
+    return
+  }
+  
+  // 如果已登录，更新状态
+  job.applicationStatus = newValue
+  handleUpdateApplicationStatus(job)
 }
 
 const handleUpdateApplicationStatus = async (job: JobItem) => {

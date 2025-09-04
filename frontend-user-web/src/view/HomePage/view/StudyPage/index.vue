@@ -7,7 +7,7 @@ import {setTitle} from '@/utils/title';
 import RightBox from "@/view/HomePage/components/StudyPage/FloatingInfoCard.vue";
 
 onMounted(() => {
-  setTitle('学习');
+  setTitle('树懒学习');
 });
 </script>
 

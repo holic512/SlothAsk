@@ -11,6 +11,7 @@
         <module name="Service-Image" />
         <module name="Service-Notification" />
         <module name="Service-Ai" />
+        <module name="Service-Vip" />
         <module name="Service-Gateway" />
         <module name="Service-Eureka" />
         <module name="Service-Common" />
@@ -45,6 +46,7 @@
       <module name="Service-Notification" options="-parameters" />
       <module name="Service-Question" options="-parameters" />
       <module name="Service-User" options="-parameters" />
+      <module name="Service-Vip" options="-parameters" />
       <module name="service-registry" options="-parameters" />
       <module name="service-registry (1)" options="-parameters" />
     </option>

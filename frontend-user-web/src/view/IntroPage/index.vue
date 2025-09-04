@@ -7,13 +7,6 @@
 
 <script setup>
 import CarouselIntro from './components/layout/CarouselIntro.vue'
-import {onMounted} from "vue";
-// 设置标题位置
-import {setTitle} from '@/utils/title.js'
-
-onMounted(() => {
-  setTitle('通知中心')
-})
 </script>
 
 <style scoped>

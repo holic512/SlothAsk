@@ -22,6 +22,11 @@ public class MailMQConfig {
     public static final String EMAIL_VERIFICATION_QUEUE = "email_verification_queue";
     public static final String EMAIL_VERIFICATION_ROUTING_KEY = "email.verification";
 
+    @Bean
+    public DirectExchange mailExchange() {
+        return new DirectExchange("mail.exchange", true, false);
+    }
+
     // 验证码邮件队列
     @Bean
     public Queue emailVerificationQueue() {
@@ -30,9 +35,9 @@ public class MailMQConfig {
 
     // 将验证码邮件队列与交换机绑定
     @Bean
-    public Binding emailVerificationBinding(Queue emailVerificationQueue, DirectExchange directExchange) {
+    public Binding emailVerificationBinding(Queue emailVerificationQueue, DirectExchange mailExchange) {
         return BindingBuilder.bind(emailVerificationQueue)
-                .to(directExchange)
+                .to(mailExchange)
                 .with(EMAIL_VERIFICATION_ROUTING_KEY);
     }
 }
