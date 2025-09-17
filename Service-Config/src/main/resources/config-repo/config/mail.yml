@@ -1,0 +1,12 @@
+mail:
+  server:
+    host: smtp.yeah.net # 邮件服务器地址
+    port: 465           # 邮件服务器端口（已修改为 465，对应 SSL）
+    username: 你的邮箱用户名 # 发送邮件的账号
+    password: 你的邮箱密钥  # 发送邮件的密码（建议使用环境变量管理）
+  smtp:
+    auth: true      # 是否需要认证
+    ssl:
+      enable: true  # 启用 SSL
+    starttls:
+      enable: false # SSL 端口（465）不需要 STARTTLS

@@ -203,10 +203,11 @@ import {
 } from 'element-plus'
 import {DocumentCopy, Location, OfficeBuilding} from '@element-plus/icons-vue'
 import type {JobItem} from './type/JobItem'
-import {getJobUrl, updateApplicationStatus} from './service'
+import {updateApplicationStatus} from './service'
 import JobDetailDialog from './JobDetailDialog.vue'
 import LoginPromptDialog from './LoginPromptDialog.vue'
 import {isUserLoggedIn} from '@/utils/useIsLoggedIn'
+import {applyJobWithAutoHandling} from './utils/applyJobUtil'
 
 const props = withDefaults(defineProps<{
   jobs: JobItem[]
@@ -272,23 +273,10 @@ const isExpired = (endTime: string) => {
 }
 
 const handleApply = async (job: JobItem) => {
-  try {
-    // 检查用户是否已登录
-    if (!isUserLoggedIn()) {
-      showLoginPrompt.value = true
-      return
-    }
-
-    // 调用getJobUrl接口获取申请URL
-    const response = await getJobUrl({ jobId: job.id })
-    
-    // 如果成功获取到URL，则打开新窗口
-    if (response.applyUrl) {
-      window.open(response.applyUrl, '_blank')
-    }
-  } catch (error: any) {
-    ElMessage.warning(error.message)
-  }
+  // 使用统一的投递逻辑
+  await applyJobWithAutoHandling(job, () => {
+    showLoginPrompt.value = true
+  })
 }
 
 const handleStatusChange = (job: JobItem, newValue: string) => {

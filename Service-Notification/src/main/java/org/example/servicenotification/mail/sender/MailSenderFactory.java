@@ -11,18 +11,16 @@
  */
 package org.example.servicenotification.mail.sender;
 
-import org.example.servicenotification.config.yaml.YamlPropertySourceFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.util.Properties;
 
 @Configuration
-@PropertySource(value = "classpath:mail-config.yml", factory = YamlPropertySourceFactory.class) // 加载 mail-config.yml
+// @PropertySource(value = "classpath:mail-config.yml", factory = YamlPropertySourceFactory.class) // 加载 mail-config.yml
 public class MailSenderFactory {
 
     // 从外部配置文件中加载邮件服务器主机名（如：smtp.example.com）

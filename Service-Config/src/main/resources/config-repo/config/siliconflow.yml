@@ -1,0 +1,7 @@
+# SiliconFlow AI API配置
+siliconflow:
+  api:
+    # 从 https://cloud.siliconflow.cn/ 获取您的API密钥
+    key: "你的ai密钥"
+    embeddings:
+      url: "https://api.siliconflow.cn/v1/embeddings"

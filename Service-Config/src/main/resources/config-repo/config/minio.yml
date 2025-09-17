@@ -1,0 +1,6 @@
+minio:
+  endpoint: http://localhost:9000
+  access-key: admin
+  secret-key: admin123
+  bucket-name: slothask
+  proxy-url: http://localhost:9000  # 代理地址，用于外部访问图片URL

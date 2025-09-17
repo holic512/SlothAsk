@@ -12,6 +12,7 @@
         <module name="Service-Notification" />
         <module name="Service-Ai" />
         <module name="Service-Vip" />
+        <module name="Service-Config" />
         <module name="Service-Gateway" />
         <module name="Service-Eureka" />
         <module name="Service-Common" />
@@ -39,6 +40,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="Service-Admin" options="-parameters" />
       <module name="Service-Ai" options="-parameters" />
+      <module name="Service-Config" options="-parameters" />
       <module name="Service-Eureka" options="-parameters" />
       <module name="Service-Gateway" options="-parameters" />
       <module name="Service-Image" options="-parameters" />

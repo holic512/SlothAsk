@@ -43,7 +43,7 @@ export const getJobUrl = async (request: JobUrlQueryRequest): Promise<JobUrlResp
         
         // 发送POST请求
         const response = await axios.post<ApiResponse<JobUrlResponse>>(
-            'service-jobrecruitpage/job-recruit/get-url', 
+            'service-jobrecruitpage/job-recruit/get-url',
             requestData
         );
         

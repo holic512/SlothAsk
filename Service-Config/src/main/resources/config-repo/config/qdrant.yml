@@ -1,0 +1,7 @@
+qdrant:
+  url: localhost
+  port: 6334
+  collection:
+    name: SlothAsk
+  vector:
+    dimension: 4096

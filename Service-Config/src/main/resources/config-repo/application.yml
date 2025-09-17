@@ -1,0 +1,17 @@
+# 主配置文件 - 引用其他配置文件
+
+spring:
+  config:
+    import:
+      - classpath:config-repo/config/database.yml
+      - classpath:config-repo/config/siliconflow.yml
+      - classpath:config-repo/config/sa-token.yml
+      - classpath:config-repo/config/redis.yml
+      - classpath:config-repo/config/rabbitmq.yml
+      - classpath:config-repo/config/gateway.yml
+      - classpath:config-repo/config/eureka.yml
+      - classpath:config-repo/config/minio.yml
+      - classpath:config-repo/config/mail.yml
+      - classpath:config-repo/config/qdrant.yml
+      - classpath:config-repo/config/github.yml
+

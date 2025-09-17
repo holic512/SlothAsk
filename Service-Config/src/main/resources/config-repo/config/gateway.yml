@@ -1,0 +1,8 @@
+spring:
+  cloud:
+    gateway:
+      enabled: true  # 启用网关功能
+      discovery:
+        locator:
+          enabled: true  # 自动映射 Eureka 下的服务路由
+          lower-case-service-id: true  # 服务名称小写处理

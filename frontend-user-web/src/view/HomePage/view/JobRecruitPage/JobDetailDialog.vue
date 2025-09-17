@@ -106,6 +106,7 @@ import {ElButton, ElDialog, ElIcon, ElTag} from 'element-plus'
 import {Location, OfficeBuilding} from '@element-plus/icons-vue'
 import type {JobItem} from './type/JobItem'
 import {ApplicationStatus} from './type/JobItem'
+import {applyJobWithAutoHandling} from './utils/applyJobUtil'
 
 // Props
 interface Props {
@@ -122,6 +123,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
   apply: [job: JobItem]
+  showLoginPrompt: []
 }>()
 
 // 计算属性
@@ -135,11 +137,13 @@ const handleClose = () => {
   visible.value = false
 }
 
-const handleApply = () => {
-  if (props.jobData) {
-    emit('apply', props.jobData)
-    window.open(props.jobData.applyUrl, '_blank')
-  }
+const handleApply = async () => {
+  if (!props.jobData) return
+  
+  // 使用统一的投递逻辑
+  await applyJobWithAutoHandling(props.jobData, () => {
+    emit('showLoginPrompt')
+  })
 }
 
 const formatDate = (dateString: string) => {

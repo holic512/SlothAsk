@@ -6,6 +6,7 @@ import FilterSection from './FilterSection.vue'
 import JobTable from './JobTable.vue'
 import type {JobItem, JobListQuery, JobSearchFilter} from './type/JobItem'
 import {getJobList} from './service'
+import {applyJobWithAutoHandling} from './utils/applyJobUtil'
 
 // 设置标题位置
 import {setTitle} from '@/utils/title.js'
@@ -134,13 +135,9 @@ const handleViewDetail = (job: JobItem) => {
 }
 
 // 申请职位
-const handleApplyJob = (job: JobItem) => {
-  // 打开申请链接
-  if (job.applyUrl) {
-    window.open(job.applyUrl, '_blank')
-  } else {
-    ElMessage.warning('该职位暂无申请链接')
-  }
+const handleApplyJob = async (job: JobItem) => {
+  // 使用统一的投递逻辑
+  await applyJobWithAutoHandling(job)
 }
 
 // 组件挂载时初始化数据

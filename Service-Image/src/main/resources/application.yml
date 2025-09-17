@@ -1,5 +1,5 @@
 server:
-  port: 8085 # 用户服务的端口号
+  port: 0 # 用户服务的端口号
 
 spring:
   application:
@@ -9,14 +9,6 @@ spring:
     caffeine:
       spec: maximumSize=1000,expireAfterWrite=3600s
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka # 指向 Eureka Server 的地址
-
-minio:
-  endpoint: http://localhost:9000
-  access-key: admin
-  secret-key: admin123
-  bucket-name: slothask
-  proxy-url: http://localhost:9000  # 代理地址，用于外部访问图片URL
+  config:
+    import:
+      - "configserver:"
