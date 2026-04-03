@@ -1,0 +1,41 @@
+HELP.md
+
+# Java / Spring build outputs
+target/
+build/
+
+# Java IDE / tool metadata
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+
+# Frontend dependencies and build outputs
+node_modules/
+dist/
+dist-ssr/
+*.local
+stats.html
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor / OS files
+.idea/
+*.iml
+.vscode/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
