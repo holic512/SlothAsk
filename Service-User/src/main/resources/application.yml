@@ -6,5 +6,4 @@ spring:
     name: service-user # 服务名
   config:
     import:
-      - "configserver:"
-
+      - "configserver:http://localhost:8761"

@@ -11,4 +11,4 @@ spring:
 
   config:
     import:
-      - "configserver:"
+      - "configserver:http://localhost:8761"

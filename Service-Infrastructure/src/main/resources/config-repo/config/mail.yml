@@ -1,0 +1,12 @@
+mail:
+  server:
+    host: smtp.yeah.net
+    port: 465
+    username: 你的邮箱用户名
+    password: 你的邮箱密钥
+  smtp:
+    auth: true
+    ssl:
+      enable: true
+    starttls:
+      enable: false

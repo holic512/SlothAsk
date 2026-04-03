@@ -149,8 +149,8 @@ docker-compose up -d mysql redis rabbitmq qdrant
 
 4. **启动后端服务**
  ```bash
- # 启动注册中心
- cd Service-Eureka
+ # 启动基础设施服务（注册中心 + 配置中心）
+ cd Service-Infrastructure
  mvn spring-boot:run
  
  # 启动网关服务
@@ -180,7 +180,9 @@ docker-compose up -d mysql redis rabbitmq qdrant
 6. **访问应用**
 - 前端地址：http://localhost:3000
 - API 网关：http://localhost:8080
+- 基础设施服务：http://localhost:8761
 - 注册中心：http://localhost:8761
+- 配置中心：http://localhost:8761
 
 ### Docker 部署
 
@@ -199,7 +201,7 @@ docker-compose logs -f
 
 ```
 SlothAsk/
-├── Service-Eureka/          # 服务注册中心
+├── Service-Infrastructure/  # 基础设施服务（Eureka + Config）
 ├── Service-Gateway/         # API 网关
 ├── Service-User/            # 用户服务
 ├── Service-Question/        # 问题服务

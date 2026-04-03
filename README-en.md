@@ -154,8 +154,8 @@ mysql -u root -p < design/database.sql
 
 4. **Start backend services**
 ```bash
-# Start service registry
-cd Service-Eureka
+# Start infrastructure service (registry + config server)
+cd Service-Infrastructure
 mvn spring-boot:run
 
 # Start gateway service
@@ -185,7 +185,9 @@ npm run dev
 6. **Access the application**
 - Frontend: http://localhost:3000
 - API Gateway: http://localhost:8080
+- Infrastructure Service: http://localhost:8761
 - Service Registry: http://localhost:8761
+- Config Server: http://localhost:8761
 
 ### Docker Deployment
 
@@ -204,7 +206,7 @@ docker-compose logs -f
 
 ```
 SlothAsk/
-├── Service-Eureka/          # Service Registry
+├── Service-Infrastructure/  # Infrastructure Service (Eureka + Config)
 ├── Service-Gateway/         # API Gateway
 ├── Service-User/            # User Service
 ├── Service-Question/        # Question Service

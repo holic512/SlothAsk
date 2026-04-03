@@ -1,0 +1,10 @@
+############## Sa-Token 配置 (文档: https://sa-token.cc) ##############
+sa-token:
+  token-name: SlothAsk
+  timeout: 2592000
+  active-timeout: -1
+  is-concurrent: true
+  is-share: true
+  token-style: uuid
+  is-log: true
+  is-read-cookie: false
