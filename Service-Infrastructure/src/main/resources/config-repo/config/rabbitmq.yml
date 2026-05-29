@@ -1,6 +1,14 @@
+# @file rabbitmq.yml
+# @project SlothAsk
+# @module Service-Infrastructure / ConfigRepo / RabbitMQ
+# @description 集中定义各微服务共享的 RabbitMQ 连接配置。
+# @logic 1. 统一 AMQP 主机与端口；2. 使用本地 Docker 容器当前可用的默认 guest 账号；3. 供消息发送与消费服务共享。
+# @dependencies RabbitMQ 3.12-management, Spring AMQP, Spring Cloud Config
+# @index_tags SlothAsk, RabbitMQ, AMQP, MQ, config-repo
+# @author holic512
 spring:
   rabbitmq:
     port: 5672
-    host: localhost
-    username: admin
-    password: admin
+    host: 127.0.0.1
+    username: guest
+    password: guest

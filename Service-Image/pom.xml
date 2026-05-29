@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+@file Service-Image pom.xml
+@project SlothAsk
+@module Service-Image / Build
+@description 定义图片服务的 Maven 依赖和 Lombok 注解处理配置。
+@logic 1. 管理图片服务运行依赖；2. 显式配置 Lombok 注解处理器；3. 保证 MinIO 配置类在命令行构建时生成访问器方法。
+@dependencies Lombok, MinIO, Spring Boot, Spring Cloud
+@index_tags SlothAsk, Service-Image, Maven, Lombok, MinIO, build
+@author holic512
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -28,6 +38,7 @@
     </scm>
     <properties>
         <java.version>17</java.version>
+        <lombok.version>1.18.36</lombok.version>
         <spring-cloud.version>2024.0.0</spring-cloud.version>
     </properties>
     <dependencyManagement>
@@ -69,7 +80,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.36</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -88,6 +99,21 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

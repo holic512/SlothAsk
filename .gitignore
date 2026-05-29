@@ -3,6 +3,8 @@ HELP.md
 # Java / Spring build outputs
 target/
 build/
+.m2repo/
+**/.m2repo/
 
 # Java IDE / tool metadata
 .apt_generated

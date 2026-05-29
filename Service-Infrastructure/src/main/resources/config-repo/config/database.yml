@@ -1,6 +1,14 @@
+# @file database.yml
+# @project SlothAsk
+# @module Service-Infrastructure / ConfigRepo / Database
+# @description 集中定义各微服务共享的 MySQL 连接参数。
+# @logic 1. 通过配置中心下发统一 JDBC URL；2. 统一数据库账号与密码；3. 让依赖数据库的微服务使用同一数据源入口。
+# @dependencies MySQL 8.0, Spring Cloud Config, spring.datasource
+# @index_tags SlothAsk, MySQL, datasource, config-repo, backend
+# @author holic512
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/slothAsk?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+    url: jdbc:mysql://127.0.0.1:3306/slothask?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver

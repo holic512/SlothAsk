@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+@file SlothAsk Root pom.xml
+@project SlothAsk
+@module Backend / Build Aggregator
+@description 提供仓库根目录的 Maven 聚合构建入口，聚焦修复公共模块、题库服务和图片服务的构建链。
+@logic 1. 聚合 Service-Common、Service-Question、Service-Image；2. 让 Service-Common 在同一 reactor 内先于依赖方构建；3. 支持从仓库根目录验证 Lombok 构建链。
+@dependencies Maven 3.9+, Java 17, Service-Common, Service-Question, Service-Image
+@index_tags SlothAsk, Maven, reactor, aggregator, lombok, backend build
+@author holic512
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.example</groupId>
+    <artifactId>slothask-build</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>SlothAsk Build Aggregator</name>
+    <description>Aggregate Lombok-related backend modules for reactor builds</description>
+
+    <modules>
+        <module>Service-Common</module>
+        <module>Service-Question</module>
+        <module>Service-Image</module>
+    </modules>
+</project>

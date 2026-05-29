@@ -1,10 +1,17 @@
+# @file redis.yml
+# @project SlothAsk
+# @module Service-Infrastructure / ConfigRepo / Redis
+# @description 集中定义各微服务共享的 Redis 连接配置。
+# @logic 1. 统一 Redis 主机与端口；2. 关闭密码认证以匹配本地容器；3. 保留连接池参数供缓存和验证码等场景复用。
+# @dependencies Redis 7, Spring Data Redis, Spring Cloud Config
+# @index_tags SlothAsk, Redis, cache, config-repo, backend
+# @author holic512
 spring:
   data:
     redis:
       database: 1
-      host: localhost
+      host: 127.0.0.1
       port: 6379
-      password: 123456
       timeout: 10s
       lettuce:
         pool:

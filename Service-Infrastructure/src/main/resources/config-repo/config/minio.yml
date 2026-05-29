@@ -1,6 +1,14 @@
+# @file minio.yml
+# @project SlothAsk
+# @module Service-Infrastructure / ConfigRepo / MinIO
+# @description 集中定义各微服务共享的 MinIO 对象存储连接配置。
+# @logic 1. 统一 MinIO 访问端点；2. 使用容器当前启用的 root 用户名和密码；3. 指定 slothask 存储桶和外部访问地址。
+# @dependencies MinIO, Spring Cloud Config, Service-Image MinioClient
+# @index_tags SlothAsk, MinIO, object-storage, image, config-repo
+# @author holic512
 minio:
-  endpoint: http://localhost:9000
-  access-key: admin
-  secret-key: admin123
+  endpoint: http://127.0.0.1:9000
+  access-key: minioadmin
+  secret-key: minioadmin123
   bucket-name: slothask
-  proxy-url: http://localhost:9000
+  proxy-url: http://127.0.0.1:9000

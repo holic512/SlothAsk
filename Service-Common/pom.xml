@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+@file Service-Common pom.xml
+@project SlothAsk
+@module Service-Common / Build
+@description 定义公共模块的 Maven 依赖和 Lombok 注解处理配置。
+@logic 1. 提供公共实体与响应模型构建依赖；2. 显式配置 Lombok 注解处理器；3. 产出供其他微服务复用的公共 jar。
+@dependencies Maven Compiler Plugin, Lombok, MyBatis-Plus
+@index_tags SlothAsk, Service-Common, Maven, Lombok, build
+@author holic512
+-->
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -27,15 +37,36 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version> <!-- 建议显式写出版本 -->
+            <version>${lombok.version}</version>
             <scope>provided</scope> <!-- 推荐使用 provided 而非 annotationProcessor -->
         </dependency>
     </dependencies>
 
     <properties>
+        <lombok.version>1.18.36</lombok.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
