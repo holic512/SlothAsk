@@ -1,0 +1,44 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName "PingFang SC"
+skinparam ArrowColor #111111
+skinparam LifeLineBorderColor #111111
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #111111
+skinparam ParticipantBackgroundColor white
+skinparam NoteBorderColor #111111
+skinparam NoteBackgroundColor white
+
+actor "用户" as User
+participant "讨论区页面" as Page
+participant "Gateway" as Gateway
+participant "PostQuestionCommentController" as Controller
+participant "PostQuestionCommentService" as CommentService
+database "Redis" as Redis
+database "MySQL" as DB
+participant "ConnectSSEController" as SSEController
+participant "EmitterManager" as Emitter
+
+User -> Page: 发表评论 / 点赞
+Page -> Gateway: POST /user/questionComment/...
+Gateway -> Controller: 转发评论请求
+Controller -> CommentService: addComment() / likeComment()
+CommentService -> Redis: 解析虚拟题目ID
+Redis --> CommentService: 返回真实题目ID
+CommentService -> DB: 写入评论或点赞关系
+DB --> CommentService: 写入成功
+CommentService --> Controller: 返回处理结果
+Controller --> Page: 刷新评论列表
+
+== 消息推送链路 ==
+Page -> SSEController: 建立 SSE 连接
+SSEController -> Emitter: 创建连接对象
+SSEController -> Redis: 标记用户在线
+Redis --> SSEController: 标记成功
+
+opt AI 结果完成或基础消息到达
+  Emitter --> Page: 推送消息事件
+  Page -> Page: 更新铃铛提示与页面状态
+end
+@enduml

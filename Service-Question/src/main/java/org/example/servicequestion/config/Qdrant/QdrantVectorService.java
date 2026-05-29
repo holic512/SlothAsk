@@ -1,14 +1,17 @@
 /**
- * File Name: QdrantVectorService.java
- * Description: Qdrant向量数据库服务工具类，提供向量插入、批量插入和相似度查询功能
- * Author: holic512
- * Created Date: 2025-01-27
- * Version: 1.0
- * Usage:
- * 提供向量数据的CRUD操作，支持单个和批量插入，以及基于相似度的查询功能
+ * @file QdrantVectorService
+ * @project SlothAsk
+ * @module Service-Question / Qdrant
+ * @description 封装题库向量集合的初始化、写入、查询与删除操作。
+ * @logic 1. 启动时检查并按需创建集合；2. 创建失败后复查集合状态，兼容已存在集合；3. 对外提供向量增删查能力。
+ * @dependencies Bean: QdrantClient, Config: qdrant.collection.name, Config: qdrant.vector.dimension
+ * @index_tags Qdrant, 向量检索, 集合初始化, Service-Question, gRPC
+ * @author holic512
  */
 package org.example.servicequestion.config.Qdrant;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.qdrant.client.QdrantClient;
 import io.qdrant.client.grpc.Collections.Distance;
 import io.qdrant.client.grpc.Collections.VectorParams;
@@ -25,8 +28,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Locale;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static io.qdrant.client.PointIdFactory.id;
@@ -73,25 +78,51 @@ public class QdrantVectorService {
     @PostConstruct
     public void initializeCollection() {
         try {
-            // 检查集合是否存在
-            Boolean existsResponse = qdrantClient.collectionExistsAsync(collectionName).get();
-
-            if (!existsResponse) {
-                // 使用简化的API创建集合
-                qdrantClient.createCollectionAsync(collectionName,
-                                VectorParams.newBuilder()
-                                        .setDistance(Distance.Cosine)
-                                        .setSize(vectorDimension)
-                                        .build())
-                        .get();
-                log.info("成功创建Qdrant集合: {}", collectionName);
-            } else {
+            if (collectionExists()) {
                 log.info("Qdrant集合已存在: {}", collectionName);
+                return;
             }
+
+            createCollection();
+            log.info("成功创建Qdrant集合: {}", collectionName);
         } catch (Exception e) {
             log.error("初始化Qdrant集合失败: {}", e.getMessage(), e);
             throw new RuntimeException("初始化Qdrant集合失败", e);
         }
+    }
+
+    private boolean collectionExists() throws ExecutionException, InterruptedException {
+        return Boolean.TRUE.equals(qdrantClient.collectionExistsAsync(collectionName).get());
+    }
+
+    private void createCollection() throws Exception {
+        try {
+            qdrantClient.createCollectionAsync(
+                    collectionName,
+                    VectorParams.newBuilder()
+                            .setDistance(Distance.Cosine)
+                            .setSize(vectorDimension)
+                            .build()
+            ).get();
+        } catch (ExecutionException e) {
+            if (isCollectionAlreadyPresent(e) && collectionExists()) {
+                log.warn("Qdrant集合在创建过程中已存在，继续使用现有集合: {}", collectionName);
+                return;
+            }
+            throw e;
+        }
+    }
+
+    private boolean isCollectionAlreadyPresent(ExecutionException exception) {
+        Throwable cause = exception.getCause();
+        if (!(cause instanceof StatusRuntimeException statusException)) {
+            return false;
+        }
+
+        String description = statusException.getStatus().getDescription();
+        return statusException.getStatus().getCode() == Status.Code.INVALID_ARGUMENT
+                && description != null
+                && description.toLowerCase(Locale.ROOT).contains("already exists");
     }
 
     /**

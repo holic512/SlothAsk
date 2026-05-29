@@ -1,0 +1,19 @@
+digraph question_entity {
+  graph [rankdir=TB, bgcolor="white"];
+  node [shape=plaintext, fontname="PingFang SC"];
+  question [label=<
+    <table border="1" cellborder="1" cellspacing="0" cellpadding="5">
+      <tr><td bgcolor="#e6e6e6" colspan="2"><b>question 题库内容表</b></td></tr>
+      <tr><td>PK</td><td align="left">id : bigint</td></tr>
+      <tr><td>FK</td><td align="left">project_id : bigint</td></tr>
+      <tr><td>FK</td><td align="left">category_id : bigint</td></tr>
+      <tr><td></td><td align="left">title : varchar(500)</td></tr>
+      <tr><td></td><td align="left">content : text</td></tr>
+      <tr><td></td><td align="left">answer : text</td></tr>
+      <tr><td></td><td align="left">difficulty : tinyint</td></tr>
+      <tr><td></td><td align="left">type : tinyint</td></tr>
+      <tr><td></td><td align="left">tag_category_ids : json</td></tr>
+      <tr><td></td><td align="left">view_count : bigint</td></tr>
+    </table>
+  >];
+}

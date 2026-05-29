@@ -1,0 +1,18 @@
+digraph category_entity {
+  graph [rankdir=TB, bgcolor="white"];
+  node [shape=plaintext, fontname="PingFang SC"];
+  category [label=<
+    <table border="1" cellborder="1" cellspacing="0" cellpadding="5">
+      <tr><td bgcolor="#e6e6e6" colspan="2"><b>question_category 题库分类表</b></td></tr>
+      <tr><td>PK</td><td align="left">id : bigint</td></tr>
+      <tr><td>FK</td><td align="left">project_id : bigint</td></tr>
+      <tr><td>FK</td><td align="left">creator_id : bigint</td></tr>
+      <tr><td></td><td align="left">name : varchar(50)</td></tr>
+      <tr><td></td><td align="left">description : varchar(200)</td></tr>
+      <tr><td></td><td align="left">avatar_url : varchar(255)</td></tr>
+      <tr><td></td><td align="left">sort_order : int</td></tr>
+      <tr><td></td><td align="left">view_count : bigint</td></tr>
+      <tr><td></td><td align="left">status : tinyint</td></tr>
+    </table>
+  >];
+}

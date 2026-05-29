@@ -1,12 +1,25 @@
+# @file .gitignore
+# @project SlothAsk
+# @module Workspace / Version Control
+# @description 管理仓库级忽略规则，过滤构建产物、本地环境文件、编辑器缓存和运行时日志。
+# @logic 1. 过滤 Java、Node.js、Python 构建输出；2. 过滤 IDE、系统与 Codex 本地缓存；3. 保留源码、配置模板和内容型文档目录。
+# @dependencies Git ignore rules, Maven, Node.js, Python, Codex Desktop
+# @index_tags gitignore, 版本管理, 缓存过滤, 临时文件, 构建产物
+# @author holic512
+
+# Spring Boot helper docs
 HELP.md
 
-# Java / Spring build outputs
-target/
-build/
-.m2repo/
-**/.m2repo/
+# Operating system / desktop files
+.DS_Store
+Thumbs.db
 
-# Java IDE / tool metadata
+# IDE and editor metadata
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
 .apt_generated
 .classpath
 .factorypath
@@ -14,30 +27,72 @@ build/
 .settings/
 .springBeans
 .sts4-cache
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*~
 
-# Frontend dependencies and build outputs
+# Local environment and machine-specific config
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+*.local
+
+# Codex / local tooling caches
+.codex-tmp/
+
+# Java / Maven / Gradle build outputs
+target/
+build/
+.gradle/
+.m2repo/
+**/.m2repo/
+
+# Frontend dependencies, caches and bundles
 node_modules/
 dist/
 dist-ssr/
-*.local
+coverage/
+.npm/
+.pnpm-store/
+.yarn/
+.parcel-cache/
+.next/
+.nuxt/
+.turbo/
+.cache/
+.eslintcache
+.sass-cache/
+*.tsbuildinfo
 stats.html
 
-# Logs
+# Python virtualenvs and caches
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+*.py[cod]
+
+# Logs and runtime files
 logs/
 *.log
+*.pid
+*.pid.lock
+*.seed
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Editor / OS files
-.idea/
-*.iml
-.vscode/
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Temporary / patch leftovers
+*.orig
+*.rej
+*.bak
+*.tmp
+*.temp

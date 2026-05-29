@@ -1,0 +1,35 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName "PingFang SC"
+skinparam ArrowColor #111111
+skinparam LifeLineBorderColor #111111
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #111111
+skinparam ParticipantBackgroundColor white
+skinparam NoteBorderColor #111111
+skinparam NoteBackgroundColor white
+
+actor "用户" as User
+participant "搜索页" as Page
+participant "GetUserQuestionSearchController" as Controller
+participant "QuestionVectorService" as SearchService
+participant "ServiceAiFeign" as Feign
+participant "UserSearchEmbeddingController" as EmbedService
+database "Qdrant" as Qdrant
+participant "IdConversionService" as IdService
+
+User -> Page: 输入查询文本
+Page -> Controller: POST /user/search/similarity-search
+Controller -> SearchService: searchSimilarQuestions(queryText)
+SearchService -> Feign: 请求文本向量化
+Feign -> EmbedService: 生成查询向量
+EmbedService --> Feign: 返回 embedding
+Feign --> SearchService: 返回 embedding
+SearchService -> Qdrant: 相似度检索
+Qdrant --> SearchService: 返回候选题目
+SearchService -> IdService: 转换真实ID为虚拟ID
+IdService --> SearchService: 返回虚拟ID
+SearchService --> Controller: 返回结果集合
+Controller --> Page: 展示相似题目列表
+@enduml

@@ -1,0 +1,57 @@
+# 论文元数据
+
+- 题目：基于Spring Boot的AI助力知识问答库系统的设计与实现
+- 项目名称：SlothAsk 树懒问答
+- 论文类型：哈尔滨理工大学软件工程毕业论文内容工作区
+- 目标工作区：`docx/slothask-hrbust-thesis`
+- 目标有效字数：40000
+- 预算区间：38000-43000
+- 技术栈：
+  - 后端：Java 17、Spring Boot 3.x、Spring Cloud、Spring Gateway、MyBatis-Plus
+  - 存储：MySQL、Redis、Qdrant
+  - 消息与通信：RabbitMQ、SSE
+  - 前端：Vue 3、TypeScript、Element Plus、Vite
+  - 认证与安全：Sa-Token
+- 核心业务对象：
+  - 游客与注册用户
+  - 管理员
+  - 项目分类、题库分类、题目、用户答题记录、AI分析记录、评论、收藏、学习历史
+- 角色边界：
+  - 游客：浏览题库、查看题目和热门题目、进入登录注册流程
+  - 注册用户：筛选题目、作答、提交答案、触发AI解析、查看学习记录、收藏题目、参与评论
+  - 管理员：维护项目分类、题库分类、标签与题库内容
+- 系统边界说明：
+  - 本论文以题库浏览、在线答题、AI解析、学习统计、语义检索、评论互动和后台维护为主体。
+  - 仓库中的招聘、会员等服务仅在总体架构中作为关联服务提及，不作为论文章节主线。
+- 证据优先级：
+  - `design/database.sql`
+  - `Service-Question`、`Service-Ai`、`Service-Gateway`、`Service-Notification`、`Service-User`
+  - `frontend-user-web`、`frontend-admin-web`
+  - `README.md`
+- budget_by_section：
+  - 摘要：450
+  - Abstract：1400字符
+  - 第1章 绪论：4200
+  - 第2章 系统需求分析：7600
+  - 第3章 系统设计：11200
+  - 第4章 系统实现：8600
+  - 第5章 系统测试：6200
+  - 结论：700
+  - 致谢：350
+  - 参考文献可见文本：900
+  - 附录译文整理稿：3200
+- non_screenshot_figure_or_table_count：25
+- reference_total：15
+- foreign_reference_total：7
+- appendix_translation_chars：3200
+- 图表策略：
+  - 总体结构图、模块图、ER图、实体结构图：Graphviz DOT
+  - 用例图、时序图、部署图：PlantUML
+  - 页面展示：截图占位，后续由截图阶段替换
+  - 数据库表设计、测试用例与测试结果：Markdown表格
+- word_export_expected：是
+- diagram_render_expected：是
+- open_risks：
+  - 当前工作区依据源码和数据库脚本完成正文草稿，尚未生成真实截图资产。
+  - 附录采用英文文献译读整理稿占位，正式送审前应补齐用户指定的已引用英文文献原文与逐段译文。
+  - 部分非功能测试指标缺少运行日志支撑，正文按保守口径给出验证方案和结果表述。

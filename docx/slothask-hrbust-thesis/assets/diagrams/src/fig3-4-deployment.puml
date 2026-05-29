@@ -1,0 +1,66 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName "PingFang SC"
+skinparam ArrowColor #111111
+skinparam componentBorderColor #111111
+skinparam componentBackgroundColor white
+skinparam nodeBorderColor #111111
+skinparam nodeBackgroundColor white
+skinparam databaseBorderColor #111111
+skinparam databaseBackgroundColor white
+skinparam queueBorderColor #111111
+skinparam queueBackgroundColor white
+
+node "用户终端" as client {
+  artifact "浏览器" as browser
+}
+
+node "应用接入区" as access {
+  component "Nginx / Gateway\nService-Gateway" as gateway
+}
+
+node "业务服务区" as service_zone {
+  component "Service-Question" as question
+  component "Service-Ai" as ai
+  component "Service-Notification" as notify
+  component "Service-User" as user
+  component "Service-Admin" as admin
+}
+
+node "基础设施区" as infra {
+  component "Service-Infrastructure\nConfig + Registry" as config
+}
+
+node "数据支撑区" as data_zone {
+  database "MySQL" as mysql
+  database "Redis" as redis
+  queue "RabbitMQ" as mq
+  database "Qdrant" as qdrant
+}
+
+browser --> gateway
+gateway --> question
+gateway --> notify
+gateway --> user
+gateway --> admin
+
+question --> mysql
+question --> redis
+question --> mq
+question --> qdrant
+question --> ai
+
+ai --> mq
+ai --> mysql
+ai --> redis
+notify --> redis
+user --> mysql
+admin --> mysql
+question --> config
+ai --> config
+notify --> config
+user --> config
+admin --> config
+gateway --> config
+@enduml

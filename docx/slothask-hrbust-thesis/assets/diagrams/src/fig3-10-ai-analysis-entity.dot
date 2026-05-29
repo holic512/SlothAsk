@@ -1,0 +1,17 @@
+digraph ai_analysis_entity {
+  graph [rankdir=TB, bgcolor="white"];
+  node [shape=plaintext, fontname="PingFang SC"];
+  analysis [label=<
+    <table border="1" cellborder="1" cellspacing="0" cellpadding="5">
+      <tr><td bgcolor="#e6e6e6" colspan="2"><b>user_answer_ai_analysis 用户答案AI分析表</b></td></tr>
+      <tr><td>PK</td><td align="left">id : bigint</td></tr>
+      <tr><td>FK</td><td align="left">record_id : bigint</td></tr>
+      <tr><td></td><td align="left">accuracy_rate : tinyint</td></tr>
+      <tr><td></td><td align="left">ai_explanation : text</td></tr>
+      <tr><td></td><td align="left">ai_source : varchar(100)</td></tr>
+      <tr><td></td><td align="left">is_deleted : tinyint</td></tr>
+      <tr><td></td><td align="left">create_time : datetime</td></tr>
+      <tr><td></td><td align="left">update_time : datetime</td></tr>
+    </table>
+  >];
+}

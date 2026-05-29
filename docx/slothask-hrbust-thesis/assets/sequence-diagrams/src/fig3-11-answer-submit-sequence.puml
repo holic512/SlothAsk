@@ -1,0 +1,40 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName "PingFang SC"
+skinparam ArrowColor #111111
+skinparam LifeLineBorderColor #111111
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #111111
+skinparam ParticipantBackgroundColor white
+skinparam SequenceBoxBorderColor #111111
+skinparam SequenceBoxBackgroundColor white
+skinparam NoteBorderColor #111111
+skinparam NoteBackgroundColor white
+
+actor "用户" as User
+participant "题目详情页" as Page
+participant "Gateway" as Gateway
+participant "PostAnswerQuestionController" as Controller
+participant "PostAnswerQuestionService" as Service
+database "MySQL" as DB
+
+User -> Page: 输入答案并点击提交
+Page -> Gateway: POST /user/answer/submitAnswer
+Gateway -> Gateway: 注入 X-User-Id
+Gateway -> Controller: 转发提交请求
+Controller -> Service: submitAnswer(answerId, userId)
+Service -> Service: 校验参数与用户身份
+Service -> DB: 查询答题记录
+DB --> Service: 返回答题记录
+
+alt 记录不存在或用户不匹配
+  Service --> Controller: 返回失败状态
+  Controller --> Page: 返回错误提示
+else 记录有效且未提交
+  Service -> DB: 更新提交状态与提交时间
+  DB --> Service: 更新成功
+  Service --> Controller: 返回成功状态
+  Controller --> Page: 返回提交成功
+end
+@enduml

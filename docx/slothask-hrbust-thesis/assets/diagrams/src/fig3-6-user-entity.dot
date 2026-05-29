@@ -1,0 +1,17 @@
+digraph user_entity {
+  graph [rankdir=TB, bgcolor="white"];
+  node [shape=plaintext, fontname="PingFang SC"];
+  user [label=<
+    <table border="1" cellborder="1" cellspacing="0" cellpadding="5">
+      <tr><td bgcolor="#e6e6e6" colspan="2"><b>user 用户信息表</b></td></tr>
+      <tr><td>PK</td><td align="left">id : bigint</td></tr>
+      <tr><td></td><td align="left">username : varchar(32)</td></tr>
+      <tr><td></td><td align="left">password : varchar(128)</td></tr>
+      <tr><td></td><td align="left">email : varchar(64)</td></tr>
+      <tr><td></td><td align="left">phone : varchar(20)</td></tr>
+      <tr><td></td><td align="left">status : tinyint</td></tr>
+      <tr><td></td><td align="left">create_time : datetime</td></tr>
+      <tr><td></td><td align="left">update_time : datetime</td></tr>
+    </table>
+  >];
+}

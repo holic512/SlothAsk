@@ -1,0 +1,16 @@
+graph user_question_history_entity {
+  graph [layout=neato, overlap=false, splines=true, bgcolor="white", pad="0.18"];
+  node [shape=ellipse, fontname="PingFang SC", color="#111111", fontsize=26, penwidth=1.4, width=1.95, height=0.82];
+  edge [dir=none, color="#111111", penwidth=1.3];
+
+  entity [shape=box, width=2.55, height=1.15, pos="0,0!", margin="0.22,0.15", label="浏览历史"];
+  id [shape=ellipse, pos="0,1.8!", label="记录ID"];
+  user_id [shape=ellipse, pos="-2.05,0!", label="用户ID"];
+  question_id [shape=ellipse, pos="2.05,0!", label="题目ID"];
+  visit_time [shape=ellipse, pos="0,-1.8!", label="访问时间"];
+
+  entity -- id;
+  entity -- user_id;
+  entity -- question_id;
+  entity -- visit_time;
+}

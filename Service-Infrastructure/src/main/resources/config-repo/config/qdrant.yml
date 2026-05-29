@@ -1,7 +1,15 @@
+# @file qdrant.yml
+# @project SlothAsk
+# @module Service-Infrastructure / ConfigRepo / Qdrant
+# @description 集中定义题库服务使用的 Qdrant 连接参数和集合信息。
+# @logic 1. 统一 Qdrant 主机与 gRPC 端口；2. 使用与现有实例一致的小写集合名；3. 统一向量维度配置供初始化与查询复用。
+# @dependencies Qdrant, Spring Cloud Config, Service-Question
+# @index_tags SlothAsk, Qdrant, vector, collection, config-repo
+# @author holic512
 qdrant:
   url: localhost
   port: 6334
   collection:
-    name: SlothAsk
+    name: slothask
   vector:
     dimension: 4096

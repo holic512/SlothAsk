@@ -1,0 +1,49 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName "PingFang SC"
+skinparam ArrowColor #111111
+skinparam LifeLineBorderColor #111111
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #111111
+skinparam ParticipantBackgroundColor white
+skinparam NoteBorderColor #111111
+skinparam NoteBackgroundColor white
+
+actor "用户" as User
+participant "题目详情页" as Page
+participant "Gateway" as Gateway
+participant "SendAiAnalysisService" as QuestionService
+database "Redis" as Redis
+queue "RabbitMQ" as MQ
+participant "AiAnalysisConsumer" as Consumer
+database "MySQL" as DB
+participant "ChatSiliconflowAiService" as AI
+participant "NotificationService" as Notify
+
+User -> Page: 点击 AI 解析
+Page -> Gateway: POST /user/aiAnalysis/sendAiAnalysis
+Gateway -> QuestionService: 转发解析请求
+QuestionService -> DB: 查询答题记录
+DB --> QuestionService: 返回记录
+QuestionService -> Redis: 检查解析锁
+Redis --> QuestionService: 返回锁状态
+
+alt 已解析或正在解析
+  QuestionService --> Page: 返回已存在结果或处理中状态
+else 可发起解析
+  QuestionService -> Redis: 写入解析锁
+  QuestionService -> MQ: 发送 AiAnalysisMessage
+  QuestionService --> Page: 返回请求已受理
+
+  MQ -> Consumer: 投递解析消息
+  Consumer -> DB: 查询题目与答题记录
+  DB --> Consumer: 返回题目内容与用户答案
+  Consumer -> AI: 调用大模型评分与解析
+  AI --> Consumer: 返回准确率与解析文本
+  Consumer -> DB: 保存 AI 分析结果
+  Consumer -> Redis: 释放解析锁
+  Consumer -> Notify: 发送结果完成通知
+  Notify --> Page: SSE / 消息提醒
+end
+@enduml

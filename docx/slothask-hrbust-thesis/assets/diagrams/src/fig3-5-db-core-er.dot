@@ -1,0 +1,137 @@
+digraph er35 {
+  graph [rankdir=TB, bgcolor="white", splines=true, nodesep="0.7", ranksep="0.9"];
+  node [shape=plaintext, fontname="PingFang SC"];
+  edge [color="#111111", penwidth=1.0, arrowsize=0.7, fontname="PingFang SC"];
+
+  project [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>project_category</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">name</td></tr>
+      <tr><td align="left">sort_order</td></tr>
+      <tr><td align="left">status</td></tr>
+    </table>
+  >];
+
+  category [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>question_category</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">FK project_id</td></tr>
+      <tr><td align="left">FK creator_id</td></tr>
+      <tr><td align="left">name</td></tr>
+      <tr><td align="left">view_count</td></tr>
+    </table>
+  >];
+
+  question [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>question</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">FK project_id</td></tr>
+      <tr><td align="left">FK category_id</td></tr>
+      <tr><td align="left">title</td></tr>
+      <tr><td align="left">difficulty</td></tr>
+      <tr><td align="left">type</td></tr>
+    </table>
+  >];
+
+  user [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>user</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">username</td></tr>
+      <tr><td align="left">email</td></tr>
+      <tr><td align="left">phone</td></tr>
+      <tr><td align="left">status</td></tr>
+    </table>
+  >];
+
+  profile [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>user_profile</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">FK user_id</td></tr>
+      <tr><td align="left">nickname</td></tr>
+      <tr><td align="left">avatar</td></tr>
+      <tr><td align="left">occupation</td></tr>
+    </table>
+  >];
+
+  record [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>user_question_record</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">FK user_id</td></tr>
+      <tr><td align="left">FK question_id</td></tr>
+      <tr><td align="left">user_answer</td></tr>
+      <tr><td align="left">is_submitted</td></tr>
+    </table>
+  >];
+
+  analysis [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>user_answer_ai_analysis</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">FK record_id</td></tr>
+      <tr><td align="left">accuracy_rate</td></tr>
+      <tr><td align="left">ai_source</td></tr>
+      <tr><td align="left">is_deleted</td></tr>
+    </table>
+  >];
+
+  comment [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>question_comment</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">FK question_id</td></tr>
+      <tr><td align="left">FK user_id</td></tr>
+      <tr><td align="left">parent_id</td></tr>
+      <tr><td align="left">like_count</td></tr>
+    </table>
+  >];
+
+  wrong [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>wrong_question_book</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">FK user_id</td></tr>
+      <tr><td align="left">FK question_id</td></tr>
+      <tr><td align="left">wrong_count</td></tr>
+      <tr><td align="left">last_wrong_time</td></tr>
+    </table>
+  >];
+
+  history [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>user_question_history</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">FK user_id</td></tr>
+      <tr><td align="left">FK question_id</td></tr>
+      <tr><td align="left">visit_time</td></tr>
+    </table>
+  >];
+
+  { rank=same; project; user; }
+  { rank=same; category; profile; record; }
+  { rank=same; question; analysis; }
+  { rank=same; comment; wrong; history; }
+
+  project -> category [label="包含 1:N"];
+  category -> question [label="归属 1:N"];
+
+  user -> profile [label="扩展 1:1"];
+  user -> record [label="作答 1:N"];
+  question -> record [label="对应 1:N"];
+
+  record -> analysis [label="分析 1:1"];
+
+  user -> comment [label="发表评论 1:N"];
+  question -> comment [label="被评论 1:N"];
+
+  user -> wrong [label="记录错题 1:N"];
+  question -> wrong [label="进入错题本 1:N"];
+
+  user -> history [label="浏览 1:N"];
+  question -> history [label="被访问 1:N"];
+}

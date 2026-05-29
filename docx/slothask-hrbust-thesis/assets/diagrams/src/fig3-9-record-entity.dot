@@ -1,0 +1,16 @@
+digraph record_entity {
+  graph [rankdir=TB, bgcolor="white"];
+  node [shape=plaintext, fontname="PingFang SC"];
+  record [label=<
+    <table border="1" cellborder="1" cellspacing="0" cellpadding="5">
+      <tr><td bgcolor="#e6e6e6" colspan="2"><b>user_question_record 答题记录表</b></td></tr>
+      <tr><td>PK</td><td align="left">id : bigint</td></tr>
+      <tr><td>FK</td><td align="left">user_id : bigint</td></tr>
+      <tr><td>FK</td><td align="left">question_id : bigint</td></tr>
+      <tr><td></td><td align="left">user_answer : text</td></tr>
+      <tr><td></td><td align="left">is_submitted : tinyint</td></tr>
+      <tr><td></td><td align="left">create_time : datetime</td></tr>
+      <tr><td></td><td align="left">update_time : datetime</td></tr>
+    </table>
+  >];
+}

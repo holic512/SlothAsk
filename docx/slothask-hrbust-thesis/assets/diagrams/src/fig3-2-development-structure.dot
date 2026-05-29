@@ -1,0 +1,15 @@
+digraph development_structure {
+  graph [rankdir=TB, bgcolor="white", splines=ortho, nodesep="0.4", ranksep="0.55"];
+  node [shape=box, style="filled", fillcolor="white", color="#111111", fontname="PingFang SC", penwidth=1.1];
+  edge [color="#111111", penwidth=1.0, dir=none];
+
+  root [label="SlothAsk项目开发结构", width=2.8, height=0.55, fixedsize=true];
+  front [label="前端层\nfrontend-user-web\nfrontend-admin-web", width=2.0, height=1.1, fixedsize=true];
+  gateway [label="接入层\nService-Gateway", width=1.7, height=0.9, fixedsize=true];
+  business [label="业务服务层\nService-Question  Service-Ai\nService-User  Service-Notification\nService-Admin", width=2.6, height=1.4, fixedsize=true];
+  infra [label="基础设施层\nService-Infrastructure\n统一配置与注册", width=2.0, height=1.05, fixedsize=true];
+  data [label="数据与中间件\nMySQL  Redis  RabbitMQ  Qdrant", width=2.3, height=1.05, fixedsize=true];
+
+  root -> front -> gateway -> business -> data;
+  gateway -> infra;
+}

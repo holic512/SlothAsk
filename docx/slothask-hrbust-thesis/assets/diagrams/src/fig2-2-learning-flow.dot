@@ -1,0 +1,31 @@
+digraph learning_flow {
+  graph [rankdir=TB, bgcolor="white", splines=ortho, nodesep="0.45", ranksep="0.55"];
+  node [fontname="PingFang SC", color="#111111", fillcolor="white", style="filled", penwidth=1.1];
+  edge [fontname="PingFang SC", color="#111111", penwidth=1.0];
+
+  start [label="开始", shape=oval, width=1.1, height=0.5];
+  select_bank [label="选择项目与题库分类", shape=box, style="rounded,filled", width=2.4, height=0.65];
+  browse_question [label="浏览题目并进入详情页", shape=box, style="rounded,filled", width=2.6, height=0.65];
+  login_check [label="是否已登录", shape=diamond, width=1.6, height=0.9];
+  login_page [label="跳转登录页面", shape=box, style="rounded,filled", width=2.1, height=0.65];
+  edit_answer [label="输入并保存答案草稿", shape=box, style="rounded,filled", width=2.8, height=0.65];
+  submit_check [label="是否提交答案", shape=diamond, width=1.7, height=0.9];
+  submit_answer [label="提交答案记录", shape=box, style="rounded,filled", width=2.1, height=0.65];
+  ai_check [label="是否发起AI解析", shape=diamond, width=1.9, height=0.9];
+  ai_queue [label="写入Redis锁并发送MQ消息", shape=box, style="rounded,filled", width=2.9, height=0.65];
+  ai_result [label="AI服务生成评分与解析结果", shape=box, style="rounded,filled", width=3.0, height=0.65];
+  update_stats [label="更新学习统计与历史记录", shape=box, style="rounded,filled", width=2.8, height=0.65];
+  end [label="结束", shape=oval, width=1.1, height=0.5];
+
+  start -> select_bank -> browse_question -> login_check;
+  login_check -> login_page [label="否"];
+  login_page -> browse_question;
+  login_check -> edit_answer [label="是"];
+  edit_answer -> submit_check;
+  submit_check -> edit_answer [label="否"];
+  submit_check -> submit_answer [label="是"];
+  submit_answer -> ai_check;
+  ai_check -> update_stats [label="否"];
+  ai_check -> ai_queue [label="是"];
+  ai_queue -> ai_result -> update_stats -> end;
+}

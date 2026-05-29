@@ -23,6 +23,7 @@ import java.util.*;
 @Service
 public class EmbeddingSiliconflowAiService {
 
+    private static final String DEFAULT_EMBEDDINGS_URL = "https://api.siliconflow.cn/v1/embeddings";
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Random random = new Random();
     
@@ -32,7 +33,7 @@ public class EmbeddingSiliconflowAiService {
     @Value("${siliconflow.api.key:}")
     private String apiKey;
     
-    @Value("${siliconflow.api.embeddings.url:https://api.siliconflow.cn/v1/embeddings}")
+    @Value("${siliconflow.api.embeddings.url:" + DEFAULT_EMBEDDINGS_URL + "}")
     private String apiUrl;
 
     /**
@@ -93,6 +94,8 @@ public class EmbeddingSiliconflowAiService {
         String inputText = String.join(", ", inputs);
 
         try {
+            String requestUrl = resolveApiUrl();
+
             // 构建请求体
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("model", model.getModelName());
@@ -108,7 +111,7 @@ public class EmbeddingSiliconflowAiService {
             );
 
             Request request = new Request.Builder()
-                    .url(apiUrl)
+                    .url(requestUrl)
                     .post(body)
                     .addHeader("Authorization", "Bearer " + apiKey)
                     .addHeader("Content-Type", "application/json")
@@ -134,9 +137,23 @@ public class EmbeddingSiliconflowAiService {
             long endTime = System.currentTimeMillis();
             long duration = endTime - startTime;
 
-            String errorMsg = "请求处理异常: " + e.getMessage();
+            String errorMsg = "请求处理异常: " + sanitizeErrorMessage(e.getMessage());
             return EmbeddingAiResponse.failure(errorMsg, model, inputText, isRandom, duration);
         }
+    }
+
+    private String resolveApiUrl() {
+        if (apiUrl == null || apiUrl.isBlank() || apiUrl.startsWith("sk-")) {
+            return DEFAULT_EMBEDDINGS_URL;
+        }
+        return apiUrl;
+    }
+
+    private String sanitizeErrorMessage(String message) {
+        if (message == null) {
+            return "未知错误";
+        }
+        return message.replaceAll("sk-[A-Za-z0-9_-]+", "sk-***");
     }
 
     /**

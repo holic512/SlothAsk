@@ -1,0 +1,157 @@
+digraph er {
+  graph [rankdir=TB, bgcolor="white", splines=ortho, nodesep="0.5", ranksep="0.7"];
+  node [shape=plaintext, fontname="PingFang SC"];
+  edge [color="#111111", penwidth=1.0, arrowsize=0.7, fontname="PingFang SC"];
+
+  project [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>project_category</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">name</td></tr>
+      <tr><td align="left">description</td></tr>
+      <tr><td align="left">sort_order</td></tr>
+      <tr><td align="left">status</td></tr>
+    </table>
+  >];
+
+  category [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>question_category</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">FK project_id</td></tr>
+      <tr><td align="left">name</td></tr>
+      <tr><td align="left">creator_id</td></tr>
+      <tr><td align="left">view_count</td></tr>
+    </table>
+  >];
+
+  question [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>question</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">FK project_id</td></tr>
+      <tr><td align="left">FK category_id</td></tr>
+      <tr><td align="left">title</td></tr>
+      <tr><td align="left">difficulty</td></tr>
+      <tr><td align="left">type</td></tr>
+    </table>
+  >];
+
+  user [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>user</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">username</td></tr>
+      <tr><td align="left">email</td></tr>
+      <tr><td align="left">phone</td></tr>
+      <tr><td align="left">status</td></tr>
+    </table>
+  >];
+
+  profile [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>user_profile</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">FK user_id</td></tr>
+      <tr><td align="left">nickname</td></tr>
+      <tr><td align="left">avatar</td></tr>
+      <tr><td align="left">location</td></tr>
+    </table>
+  >];
+
+  record [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>user_question_record</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">FK user_id</td></tr>
+      <tr><td align="left">FK question_id</td></tr>
+      <tr><td align="left">user_answer</td></tr>
+      <tr><td align="left">is_submitted</td></tr>
+    </table>
+  >];
+
+  analysis [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>user_answer_ai_analysis</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">FK record_id</td></tr>
+      <tr><td align="left">accuracy_rate</td></tr>
+      <tr><td align="left">ai_source</td></tr>
+      <tr><td align="left">is_deleted</td></tr>
+    </table>
+  >];
+
+  comment [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>question_comment</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">FK question_id</td></tr>
+      <tr><td align="left">FK user_id</td></tr>
+      <tr><td align="left">parent_id</td></tr>
+      <tr><td align="left">like_count</td></tr>
+    </table>
+  >];
+
+  fav [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>user_favorite_question</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">FK user_id</td></tr>
+      <tr><td align="left">FK question_id</td></tr>
+      <tr><td align="left">create_time</td></tr>
+    </table>
+  >];
+
+  history [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="4">
+      <tr><td bgcolor="#e6e6e6"><b>user_question_history</b></td></tr>
+      <tr><td align="left">PK id</td></tr>
+      <tr><td align="left">FK user_id</td></tr>
+      <tr><td align="left">FK question_id</td></tr>
+      <tr><td align="left">visit_time</td></tr>
+    </table>
+  >];
+
+  rel1 [label="包含", shape=diamond, width=0.8, height=0.5];
+  rel2 [label="归属", shape=diamond, width=0.8, height=0.5];
+  rel3 [label="作答", shape=diamond, width=0.8, height=0.5];
+  rel4 [label="分析", shape=diamond, width=0.8, height=0.5];
+  rel5 [label="评论", shape=diamond, width=0.8, height=0.5];
+  rel6 [label="收藏", shape=diamond, width=0.8, height=0.5];
+  rel7 [label="浏览", shape=diamond, width=0.8, height=0.5];
+  rel8 [label="扩展", shape=diamond, width=0.8, height=0.5];
+
+  { rank=same; project; user; }
+  { rank=same; category; profile; }
+  { rank=same; question; record; }
+  { rank=same; comment; analysis; fav; history; }
+
+  project -> rel1 [dir=none];
+  rel1 -> category [dir=none];
+
+  project -> rel2 [dir=none];
+  rel2 -> question [dir=none];
+  category -> question [label="1..n"];
+
+  user -> rel8 [dir=none];
+  rel8 -> profile [dir=none];
+
+  user -> rel3 [dir=none];
+  rel3 -> record [dir=none];
+  question -> record [dir=none];
+
+  record -> rel4 [dir=none];
+  rel4 -> analysis [dir=none];
+
+  user -> rel5 [dir=none];
+  rel5 -> comment [dir=none];
+  question -> comment [dir=none];
+
+  user -> rel6 [dir=none];
+  rel6 -> fav [dir=none];
+  question -> fav [dir=none];
+
+  user -> rel7 [dir=none];
+  rel7 -> history [dir=none];
+  question -> history [dir=none];
+}

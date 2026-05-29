@@ -1,0 +1,69 @@
+@startuml
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultFontName "PingFang SC"
+skinparam ArrowColor #111111
+skinparam actorStyle stickman
+skinparam actorBorderColor #111111
+skinparam actorBackgroundColor white
+skinparam actorFontColor #111111
+skinparam usecaseBorderColor #111111
+skinparam usecaseBackgroundColor white
+skinparam usecaseFontColor #111111
+skinparam rectangleBorderColor #111111
+skinparam rectangleBackgroundColor white
+skinparam rectangleFontColor #111111
+
+actor "游客" as Visitor
+actor "注册用户" as User
+actor "管理员" as Admin
+Visitor -[hidden]down- User
+User -[hidden]down- Admin
+
+rectangle "AI助力知识问答库系统" {
+  (浏览项目与题库分类) as UC1
+  (查看题目详情) as UC2
+  (登录与身份校验) as UC3
+  (保存答案草稿) as UC4
+  (提交答案) as UC5
+  (触发AI解析) as UC6
+  (查看学习统计与历史) as UC7
+  (发表评论与点赞) as UC8
+  (收藏题目) as UC9
+  (维护项目与分类) as UC10
+  (维护标签与题目) as UC11
+  (查看后台统计) as UC12
+
+  UC1 -[hidden]down- UC2
+  UC2 -[hidden]down- UC4
+  UC4 -[hidden]down- UC7
+  UC7 -[hidden]down- UC10
+
+  UC5 .> UC3 : <<include>>
+  UC6 .> UC5 : <<include>>
+  UC7 .> UC3 : <<include>>
+  UC8 .> UC3 : <<include>>
+  UC9 .> UC3 : <<include>>
+  UC10 .> UC3 : <<include>>
+  UC11 .> UC3 : <<include>>
+  UC12 .> UC3 : <<include>>
+}
+
+Visitor --> UC1
+Visitor --> UC2
+
+User --> UC1
+User --> UC2
+User --> UC4
+User --> UC5
+User --> UC6
+User --> UC7
+User --> UC8
+User --> UC9
+
+Admin --> UC10
+Admin --> UC11
+Admin --> UC12
+@enduml

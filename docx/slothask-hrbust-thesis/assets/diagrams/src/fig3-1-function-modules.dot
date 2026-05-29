@@ -1,0 +1,29 @@
+digraph function_modules {
+  graph [rankdir=TB, bgcolor="white", splines=ortho, nodesep="0.28", ranksep="0.45"];
+  node [shape=box, style="filled", fillcolor="white", color="#111111", fontname="PingFang SC", penwidth=1.1];
+  edge [color="#111111", dir=none, penwidth=1.0];
+
+  root [label="AI助力知识问答库系统", width=2.8, height=0.5, fixedsize=true];
+  hub [label="", shape=plaintext, width=0, height=0];
+
+  m1 [label="题库浏览\n模块", width=1.15, height=1.4, fixedsize=true];
+  m2 [label="在线答题\n模块", width=1.15, height=1.4, fixedsize=true];
+  m3 [label="AI解析\n模块", width=1.15, height=1.4, fixedsize=true];
+  m4 [label="语义搜索\n模块", width=1.15, height=1.4, fixedsize=true];
+  m5 [label="学习统计\n模块", width=1.15, height=1.4, fixedsize=true];
+  m6 [label="评论互动\n模块", width=1.15, height=1.4, fixedsize=true];
+  m7 [label="消息通知\n模块", width=1.15, height=1.4, fixedsize=true];
+  m8 [label="后台管理\n模块", width=1.15, height=1.4, fixedsize=true];
+
+  { rank=same; m1; m2; m3; m4; m5; m6; m7; m8; }
+
+  root -> hub;
+  hub -> m1;
+  hub -> m2;
+  hub -> m3;
+  hub -> m4;
+  hub -> m5;
+  hub -> m6;
+  hub -> m7;
+  hub -> m8;
+}
